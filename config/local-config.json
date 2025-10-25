@@ -1,0 +1,38 @@
+{
+  "environment": "local",
+  "database": {
+      "driver": "mysql",
+      "host": "localhost",
+      "port": "3309",
+      "username": "root",
+      "password": "1997",
+      "name": "flightDb"
+  },
+  "server": {
+      "port": "8081",
+      "host": "localhost"
+  },
+  "resend": {
+      "api_key": "re_6w3aQQUe_EQaL4h4X3QpUizqcxbG725a8",
+    "from_email": "flighthours@rbsuport.com"
+  },
+  "verification": {
+      "base_url": "http://localhost:8081"
+  },
+  "keycloak":{
+    "server_url": "http://localhost:8080",
+    "realm": "flighthours",
+    "client_id": "emma",
+    "client_secret": "M9HfWmIWf6huAnpKPXIGNdDeTfrwcNMt",
+    "admin_user": "go-admin",
+    "admin_pass": "1997"
+  }
+}
+
+
+
+
+
+
+
+

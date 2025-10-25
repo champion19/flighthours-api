@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the person",
+      "maxLength": 120,
+      "minLength": 1
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address",
+      "maxLength": 250
+    },
+    "password": {
+      "type": "string",
+      "description": "Access password",
+      "minLength": 8,
+      "maxLength": 50
+    },
+    "identificationnumber": {
+      "type": "string",
+      "description": "Identity document number (ID card, passport, DNI, etc.)",
+      "maxLength": 20,
+      "minLength": 1
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date in ISO 8601 format"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date in ISO 8601 format"
+    },
+  "role": {
+    "type": "string",
+    "description": "Role of the person",
+    "maxLength": 10,
+    "minLength": 1
+  }
+  },
+  "required": [
+    "name",
+    "email",
+    "password",
+    "identificationnumber",
+    "start_date",
+    "end_date",
+    "role"
+  ],
+  "additionalProperties": false
+}
