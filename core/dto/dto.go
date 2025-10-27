@@ -2,7 +2,7 @@ package dto
 
 import (
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/champion19/Flighthours_backend/core/domain"
+	"github.com/champion19/flighthours-api/core/domain"
 )
 type RegisterEmployee struct {
 	Employee domain.Employee

@@ -3,7 +3,7 @@ package main
 import (
 	"log/slog"
 
-	"github.com/champion19/Flighthours_backend/server"
+	"github.com/champion19/flighthours-api/server"
 	"github.com/gin-gonic/gin"
 )
 

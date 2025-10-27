@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	domain "github.com/champion19/Flighthours_backend/core/domain"
+	domain "github.com/champion19/flighthours-api/core/domain"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,48 +3,82 @@ package middleware
 import (
 	"log"
 	"net/http"
-
-	"github.com/champion19/Flighthours_backend/core/domain"
+    "errors"
+	"github.com/champion19/flighthours-api/core/domain"
 	"github.com/gin-gonic/gin"
 )
 var(
-	errorsMap = map[error]ErrorResponse{
-		domain.ErrDuplicateUser:{
-            Code: http.StatusConflict,
-            Message: "User already exists",
-        },
-	}
+	errorStatusMap = map[string]int{
+		"MOD_U_USU_ERR_00001": http.StatusConflict,
+        "MOD_U_USU_ERR_00002": http.StatusInternalServerError,
+        "MOD_U_USU_ERR_00003": http.StatusNotFound,
+        "MOD_U_USU_ERR_00004": http.StatusNotFound,
+        "MOD_U_USU_ERR_00005": http.StatusNotFound,
+        "MOD_U_USU_ERR_00006": http.StatusNotFound,
+        "MOD_U_USU_ERR_00007": http.StatusInternalServerError,
+        "MOD_U_USU_ERR_00008": http.StatusForbidden,
+        "MOD_U_USU_ERR_00009": http.StatusNotFound,
+        "MOD_U_USU_ERR_00010": http.StatusGone,
+        "MOD_U_USU_ERR_00011": http.StatusConflict,
+        "MOD_U_USU_ERR_00012": http.StatusInternalServerError,
+        "MOD_U_USU_ERR_00013": http.StatusBadRequest,
+        "Mod_U_USU_ERR_00014": http.StatusInternalServerError,
+
+
+    "MOD_V_VAL_ERR_00001": http.StatusBadRequest,
+	"MOD_V_VAL_ERR_00002": http.StatusBadRequest,
+
+
+	"MOD_A_AUT_ERR_00001": http.StatusInternalServerError,
+	"MOD_A_AUT_ERR_00002": http.StatusInternalServerError,
+	"MOD_A_AUT_ERR_00003": http.StatusInternalServerError,
+	"MOD_A_AUT_ERR_00004": http.StatusInternalServerError,
+
+    }
 )
 
 type 	ErrorResponse struct{
-	Code int `json:"code"`
+    Status int `json:"status"`
+	Code string `json:"code"`
 	Message string `json:"message"`
 }
+
 
 // ErrorHandler captures errors and returns a consistent JSON error response
 func ErrorHandler() gin.HandlerFunc {
     return func(c *gin.Context) {
-        c.Next() // Step1: Process the request first.
+        c.Next()
 
-        // Step2: Check if any errors were added to the context
-        if len(c.Errors) > 0 {
-            // Step3: Use the last error
-            err := c.Errors.Last().Err
-            errResponse, ok := errorsMap[err]
-            if !ok{
-                log.Println("Error desconocido",err)
-                c.JSON(http.StatusInternalServerError, ErrorResponse{
-                    Code: http.StatusInternalServerError,
-                    Message: "Error desconocido",
-                })
-                return
-            }
-            // Step4: Respond with a generic error message
-            c.JSON(http.StatusInternalServerError,ErrorResponse{
-                Code: errResponse.Code,
-                Message: errResponse.Message,
-            })
-        }
+		if len(c.Errors) > 0 {
+			err := c.Errors.Last().Err
+
+			var domainErr *domain.DomainError
+			if errors.As(err, &domainErr) {
+				statusCode, exists := errorStatusMap[domainErr.Code]
+				if !exists {
+					statusCode = http.StatusInternalServerError
+					log.Printf("Unknown error code: %s", domainErr.Code)
+				}
+
+				response := ErrorResponse{
+					Status:  statusCode,
+					Code:    domainErr.Code,
+					Message: domainErr.Message,
+				}
+
+				c.AbortWithStatusJSON(statusCode, response)
+				return
+			}
+
+			log.Printf("Non-domain error: %v", err)
+			response := ErrorResponse{
+				Status:  http.StatusInternalServerError,
+				Code:    "MOD_G_GEN_ERR_00001",
+				Message: "Error interno del servidor",
+			}
+			c.AbortWithStatusJSON(http.StatusInternalServerError, response)
+		}
+
     }
 }
 

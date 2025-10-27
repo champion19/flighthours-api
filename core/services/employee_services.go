@@ -6,10 +6,10 @@ import (
 	"log/slog"
 
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/champion19/Flighthours_backend/config"
-	"github.com/champion19/Flighthours_backend/core/domain"
-	"github.com/champion19/Flighthours_backend/core/dto"
-	"github.com/champion19/Flighthours_backend/core/ports"
+	"github.com/champion19/flighthours-api/config"
+	"github.com/champion19/flighthours-api/core/domain"
+	"github.com/champion19/flighthours-api/core/dto"
+	"github.com/champion19/flighthours-api/core/ports"
 )
 
 type service struct {

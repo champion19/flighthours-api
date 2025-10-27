@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	domain "github.com/champion19/Flighthours_backend/core/domain"
-	"github.com/champion19/Flighthours_backend/core/ports"
+	domain "github.com/champion19/flighthours-api/core/domain"
+	"github.com/champion19/flighthours-api/core/ports"
 	mysql "github.com/go-sql-driver/mysql"
 )
 

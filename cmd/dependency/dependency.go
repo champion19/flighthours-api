@@ -3,12 +3,12 @@ package dependency
 import (
 	"log/slog"
 
-	"github.com/champion19/Flighthours_backend/config"
-	"github.com/champion19/Flighthours_backend/core/ports"
-	"github.com/champion19/Flighthours_backend/core/services"
-	keycloak "github.com/champion19/Flighthours_backend/platform/keycloak"
-	mysql "github.com/champion19/Flighthours_backend/platform/mysql"
-	repo "github.com/champion19/Flighthours_backend/repositories/employee"
+	"github.com/champion19/flighthours-api/config"
+	"github.com/champion19/flighthours-api/core/ports"
+	"github.com/champion19/flighthours-api/core/services"
+	keycloak "github.com/champion19/flighthours-api/platform/keycloak"
+	mysql "github.com/champion19/flighthours-api/platform/mysql"
+	repo "github.com/champion19/flighthours-api/repositories/employee"
 )
 
 type Dependencies struct {

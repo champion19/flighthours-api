@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/champion19/Flighthours_backend/core/ports"
+	"github.com/champion19/flighthours-api/core/ports"
 	"github.com/gin-gonic/gin"
 )
 

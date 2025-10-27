@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/champion19/Flighthours_backend/config"
+	"github.com/champion19/flighthours-api/config"
 )
 
 func GetDB(dbConfig config.Database) (*sql.DB, error) {
