@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"github.com/champion19/Flighthours_backend/tools/utils"
+	"github.com/champion19/flighthours-api/tools/utils"
 )
 
 type Config struct {

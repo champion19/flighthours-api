@@ -3,7 +3,7 @@ package employee
 import (
 	"time"
 
-	"github.com/champion19/Flighthours_backend/core/domain"
+	"github.com/champion19/flighthours-api/core/domain"
 )
 
 type Employee struct {

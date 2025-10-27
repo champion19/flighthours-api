@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	domain "github.com/champion19/Flighthours_backend/core/domain"
+	domain "github.com/champion19/flighthours-api/core/domain"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +13,7 @@ func (h handler) GetEmployeeByEmail() func(c *gin.Context) {
 
 		employee, err := h.EmployeeService.GetEmployeeByEmail(email)
 		if err != nil {
-			h.HandleError(c, err)
+			c.Error(err)
 			return
 		}
 		c.JSON(http.StatusOK, employee)
@@ -24,21 +24,13 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var employeeRequest EmployeeRequest
 		if err := c.ShouldBindJSON(&employeeRequest); err != nil {
-			h.HandleError(c, domain.ErrInvalidJSONFormat)
+			c.Error(domain.ErrInvalidJSONFormat)
 			return
 		}
 
 		result, err := h.EmployeeService.RegisterEmployee(employeeRequest.ToDomain())
 		if err != nil {
-
-			switch err {
-			case domain.ErrDuplicateUser:
-				h.HandleError(c, domain.ErrDuplicateUser)
-			case domain.ErrUserCannotSave:
-				h.HandleError(c, domain.ErrUserCannotSave)
-			default:
-				h.HandleError(c, domain.ErrUserCannotSave)
-			}
+			c.Error(err)
 			return
 		}
 
@@ -76,19 +68,13 @@ func (h handler) LoginEmployee() func(c *gin.Context) {
 		}
 
 		if err := c.ShouldBindJSON(&loginRequest); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error":   "Invalid request format",
-				"details": err.Error(),
-			})
+			c.Error(domain.ErrInvalidRequest)
 			return
 		}
 
 		token, err := h.EmployeeService.LoginEmployee(loginRequest.Email, loginRequest.Password)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error":   "Authentication failed",
-				"message": "Invalid email or password",
-			})
+			c.Error(domain.ErrUserCannotFound)
 			return
 		}
 

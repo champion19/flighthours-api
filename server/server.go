@@ -4,10 +4,10 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/champion19/Flighthours_backend/cmd/dependency"
-	"github.com/champion19/Flighthours_backend/handlers"
-	"github.com/champion19/Flighthours_backend/middleware"
-	"github.com/champion19/Flighthours_backend/platform/schema"
+	"github.com/champion19/flighthours-api/cmd/dependency"
+	"github.com/champion19/flighthours-api/handlers"
+	"github.com/champion19/flighthours-api/middleware"
+	"github.com/champion19/flighthours-api/platform/schema"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +15,7 @@ import (
 func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	slog.Info("Setting up routes")
 
+	app.Use(middleware.ErrorHandler())
 	handler := handlers.New(dependencies.EmployeeService)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -33,7 +34,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// Login - devuelve tokens JWT
 		public.POST("/login", handler.LoginEmployee())
 		public.GET("/user/email/:email", handler.GetEmployeeByEmail())
-
+		
 	}
 
 }

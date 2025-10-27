@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	schema "github.com/champion19/Flighthours_backend/platform/schema"
+	schema "github.com/champion19/flighthours-api/platform/schema"
 	"github.com/gin-gonic/gin"
 	"github.com/kaptinlin/jsonschema"
 )
