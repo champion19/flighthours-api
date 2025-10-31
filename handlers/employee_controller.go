@@ -49,10 +49,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 				Role:                 result.Employee.Role,
 				KeycloakUserID:       result.Employee.KeycloakUserID,
 			},
-			AccessToken:  result.Token.AccessToken,
-			RefreshToken: result.Token.RefreshToken,
-			ExpiresIn:    result.Token.ExpiresIn,
-			TokenType:    result.Token.TokenType,
+			Message: result.Message,
 		}
 
 		c.JSON(http.StatusCreated, response)
@@ -62,11 +59,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 
 func (h handler) LoginEmployee() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		var loginRequest struct {
-			Email    string `json:"email" binding:"required,email"`
-			Password string `json:"password" binding:"required"`
-		}
-
+		var loginRequest LoginRequest
 		if err := c.ShouldBindJSON(&loginRequest); err != nil {
 			c.Error(domain.ErrInvalidRequest)
 			return
@@ -74,15 +67,16 @@ func (h handler) LoginEmployee() func(c *gin.Context) {
 
 		token, err := h.EmployeeService.LoginEmployee(loginRequest.Email, loginRequest.Password)
 		if err != nil {
-			c.Error(domain.ErrUserCannotFound)
+			c.Error(err)
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"access_token":  token.AccessToken,
-			"refresh_token": token.RefreshToken,
-			"expires_in":    token.ExpiresIn,
-			"token_type":    token.TokenType,
-		})
+		response:= LoginResponse{
+			AccessToken:  token.AccessToken,
+			RefreshToken: token.RefreshToken,
+			ExpiresIn:    token.ExpiresIn,
+			TokenType:    token.TokenType,
+		}
+		c.JSON(http.StatusOK, response)
 	}
 }

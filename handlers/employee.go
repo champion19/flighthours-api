@@ -38,16 +38,26 @@ type EmployeeResponse struct {
 
 type RegisterEmployeeResponse struct {
 	User         EmployeeResponse `json:"user"`
-	AccessToken  string           `json:"access_token"`
-	RefreshToken string           `json:"refresh_token"`
-	ExpiresIn    int              `json:"expires_in"`
-	TokenType    string           `json:"token_type"`
+	Message      string           `json:"message"`
 }
 
 type ResponseEmail struct {
 	Title   string
 	Content template.HTML
 }
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	TokenType    string `json:"token_type"`
+}
+
 
 func (e EmployeeRequest) ToDomain() domain.Employee {
 	layout := "2006-01-02"

@@ -1,12 +1,12 @@
 package dto
 
 import (
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/domain"
+
 )
 type RegisterEmployee struct {
 	Employee domain.Employee
-	Token    *gocloak.JWT
+	Message string
 }
 
 type UserSyncStatus struct {
