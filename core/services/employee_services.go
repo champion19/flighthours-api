@@ -55,7 +55,7 @@ func (s service) RegisterEmployee(employee domain.Employee) (*dto.RegisterEmploy
 	}
 
 	ctx := context.Background()
-	token, err := s.syncUserWithKeycloak(ctx, &employee, plainPassword)
+	err = s.syncUserWithKeycloak(ctx, &employee, plainPassword)
 	if err != nil {
 
 		slog.Error("Failed to sync user with Keycloak, rolling back",
@@ -79,38 +79,30 @@ func (s service) RegisterEmployee(employee domain.Employee) (*dto.RegisterEmploy
 
 	return &dto.RegisterEmployee{
 		Employee: employee,
-		Token:    token,
+		Message:  "Usuario registrado exitosamente.puedes continuar",
 	}, nil
 }
 
-func (s service) syncUserWithKeycloak(ctx context.Context, employee *domain.Employee, plainPassword string) (*gocloak.JWT, error) {
+func (s service) syncUserWithKeycloak(ctx context.Context, employee *domain.Employee, plainPassword string) error {
 	if s.authService == nil {
-		return nil, fmt.Errorf("keycloak service not configured")
+		return fmt.Errorf("keycloak service not configured")
 	}
 
 	keycloakUserID, err := s.authService.SyncUserToKeycloak(ctx, employee)
 	if err != nil {
-		return nil, fmt.Errorf("failed to sync user: %w", err)
+		return fmt.Errorf("failed to sync user: %w", err)
 	}
 
 	err = s.authService.SetUserPassword(ctx, keycloakUserID, plainPassword)
 	if err != nil {
 		_ = s.authService.DeleteUserFromKeycloak(ctx, keycloakUserID)
-		return nil, fmt.Errorf("failed to set password: %w", err)
+		return fmt.Errorf("failed to set password: %w", err)
 	}
 
 	err = s.authService.AssignRole(ctx, employee.ID, employee.Role)
 	if err != nil {
 		_ = s.authService.DeleteUserFromKeycloak(ctx, keycloakUserID)
-		return nil, fmt.Errorf("failed to assign role: %w", err)
-	}
-
-	token, err := s.authService.LoginUser(ctx, employee.Email, plainPassword)
-	if err != nil {
-		slog.Warn("User created but login failed",
-			"user_id", employee.ID,
-			"error", err)
-		return nil, fmt.Errorf("user created but failed to generate token: %w", err)
+		return fmt.Errorf("failed to assign role: %w", err)
 	}
 
 	slog.Info("User synced with Keycloak successfully",
@@ -119,7 +111,7 @@ func (s service) syncUserWithKeycloak(ctx context.Context, employee *domain.Empl
 		"role", employee.Role,
 		"keycloak_user_id", keycloakUserID)
 
-	return token, nil
+	return nil
 }
 
 func (s service) LoginEmployee(email, password string) (*gocloak.JWT, error) {

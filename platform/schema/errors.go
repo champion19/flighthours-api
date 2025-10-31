@@ -1,25 +1,8 @@
-package middleware
+package schema
 
 import (
 	"errors"
 	"fmt"
-)
-
-
-var (
-	ErrInvalidJSONFormat       = errors.New("invalid JSON format")
-	ErrUnmarshalBody           = errors.New("failed to process request body")
-	ErrSchemaValidation        = errors.New("validation failed")
-	ErrInternalServer          = errors.New("internal server error")
-	ErrModuleRootNotFound      = errors.New("could not find module root")
-	ErrSchemaFileNotFound      = errors.New("schema file not found")
-	ErrSchemaFileRead          = errors.New("failed to read schema file")
-	ErrSchemaCompilation       = errors.New("failed to compile JSON schema")
-	ErrSchemaEmpty             = errors.New("JSON schema is empty or null")
-	ErrValidatorInitFailed     = errors.New("validator initialization failed")
-	ErrValidationUserFailed    = errors.New("user validation failed")
-	ErrValidationUserNotFound  = errors.New("user not found")
-	ErrValidationUserAlreadyExists = errors.New("user already exists")
 )
 
 type SchemaError struct {
@@ -35,7 +18,6 @@ func (e *SchemaError) Error() string {
 func (e *SchemaError) Unwrap() error {
 	return e.err
 }
-
 
 func NewSchemaError(code, message string) *SchemaError {
 	return &SchemaError{
@@ -68,3 +50,15 @@ func NewMultipleFieldSchemaError(fieldNames []string) *SchemaError {
 	}
 }
 
+var (
+	ErrBadRequest            = NewSchemaError("MOD_V_VAL_ERR_00001", "Formato de solicitud no válido")
+	ErrInvalidRequest        = NewSchemaError("MOD_V_VAL_ERR_00002", "Solicitud inválida")
+	ErrSchemaReadFailed      = NewSchemaError("MOD_V_VAL_ERR_00003", "Error leyendo esquema JSON")
+	ErrSchemaEmpty           = NewSchemaError("MOD_V_VAL_ERR_00004", "El esquema JSON está vacío o es nulo")
+	ErrSchemaCompileFailed   = NewSchemaError("MOD_V_VAL_ERR_00005", "Error compilando esquema")
+	ErrValidationFailed      = NewSchemaError("MOD_V_VAL_ERR_00006", "Falló la validación del esquema")
+	ErrBodyReadFailed        = NewSchemaError("MOD_V_VAL_ERR_00007", "Error leyendo cuerpo de la solicitud")
+	ErrFieldPropertyMismatch = NewSchemaError("MOD_V_VAL_ERR_00008", "El campo no cumple con el formato requerido")
+	ErrFieldRequired         = NewSchemaError("MOD_V_VAL_ERR_00009", "El campo es requerido")
+	ErrFieldTypeInvalid      = NewSchemaError("MOD_V_VAL_ERR_00010", "El campo tiene un tipo de dato incorrecto")
+)

@@ -8,7 +8,6 @@ import (
 	"github.com/champion19/flighthours-api/handlers"
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/schema"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +25,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	validator := middleware.NewMiddlewareValidator(validators)
 
 	// Rutas públicas (sin autenticación)
-	public := app.Group("/v1/flighthours")
+	public := app.Group("flighthours/api/v1")
 	{
 		// Registro de usuario
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
@@ -34,7 +33,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// Login - devuelve tokens JWT
 		public.POST("/login", handler.LoginEmployee())
 		public.GET("/user/email/:email", handler.GetEmployeeByEmail())
-		
+
 	}
 
 }
