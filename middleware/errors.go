@@ -5,20 +5,19 @@ import (
 	"fmt"
 )
 
-
 var (
-	ErrInvalidJSONFormat       = errors.New("invalid JSON format")
-	ErrUnmarshalBody           = errors.New("failed to process request body")
-	ErrSchemaValidation        = errors.New("validation failed")
-	ErrInternalServer          = errors.New("internal server error")
-	ErrModuleRootNotFound      = errors.New("could not find module root")
-	ErrSchemaFileNotFound      = errors.New("schema file not found")
-	ErrSchemaFileRead          = errors.New("failed to read schema file")
-	ErrSchemaCompilation       = errors.New("failed to compile JSON schema")
-	ErrSchemaEmpty             = errors.New("JSON schema is empty or null")
-	ErrValidatorInitFailed     = errors.New("validator initialization failed")
-	ErrValidationUserFailed    = errors.New("user validation failed")
-	ErrValidationUserNotFound  = errors.New("user not found")
+	ErrInvalidJSONFormat           = errors.New("invalid JSON format")
+	ErrUnmarshalBody               = errors.New("failed to process request body")
+	ErrSchemaValidation            = errors.New("validation failed")
+	ErrInternalServer              = errors.New("internal server error")
+	ErrModuleRootNotFound          = errors.New("could not find module root")
+	ErrSchemaFileNotFound          = errors.New("schema file not found")
+	ErrSchemaFileRead              = errors.New("failed to read schema file")
+	ErrSchemaCompilation           = errors.New("failed to compile JSON schema")
+	ErrSchemaEmpty                 = errors.New("JSON schema is empty or null")
+	ErrValidatorInitFailed         = errors.New("validator initialization failed")
+	ErrValidationUserFailed        = errors.New("user validation failed")
+	ErrValidationUserNotFound      = errors.New("user not found")
 	ErrValidationUserAlreadyExists = errors.New("user already exists")
 )
 
@@ -35,7 +34,6 @@ func (e *SchemaError) Error() string {
 func (e *SchemaError) Unwrap() error {
 	return e.err
 }
-
 
 func NewSchemaError(code, message string) *SchemaError {
 	return &SchemaError{
@@ -67,4 +65,3 @@ func NewMultipleFieldSchemaError(fieldNames []string) *SchemaError {
 		err:     errors.New(message),
 	}
 }
-

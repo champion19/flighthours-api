@@ -40,14 +40,12 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 				Name:                 result.Employee.Name,
 				Email:                result.Employee.Email,
 				Airline:              result.Employee.Airline,
-				Emailconfirmed:       result.Employee.Emailconfirmed,
 				IdentificationNumber: result.Employee.IdentificationNumber,
 				Bp:                   result.Employee.Bp,
 				StartDate:            result.Employee.StartDate,
 				EndDate:              result.Employee.EndDate,
 				Active:               result.Employee.Active,
 				Role:                 result.Employee.Role,
-				KeycloakUserID:       result.Employee.KeycloakUserID,
 			},
 			Message: result.Message,
 		}
@@ -55,7 +53,6 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 		c.JSON(http.StatusCreated, response)
 	}
 }
-
 
 func (h handler) LoginEmployee() func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -71,7 +68,7 @@ func (h handler) LoginEmployee() func(c *gin.Context) {
 			return
 		}
 
-		response:= LoginResponse{
+		response := LoginResponse{
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
 			ExpiresIn:    token.ExpiresIn,

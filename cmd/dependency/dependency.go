@@ -15,7 +15,6 @@ type Dependencies struct {
 	EmployeeService      ports.Service
 	EmployeeRepo         ports.Repository
 	KeycloakClient       ports.AuthClient
-	AuthorizationService ports.AuthorizationService
 	Config               *config.Config
 }
 
@@ -62,7 +61,6 @@ func Init() (*Dependencies, error) {
 		EmployeeService:      employeeService,
 		EmployeeRepo:         employeeRepo,
 		KeycloakClient:       keycloakClient,
-		AuthorizationService: authorizationService,
 		Config:               cfg,
 	}, nil
 }

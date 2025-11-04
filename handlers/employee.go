@@ -12,7 +12,6 @@ type EmployeeRequest struct {
 	Airline              string `json:"airline"`
 	Email                string `json:"email"`
 	Password             string `json:"password"`
-	Emailconfirmed       bool   `json:"emailconfirmed"`
 	IdentificationNumber string `json:"identificationNumber"`
 	Bp                   string `json:"bp"`
 	StartDate            string `json:"start_date"`
@@ -26,14 +25,12 @@ type EmployeeResponse struct {
 	Name                 string    `json:"name"`
 	Airline              string    `json:"airline,omitempty"`
 	Email                string    `json:"email"`
-	Emailconfirmed       bool      `json:"emailconfirmed"`
 	IdentificationNumber string    `json:"identification_number"`
 	Bp                   string    `json:"bp,omitempty"`
 	StartDate            time.Time `json:"start_date"`
 	EndDate              time.Time `json:"end_date"`
 	Active               bool      `json:"active"`
 	Role                 string    `json:"role,omitempty"`
-	KeycloakUserID       string    `json:"keycloak_user_id,omitempty"`
 }
 
 type RegisterEmployeeResponse struct {
@@ -80,7 +77,6 @@ func (e EmployeeRequest) ToDomain() domain.Employee {
 		Airline:              e.Airline,
 		Email:                e.Email,
 		Password:             e.Password,
-		Emailconfirmed:       e.Emailconfirmed,
 		IdentificationNumber: e.IdentificationNumber,
 		Bp:                   e.Bp,
 		StartDate:            startDate,
