@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	QuerySave    = "INSERT INTO employee(id,name,airline,email,password,email_confirmed,identification_number,bp,start_date,end_date,active,role,keycloak_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)"
-	QueryByEmail = "SELECT id,name,airline,email,password,email_confirmed,identification_number,bp,start_date,end_date,active,role,keycloak_user_id FROM employee WHERE email=? LIMIT 1"
-	QueryByID    = "SELECT id,name,airline,email,password,email_confirmed,identification_number,bp,start_date,end_date,active,role,keycloak_user_id FROM employee WHERE id=? LIMIT 1"
-	QueryUpdate  = "UPDATE employee SET name=?,airline=?,email=?,password=?,email_confirmed=?,identification_number=?,bp=?,start_date=?,end_date=?,active=?,role=?,keycloak_user_id=? WHERE id=?"
+	QuerySave    = "INSERT INTO employee(id,name,airline,email,identification_number,bp,start_date,end_date,active,role,keycloak_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+	QueryByEmail = "SELECT id,name,airline,email,identification_number,bp,start_date,end_date,active,role,keycloak_user_id FROM employee WHERE email=? LIMIT 1"
+	QueryByID    = "SELECT id,name,airline,email,identification_number,bp,start_date,end_date,active,role,keycloak_user_id FROM employee WHERE id=? LIMIT 1"
+	QueryUpdate  = "UPDATE employee SET name=?,airline=?,email=?,identification_number=?,bp=?,start_date=?,end_date=?,active=?,role=?,keycloak_user_id=? WHERE id=?"
 	QueryDelete  = "DELETE FROM employee WHERE id=?"
 )
 
@@ -64,8 +64,6 @@ func (r *repository) GetEmployeeByEmail(email string) (*domain.Employee, error) 
 		&e.Name,
 		&e.Airline,
 		&e.Email,
-		&e.Password,
-		&e.Emailconfirmed,
 		&e.IdentificationNumber,
 		&e.Bp,
 		&e.StartDate,
@@ -90,8 +88,6 @@ func (r *repository) GetEmployeeByID(id string) (*domain.Employee, error) {
 		&e.Name,
 		&e.Airline,
 		&e.Email,
-		&e.Password,
-		&e.Emailconfirmed,
 		&e.IdentificationNumber,
 		&e.Bp, &e.StartDate,
 		&e.EndDate,
@@ -116,8 +112,6 @@ employeeToSave := FromDomain(employee)
 		employeeToSave.Name,
 		employeeToSave.Airline,
 		employeeToSave.Email,
-		employeeToSave.Password,
-		employeeToSave.Emailconfirmed,
 		employeeToSave.IdentificationNumber,
 		employeeToSave.Bp,
 		employeeToSave.StartDate,
@@ -144,8 +138,6 @@ func (r *repository) UpdateEmployee(employee domain.Employee) error {
 		employeeToUpdate.Name,
 		employeeToUpdate.Airline,
 		employeeToUpdate.Email,
-		employeeToUpdate.Password,
-		employeeToUpdate.Emailconfirmed,
 		employeeToUpdate.IdentificationNumber,
 		employeeToUpdate.Bp,
 		employeeToUpdate.StartDate,

@@ -1,56 +1,120 @@
 package middleware
 
 import (
-	"errors"
-	"log"
 	"net/http"
 
 	"github.com/champion19/flighthours-api/core/domain"
-	json_schema "github.com/champion19/flighthours-api/platform/schema"
 	"github.com/gin-gonic/gin"
 )
 
-type ErrorResponse struct {
-	Status  int    `json:"status"`
-	Code    string `json:"code"`
-	Message string `json:"message"`
+var mapError = map[error]ErrorResponse{
+	domain.ErrDuplicateUser: {
+		Code:    "MODE_U_USU_ERR_00001",
+		Message: "User already exists",
+		Status:  http.StatusConflict,
+	},
+	domain.ErrUserCannotSave: {
+		Code:    "MODE_U_USU_ERR_00002",
+		Message: "User cannot be saved",
+		Status:  http.StatusInternalServerError,
+	},
+	domain.ErrPersonNotFound: {
+		Code:    "MODE_U_USU_ERR_00003",
+		Message: "Person not found",
+		Status:  http.StatusNotFound,
+	},
+	domain.ErrGettingUserByEmail: {
+		Code:    "MODE_U_USU_ERR_00004",
+		Message: "Error getting user by email",
+		Status:  http.StatusInternalServerError,
+	},
+	domain.ErrNotFoundUserByEmail: {
+		Code:    "MODE_U_USU_ERR_00005",
+		Message: "User not found by email",
+		Status:  http.StatusNotFound,
+	},
+	domain.ErrNotFoundUserById: {
+		Code:    "MODE_U_USU_ERR_00006",
+		Message: "User not found by id",
+		Status:  http.StatusNotFound,
+	},
+	domain.ErrUserCannotFound: {
+		Code:    "MODE_U_USU_ERR_00007",
+		Message: "User cannot be found",
+		Status:  http.StatusNotFound,
+	},
+	domain.ErrUserCannotGet: {
+		Code:    "MODE_U_USU_ERR_00008",
+		Message: "User cannot be retrieved",
+		Status:  http.StatusInternalServerError,
+	},
+	domain.ErrorEmailNotVerified: {
+		Code:    "MODE_U_USU_ERR_00009",
+		Message: "Email not verified",
+		Status:  http.StatusUnauthorized,
+	},
+	domain.ErrVerificationTokenNotFound: {
+		Code:    "MODE_U_USU_ERR_00010",
+		Message: "Verification token not found",
+		Status:  http.StatusNotFound,
+	},
+	domain.ErrTokenExpired: {
+		Code:    "MODE_U_USU_ERR_00011",
+		Message: "Token expired",
+		Status:  http.StatusUnauthorized,
+	},
+	domain.ErrTokenAlreadyUsed: {
+		Code:    "MODE_U_USU_ERR_00012",
+		Message: "Token already used",
+		Status:  http.StatusForbidden,
+	},
+	domain.ErrRegistrationFailed: {
+		Code:    "MODE_U_USU_ERR_00013",
+		Message: "Registration failed",
+		Status:  http.StatusBadRequest,
+	},
+	domain.ErrRoleRequired: {
+		Code:    "MODE_U_USU_ERR_00014",
+		Message: "Role required",
+		Status:  http.StatusBadRequest,
+	},
+	domain.ErrInvalidJSONFormat: {
+		Code:    "MODE_U_USU_ERR_00015",
+		Message: "Invalid JSON format",
+		Status:  http.StatusBadRequest,
+	},
+	domain.ErrInvalidRequest: {
+		Code:    "MODE_U_USU_ERR_00016",
+		Message: "Invalid request parameters",
+		Status:  http.StatusBadRequest,
+	},
+	domain.ErrRoleAssignmentFailed: {
+		Code:    "MODE_U_USU_ERR_00017",
+		Message: "Error assigning role",
+		Status:  http.StatusInternalServerError,
+	},
+	domain.ErrRoleRemovalFailed: {
+		Code:    "MODE_U_USU_ERR_00018",
+		Message: "Error removing role",
+		Status:  http.StatusInternalServerError,
+	},
+	domain.ErrRoleCheckFailed: {
+		Code:    "MODE_U_USU_ERR_00019",
+		Message: "Error checking role",
+		Status:  http.StatusInternalServerError,
+	},
+	domain.ErrGetUserRolesFailed: {
+		Code:    "MODE_U_USU_ERR_00020",
+		Message: "Error retrieving user roles",
+		Status:  http.StatusInternalServerError,
+	},
 }
 
-var (
-	errorStatusMap = map[string]int{
-		"MOD_U_USU_ERR_00001": http.StatusConflict,
-		"MOD_U_USU_ERR_00002": http.StatusInternalServerError,
-		"MOD_U_USU_ERR_00003": http.StatusNotFound,
-		"MOD_U_USU_ERR_00004": http.StatusNotFound,
-		"MOD_U_USU_ERR_00005": http.StatusNotFound,
-		"MOD_U_USU_ERR_00006": http.StatusNotFound,
-		"MOD_U_USU_ERR_00007": http.StatusInternalServerError,
-		"MOD_U_USU_ERR_00008": http.StatusForbidden,
-		"MOD_U_USU_ERR_00009": http.StatusNotFound,
-		"MOD_U_USU_ERR_00010": http.StatusGone,
-		"MOD_U_USU_ERR_00011": http.StatusConflict,
-		"MOD_U_USU_ERR_00012": http.StatusInternalServerError,
-		"MOD_U_USU_ERR_00013": http.StatusBadRequest,
-		"Mod_U_USU_ERR_00014": http.StatusInternalServerError,
-
-		"MOD_V_VAL_ERR_00001": http.StatusBadRequest,
-		"MOD_V_VAL_ERR_00002": http.StatusBadRequest,
-		"MOD_V_VAL_ERR_00003": http.StatusInternalServerError,
-		"MOD_V_VAL_ERR_00004": http.StatusInternalServerError,
-		"MOD_V_VAL_ERR_00005": http.StatusInternalServerError,
-		"MOD_V_VAL_ERR_00006": http.StatusBadRequest,
-		"MOD_V_VAL_ERR_00007": http.StatusBadRequest,
-		"MOD_V_VAL_ERR_00008": http.StatusBadRequest,
-		"MOD_V_VAL_ERR_00009": http.StatusBadRequest,
-		"MOD_V_VAL_ERR_00010": http.StatusBadRequest,
-		"MOD_V_VAL_ERR_00011": http.StatusBadRequest,
-
-		"MOD_A_AUT_ERR_00001": http.StatusInternalServerError,
-		"MOD_A_AUT_ERR_00002": http.StatusInternalServerError,
-		"MOD_A_AUT_ERR_00003": http.StatusInternalServerError,
-		"MOD_A_AUT_ERR_00004": http.StatusInternalServerError,
-	}
-)
+type ErrorResponse struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Status  int    `json:"-"`
+}
 
 func ErrorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -59,53 +123,17 @@ func ErrorHandler() gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
 
-			// Try SchemaError first
-			var schemaErr *json_schema.SchemaError
-			if errors.As(err, &schemaErr) {
-				statusCode, exists := errorStatusMap[schemaErr.Code]
-				if !exists {
-					statusCode = http.StatusInternalServerError
-					log.Printf("Unknown schema error code: %s", schemaErr.Code)
-				}
-
-				response := ErrorResponse{
-					Status:  statusCode,
-					Code:    schemaErr.Code,
-					Message: schemaErr.Message,
-				}
-
-				c.AbortWithStatusJSON(statusCode, response)
+			if response, ok := mapError[err]; ok {
+				c.JSON(response.Status, response)
 				return
 			}
 
-			// Try DomainError second
-			var domainErr *domain.DomainError
-			if errors.As(err, &domainErr) {
-				statusCode, exists := errorStatusMap[domainErr.Code]
-				if !exists {
-					statusCode = http.StatusInternalServerError
-					log.Printf("Unknown domain error code: %s", domainErr.Code)
-				}
+			c.JSON(http.StatusInternalServerError, map[string]any{
+				"success": false,
+				"message": err.Error(),
+			})
 
-				response := ErrorResponse{
-					Status:  statusCode,
-					Code:    domainErr.Code,
-					Message: domainErr.Message,
-				}
-
-				c.AbortWithStatusJSON(statusCode, response)
-				return
-			}
-
-			log.Printf("Non-domain error: %v", err)
-			response := ErrorResponse{
-				Status:  http.StatusInternalServerError,
-				Code:    "MOD_G_GEN_ERR_00001",
-				Message: "Error interno del servidor",
-			}
-			c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		}
 	}
+
 }
-
-

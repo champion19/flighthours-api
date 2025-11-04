@@ -43,19 +43,13 @@ func (s service) RegisterEmployee(employee domain.Employee) (*dto.RegisterEmploy
 
 	employee.SetID()
 
-	plainPassword := employee.Password
-
-	if err := employee.HashPassword(); err != nil {
-		return nil, err
-	}
-
 	err = s.repository.Save(employee)
 	if err != nil {
 		return nil, err
 	}
 
 	ctx := context.Background()
-	err = s.syncUserWithKeycloak(ctx, &employee, plainPassword)
+	err = s.syncUserWithKeycloak(ctx, &employee, employee.Password)
 	if err != nil {
 
 		slog.Error("Failed to sync user with Keycloak, rolling back",

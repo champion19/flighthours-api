@@ -1,11 +1,10 @@
-package employee
+package newemployee
 
 import (
 	"time"
 
 	"github.com/champion19/flighthours-api/core/domain"
 )
-
 type Employee struct {
 	ID                   string    `db:"id"`
 	Name                 string    `db:"name"`
@@ -51,5 +50,3 @@ func FromDomain(domainEmployee domain.Employee) Employee {
 		KeycloakUserID:       domainEmployee.KeycloakUserID,
 	}
 }
-
-

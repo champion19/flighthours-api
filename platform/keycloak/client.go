@@ -40,7 +40,7 @@ func NewClient(cfg *config.KeycloakConfig) (ports.AuthClient, error) {
 		return nil, fmt.Errorf("failed to initialize admin token: %w", err)
 	}
 	authClient.token = token
-	authClient.tokenExpiresAt =time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
+	authClient.tokenExpiresAt = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 
 	return authClient, nil
 }
@@ -74,7 +74,6 @@ func (c *client) ensureValidToken(ctx context.Context) error {
 	return nil
 }
 
-
 func (c *client) LoginUser(ctx context.Context, username, password string) (*gocloak.JWT, error) {
 	if username == "" || password == "" {
 		return nil, fmt.Errorf("username and password cannot be empty")
@@ -100,17 +99,16 @@ func (c *client) CreateUser(ctx context.Context, employee *domain.Employee) (str
 		return "", fmt.Errorf("person cannot be nil")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return "", err
 	}
 
 	keycloakUser := gocloak.User{
-		Email:         &employee.Email,
-		FirstName:     &employee.Name,
-		LastName:      &employee.Name,
-		EmailVerified: &employee.Emailconfirmed,
-		Enabled:       gocloak.BoolP(true),
-		Username:      &employee.Email,
+		Email:     &employee.Email,
+		FirstName: &employee.Name,
+		LastName:  &employee.Name,
+		Enabled:   gocloak.BoolP(true),
+		Username:  &employee.Email,
 	}
 
 	userID, err := c.gocloak.CreateUser(
@@ -131,7 +129,7 @@ func (c *client) GetUserByEmail(ctx context.Context, email string) (*gocloak.Use
 		return nil, fmt.Errorf("email cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return nil, err
 	}
 
@@ -161,7 +159,7 @@ func (c *client) GetUserByID(ctx context.Context, userID string) (*gocloak.User,
 		return nil, fmt.Errorf("userID cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return nil, err
 	}
 
@@ -183,7 +181,7 @@ func (c *client) UpdateUser(ctx context.Context, user *gocloak.User) error {
 		return fmt.Errorf("user or user ID cannot be nil")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return err
 	}
 
@@ -205,7 +203,7 @@ func (c *client) DeleteUser(ctx context.Context, userID string) error {
 		return fmt.Errorf("userID cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return err
 	}
 
@@ -227,7 +225,7 @@ func (c *client) SetPassword(ctx context.Context, userID string, password string
 		return fmt.Errorf("userID and password cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return err
 	}
 
@@ -251,7 +249,7 @@ func (c *client) AssignRole(ctx context.Context, userID string, roleName string)
 		return fmt.Errorf("userID and roleName cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return err
 	}
 
@@ -284,7 +282,7 @@ func (c *client) RemoveRole(ctx context.Context, userID string, roleName string)
 		return fmt.Errorf("userID and roleName cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return err
 	}
 
@@ -317,7 +315,7 @@ func (c *client) GetUserRoles(ctx context.Context, userID string) ([]*gocloak.Ro
 		return nil, fmt.Errorf("userID cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return nil, err
 	}
 
@@ -339,7 +337,7 @@ func (c *client) SendVerificationEmail(ctx context.Context, userID string) error
 		return fmt.Errorf("userID cannot be empty")
 	}
 
-	if err:=c.ensureValidToken(ctx);err!=nil{
+	if err := c.ensureValidToken(ctx); err != nil {
 		return err
 	}
 
