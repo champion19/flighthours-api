@@ -1,4 +1,4 @@
-package newemployee
+package employee
 
 import (
 	"context"
@@ -36,5 +36,8 @@ func (r *repository) UpdateEmployee(ctx context.Context,employee domain.Employee
 		return domain.ErrUserCannotSave
 	}
 
-	return nil
+	if err = tx.Commit(); err != nil {
+	return err
+}
+return nil
 }

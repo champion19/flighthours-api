@@ -1,4 +1,4 @@
-package newemployee
+package employee
 
 import (
 	"time"

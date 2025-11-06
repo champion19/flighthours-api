@@ -1,4 +1,4 @@
-package newemployee
+package employee
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-func (r *repository) SaveEmployee(ctx context.Context, employee domain.Employee) error {
+func (r *repository) Save(ctx context.Context, employee domain.Employee) error {
 
 	employeeToSave := FromDomain(employee)
 

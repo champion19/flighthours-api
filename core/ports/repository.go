@@ -1,6 +1,10 @@
 package ports
 
-import "github.com/champion19/flighthours-api/core/domain"
+import (
+
+
+	"github.com/champion19/flighthours-api/core/domain"
+)
 
 type Repository interface {
 	Save(employee domain.Employee) error

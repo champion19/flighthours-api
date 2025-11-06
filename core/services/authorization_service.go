@@ -41,7 +41,7 @@ func (a *authorizationService) SyncUserToKeycloak(ctx context.Context, employee 
 
 
 	employee.KeycloakUserID = keycloakUserID
-	err = a.repository.UpdateEmployee(*employee)
+	err = a.repository.UpdateEmployee( *employee)
 	if err != nil {
 
 		_ = a.keycloakClient.DeleteUser(ctx, keycloakUserID)
@@ -97,7 +97,7 @@ func (a *authorizationService) SetUserPassword(ctx context.Context, keycloakUser
 
 func (a *authorizationService) AssignRole(ctx context.Context, employeeID string, roleName string) error {
 
-	employee, err := a.repository.GetEmployeeByID(employeeID)
+	employee, err := a.repository.GetEmployeeByID( employeeID)
 	if err != nil {
 		return fmt.Errorf("employee not found: %w", err)
 	}
@@ -217,7 +217,7 @@ func (a *authorizationService) GetAllRoles(ctx context.Context) ([]*string, erro
 }
 
 func (a *authorizationService) getKeycloakUserID(ctx context.Context, employeeID string) (string, error) {
-	employee, err := a.repository.GetEmployeeByID(employeeID)
+	employee, err := a.repository.GetEmployeeByID( employeeID)
 	if err != nil {
 		return "", fmt.Errorf("employee not found: %w", err)
 	}

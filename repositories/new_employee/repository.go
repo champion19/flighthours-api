@@ -1,12 +1,11 @@
-package newemployee
+package employee
 
 import (
 	"database/sql"
 
+	"github.com/champion19/flighthours-api/core/domain"
 	"github.com/champion19/flighthours-api/core/ports"
 )
-
-
 
 const (
 	QuerySave    = "INSERT INTO employee(id,name,airline,email,identification_number,bp,start_date,end_date,active,role,keycloak_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
@@ -17,14 +16,43 @@ const (
 )
 
 type repository struct {
-	keycloak ports.AuthClient
-	db *sql.DB
+	keycloak       ports.AuthClient
+	db             *sql.DB
+	stmtSave       *sql.Stmt
+	stmtGetByEmail *sql.Stmt
+	stmtGetByID    *sql.Stmt
+	stmtUpdate     *sql.Stmt
+	stmtDelete     *sql.Stmt
 }
 
-func NewClient(db *sql.DB,keycloak ports.AuthClient)(*repository,error){
+func NewClientRepository(db *sql.DB, keycloak ports.AuthClient) (*repository, error) {
+	stmtSave, err := db.Prepare(QuerySave)
+	if err != nil {
+		return nil, domain.ErrUserCannotSave
+	}
+	stmtGetByEmail, err := db.Prepare(QueryByEmail)
+	if err != nil {
+		return nil, domain.ErrUserCannotSave
+	}
+	stmtGetByID, err := db.Prepare(QueryByID)
+	if err != nil {
+		return nil, domain.ErrUserCannotSave
+	}
+	stmtUpdate, err := db.Prepare(QueryUpdate)
+	if err != nil {
+		return nil, domain.ErrUserCannotSave
+	}
+	stmtDelete, err := db.Prepare(QueryDelete)
+	if err != nil {
+		return nil, domain.ErrUserCannotSave
+	}
 	return &repository{
-		keycloak:keycloak,
-
-		db:db,
+		keycloak:       keycloak,
+		db:             db,
+		stmtSave:       stmtSave,
+		stmtGetByEmail: stmtGetByEmail,
+		stmtGetByID:    stmtGetByID,
+		stmtUpdate:     stmtUpdate,
+		stmtDelete:     stmtDelete,
 	}, nil
 }

@@ -106,7 +106,7 @@ func (r *repository) GetEmployeeByID(id string) (*domain.Employee, error) {
 
 func (r *repository) Save(employee domain.Employee) error {
 
-employeeToSave := FromDomain(employee)
+	employeeToSave := FromDomain(employee)
 	_, err := r.stmtSave.Exec(
 		employeeToSave.ID,
 		employeeToSave.Name,
@@ -144,8 +144,8 @@ func (r *repository) UpdateEmployee(employee domain.Employee) error {
 		employeeToUpdate.EndDate,
 		employeeToUpdate.Active,
 		employeeToUpdate.Role,
-	  employeeToUpdate.KeycloakUserID,
-	  employeeToUpdate.ID,
+		employeeToUpdate.KeycloakUserID,
+		employeeToUpdate.ID,
 	)
 	if err != nil {
 		return domain.ErrUserCannotSave
@@ -155,12 +155,12 @@ func (r *repository) UpdateEmployee(employee domain.Employee) error {
 }
 
 func (r *repository) DeleteEmployee(id string) error {
-	result,err:=r.db.Exec(QueryDelete,id)
-		if err != nil {
+	result, err := r.db.Exec(QueryDelete, id)
+	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
 
-	rowsAffected,err:=result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("failed to get rows affected: %w", err)
 	}

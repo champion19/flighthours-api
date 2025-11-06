@@ -51,6 +51,12 @@ func Init() (*Dependencies, error) {
 	}
 	slog.Info("Keycloak client initialized successfully")
 
+	employeeRepo, err = repo.NewRepository(db)
+	if err != nil {
+		slog.Error("Failed to create employee repository", slog.String("error", err.Error()))
+		return nil, err
+	}
+
 	// Crear AuthorizationService con Keycloak y Repository
 	authorizationService := services.NewAuthorizationService(keycloakClient, employeeRepo)
 
