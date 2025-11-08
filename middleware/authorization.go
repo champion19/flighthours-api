@@ -4,16 +4,16 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/champion19/flighthours-api/core/ports"
+	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/gin-gonic/gin"
 )
 
 
 type AuthorizationMiddleware struct {
-	authzService ports.AuthorizationService
+	authzService input.AuthorizationService
 }
 
-func NewAuthorizationMiddleware(authzService ports.AuthorizationService) *AuthorizationMiddleware {
+func NewAuthorizationMiddleware(authzService input.AuthorizationService) *AuthorizationMiddleware {
 	return &AuthorizationMiddleware{
 		authzService: authzService,
 	}

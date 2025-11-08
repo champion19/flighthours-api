@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"time"
 
-	domain "github.com/champion19/flighthours-api/core/domain"
+	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 )
 
 type EmployeeRequest struct {

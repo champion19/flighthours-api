@@ -8,8 +8,8 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/config"
-	"github.com/champion19/flighthours-api/core/domain"
-	"github.com/champion19/flighthours-api/core/ports"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
 type client struct {
@@ -20,7 +20,7 @@ type client struct {
 	tokenMutex     sync.RWMutex
 }
 
-func NewClient(cfg *config.KeycloakConfig) (ports.AuthClient, error) {
+func NewClient(cfg *config.KeycloakConfig) (output.AuthClient, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("keycloak config cannot be nil")
 	}

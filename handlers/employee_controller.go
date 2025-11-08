@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	domain "github.com/champion19/flighthours-api/core/domain"
+	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,7 +11,7 @@ func (h handler) GetEmployeeByEmail() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		email := c.Param("email")
 
-		employee, err := h.EmployeeService.GetEmployeeByEmail(email)
+		employee, err := h.EmployeeService.GetEmployeeByEmail(c,email)
 		if err != nil {
 			c.Error(err)
 			return
@@ -28,7 +28,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			return
 		}
 
-		result, err := h.EmployeeService.RegisterEmployee(employeeRequest.ToDomain())
+		result, err := h.EmployeeService.RegisterEmployee(c,employeeRequest.ToDomain())
 		if err != nil {
 			c.Error(err)
 			return
@@ -62,7 +62,7 @@ func (h handler) LoginEmployee() func(c *gin.Context) {
 			return
 		}
 
-		token, err := h.EmployeeService.LoginEmployee(loginRequest.Email, loginRequest.Password)
+		token, err := h.EmployeeService.LoginEmployee(c,loginRequest.Email, loginRequest.Password)
 		if err != nil {
 			c.Error(err)
 			return

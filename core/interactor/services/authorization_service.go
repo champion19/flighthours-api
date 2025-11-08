@@ -1,12 +1,15 @@
 package services
 
+/*¨
 import (
 	"context"
 	"fmt"
 
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/champion19/flighthours-api/core/domain"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports"
+
+
 )
 
 type authorizationService struct {
@@ -228,3 +231,4 @@ func (a *authorizationService) getKeycloakUserID(ctx context.Context, employeeID
 	}
 	return a.SyncUserToKeycloak(ctx, employee)
 }
+*/

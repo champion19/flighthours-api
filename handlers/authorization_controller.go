@@ -4,15 +4,16 @@ import (
 	"context"
 	"net/http"
 
-	domain "github.com/champion19/flighthours-api/core/domain"
-	"github.com/champion19/flighthours-api/core/ports"
+	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
+
+	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/gin-gonic/gin"
 )
 type AuthorizationController struct {
-	authService ports.AuthorizationService
+	authService input.AuthorizationService
 }
 
-func NewAuthorizationController(authService ports.AuthorizationService) AuthorizationController {
+func NewAuthorizationController(authService input.AuthorizationService) AuthorizationController {
 	return AuthorizationController{
 		authService: authService,
 	}

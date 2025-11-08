@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/champion19/flighthours-api/core/domain"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/gin-gonic/gin"
 )
 

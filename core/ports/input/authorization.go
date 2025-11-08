@@ -1,10 +1,10 @@
-package ports
+package input
 
 import (
 	"context"
 
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/champion19/flighthours-api/core/domain"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 )
 
 type AuthorizationService interface {

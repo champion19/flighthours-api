@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/champion19/flighthours-api/core/domain"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 
 )
 type RegisterEmployee struct {
