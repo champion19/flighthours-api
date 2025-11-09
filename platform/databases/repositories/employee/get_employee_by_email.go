@@ -8,16 +8,10 @@ import (
 )
 
 
-func (r *repository) GetEmployeeByEmail(ctx context.Context,email string) (*domain.Employee, error) {
-	tx,err:=r.db.BeginTx(ctx,nil)
-	if err!=nil{
-		return nil,domain.ErrUserCannotSave
-	}
-
-	row := tx.QueryRowContext(ctx,QueryByEmail,email)
+func (r *repository) GetEmployeeByEmail(email string) (*domain.Employee, error) {
 
 	var e Employee
-	err = row.Scan(
+	err := r.db.QueryRowContext(context.Background(),QueryByEmail,email).Scan(
 		&e.ID,
 		&e.Name,
 		&e.Airline,
@@ -31,15 +25,10 @@ func (r *repository) GetEmployeeByEmail(ctx context.Context,email string) (*doma
 		&e.KeycloakUserID)
 
    if err != nil {
-		tx.Rollback()
 		if err== sql.ErrNoRows{
 			return nil,domain.ErrPersonNotFound
 		}
-		return nil,domain.ErrUserCannotSave
-	}
-
-	if err:=tx.Commit();err!=nil{
-		return nil,domain.ErrUserCannotSave
+		return nil,err
 	}
 
   domainEmployee := e.ToDomain()

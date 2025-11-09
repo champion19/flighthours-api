@@ -34,8 +34,8 @@ type EmployeeResponse struct {
 }
 
 type RegisterEmployeeResponse struct {
-	User         EmployeeResponse `json:"user"`
-	Message      string           `json:"message"`
+	User    EmployeeResponse `json:"user"`
+	Message string           `json:"message"`
 }
 
 type ResponseEmail struct {
@@ -54,7 +54,6 @@ type LoginResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	TokenType    string `json:"token_type"`
 }
-
 
 func (e EmployeeRequest) ToDomain() domain.Employee {
 	layout := "2006-01-02"

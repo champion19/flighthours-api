@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+
 	"github.com/champion19/flighthours-api/tools/utils"
 )
 
@@ -23,13 +24,17 @@ type Verification struct {
 }
 
 type Database struct {
-	Driver   string `json:"driver"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
-	SSL      string `json:"ssl,omitempty"`
+	Driver          string `json:"driver"`
+	Host            string `json:"host"`
+	Port            string `json:"port"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	Name            string `json:"name"`
+	SSL             string `json:"ssl,omitempty"`
+	MaxOpenConns    int    `json:"max_open_conns,omitempty"`
+	MaxIdleConns    int    `json:"max_idle_conns,omitempty"`
+	ConnMaxLifetime int    `json:"conn_max_lifetime,omitempty"`
+	ConnMaxIdleTime int    `json:"conn_max_idle_time,omitempty"`
 }
 
 type Server struct {

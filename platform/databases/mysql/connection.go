@@ -3,9 +3,10 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/champion19/flighthours-api/config"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func GetDB(dbConfig config.Database) (*sql.DB, error) {
@@ -28,12 +29,19 @@ func GetDB(dbConfig config.Database) (*sql.DB, error) {
 
 	db, err := sql.Open(dbConfig.Driver, dsn)
 	if err != nil {
-		return nil, fmt.Errorf("Error to connect to database: %w", err)
+		return nil, fmt.Errorf("error to connect to database: %w", err)
 	}
+
+	 db.SetMaxOpenConns(dbConfig.MaxOpenConns)
+	 db.SetMaxIdleConns(dbConfig.MaxIdleConns)
+	 db.SetConnMaxLifetime(time.Duration(dbConfig.ConnMaxLifetime))
+	 db.SetConnMaxIdleTime(time.Duration(dbConfig.ConnMaxIdleTime))
+
+
 
 	err = db.Ping()
 	if err != nil {
-		return nil, fmt.Errorf("Error pinging database: %w", err)
+		return nil, fmt.Errorf("error pinging database: %w", err)
 	}
 
 	return db, nil

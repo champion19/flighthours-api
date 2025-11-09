@@ -2,11 +2,11 @@ package dto
 
 import (
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
-
 )
+
 type RegisterEmployee struct {
-	Employee domain.Employee
-	Message string
+	Employee domain.Employee `json:"employee"`
+	Message  string          `json:"message"`
 }
 
 type UserSyncStatus struct {

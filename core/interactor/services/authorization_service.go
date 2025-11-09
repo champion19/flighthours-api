@@ -42,7 +42,6 @@ func (a *authorizationService) SyncUserToKeycloak(ctx context.Context, employee 
 		keycloakUserID = *existingUser.ID
 	}
 
-
 	employee.KeycloakUserID = keycloakUserID
 	err = a.repository.UpdateEmployee(*employee)
 	if err != nil {

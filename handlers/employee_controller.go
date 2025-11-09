@@ -6,19 +6,20 @@ import (
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/gin-gonic/gin"
 )
-
 func (h handler) GetEmployeeByEmail() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		email := c.Param("email")
 
-		employee, err := h.EmployeeService.GetEmployeeByEmail(c,email)
+		person, err := h.EmployeeService.GetEmployeeByEmail(c,email)
 		if err != nil {
 			c.Error(err)
 			return
 		}
-		c.JSON(http.StatusOK, employee)
+
+		c.JSON(http.StatusOK, person)
 	}
 }
+
 
 func (h handler) RegisterEmployee() func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -28,7 +29,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			return
 		}
 
-		result, err := h.EmployeeService.RegisterEmployee(c,employeeRequest.ToDomain())
+		result, err := h.Interactor.RegisterEmployee(c,employeeRequest.ToDomain())
 		if err != nil {
 			c.Error(err)
 			return
@@ -51,29 +52,5 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusCreated, response)
-	}
-}
-
-func (h handler) LoginEmployee() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		var loginRequest LoginRequest
-		if err := c.ShouldBindJSON(&loginRequest); err != nil {
-			c.Error(domain.ErrInvalidRequest)
-			return
-		}
-
-		token, err := h.EmployeeService.LoginEmployee(c,loginRequest.Email, loginRequest.Password)
-		if err != nil {
-			c.Error(err)
-			return
-		}
-
-		response := LoginResponse{
-			AccessToken:  token.AccessToken,
-			RefreshToken: token.RefreshToken,
-			ExpiresIn:    token.ExpiresIn,
-			TokenType:    token.TokenType,
-		}
-		c.JSON(http.StatusOK, response)
 	}
 }

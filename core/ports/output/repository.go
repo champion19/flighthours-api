@@ -1,15 +1,14 @@
 package output
 
 import (
-	"context"
-
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 )
 
 type Repository interface {
-	Save(ctx context.Context, employee domain.Employee) error
-	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
-	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
-	UpdateEmployee(ctx context.Context, employee domain.Employee) error
-	DeleteEmployee(ctx context.Context, id string) error
+	Save(employee domain.Employee) error
+	GetEmployeeByEmail(email string) (*domain.Employee, error)
+	GetEmployeeByID(id string) (*domain.Employee, error)
+	UpdateEmployee(employee domain.Employee) error
+	PatchEmployee(id string, keycloakUserID string) error
+	DeleteEmployee(id string) error
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-func (r *repository) Save(ctx context.Context, employee domain.Employee) error {
+func (r *repository) Save( employee domain.Employee) error {
 
 	employeeToSave := FromDomain(employee)
 
@@ -17,7 +17,7 @@ func (r *repository) Save(ctx context.Context, employee domain.Employee) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.ExecContext(ctx, QuerySave,
+	_, err = tx.ExecContext(context.Background(),QuerySave,
 		employeeToSave.ID,
 		employeeToSave.Name,
 		employeeToSave.Airline,
@@ -38,6 +38,10 @@ func (r *repository) Save(ctx context.Context, employee domain.Employee) error {
 			return domain.ErrUserCannotSave
 		}
 	}
+
+	if err = tx.Commit(); err != nil {
+		return domain.ErrUserCannotSave
+		}
 
 	return nil
 }

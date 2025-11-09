@@ -8,7 +8,7 @@ import (
 
 
 
-func (r *repository) UpdateEmployee(ctx context.Context,employee domain.Employee) error {
+func (r *repository) UpdateEmployee(employee domain.Employee) error {
 	employeeToUpdate := FromDomain(employee)
 
 	tx, err := r.db.BeginTx(context.Background(), nil)
@@ -16,7 +16,7 @@ func (r *repository) UpdateEmployee(ctx context.Context,employee domain.Employee
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx,QueryUpdate,
+	_, err = tx.ExecContext(context.Background(), QueryUpdate,
 
 		employeeToUpdate.Name,
 		employeeToUpdate.Airline,
@@ -36,7 +36,8 @@ func (r *repository) UpdateEmployee(ctx context.Context,employee domain.Employee
 		return domain.ErrUserCannotSave
 	}
 
-	if err = tx.Commit(); err != nil {
+ err = tx.Commit()
+ if err != nil {
 	return err
 }
 return nil

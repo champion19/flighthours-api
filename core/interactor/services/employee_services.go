@@ -2,10 +2,7 @@ package services
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Nerzal/gocloak/v13"
-	"github.com/champion19/flighthours-api/config"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/input"
@@ -14,62 +11,61 @@ import (
 
 type service struct {
 	repository output.Repository
-	authClient output.AuthClient
-	config     *config.Config
+	keycloak   output.AuthClient
 }
 
-func NewService(repo output.Repository, authClient output.AuthClient, cfg *config.Config) input.Service {
+func NewService(repository output.Repository, keycloak output.AuthClient) input.Service {
 	return &service{
-		repository: repo,
-		authClient: authClient,
-		config:     cfg,
+		repository: repository,
+		keycloak:   keycloak,
 	}
 }
 
-func (s service) GetEmployeeByEmail(ctx context.Context,email string) (*domain.Employee, error) {
-	return s.repository.GetEmployeeByEmail(ctx,email)
+func (s service) GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error) {
+	return s.repository.GetEmployeeByEmail(email)
 }
 
-func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error) {
 
-	existingEmployee, err := s.repository.GetEmployeeByEmail(ctx, employee.Email)
+
+func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error) {
+	existingEmployee, err := s.repository.GetEmployeeByEmail(employee.Email)
 	if err == nil && existingEmployee != nil {
 		return nil, domain.ErrDuplicateUser
 	}
-
 	if employee.Role == "" {
-		return nil, fmt.Errorf("role is required")
+		return nil, domain.ErrRoleRequired
 	}
 
-	userID, err := s.authClient.CreateUser(ctx, &employee)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create user in Keycloak: %w", err)
-	}
-
-	err = s.authClient.AssignRole(ctx, userID, employee.Role)
-	if err != nil {
-		_ = s.authClient.DeleteUser(ctx, userID)
-		return nil, fmt.Errorf("failed to assign role in Keycloak: %w", err)
-	}
-
-	employee.KeycloakUserID = userID
-	err = s.repository.Save(ctx, employee)
-	if err != nil {
-		_ = s.authClient.DeleteUser(ctx, userID)
-		return nil, err
-	}
 	//dto de respuesta
 	return &dto.RegisterEmployee{
 		Employee: employee,
 		Message:  "Employee registered successfully",
 	}, nil
 }
+func (s service) SaveEmployeeToDB(ctx context.Context, employee domain.Employee) error {
+	return s.repository.Save(employee)
+}
 
-func (s service) LoginEmployee(ctx context.Context,email, password string) (*gocloak.JWT, error) {
+func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error) {
+	return s.keycloak.CreateUser(ctx, employee)
+}
 
-	token, err := s.authClient.LoginUser(ctx, email, password)
-	if err != nil {
-		return nil, fmt.Errorf("login failed: %w", err)
-	}
-	return token, nil
+func (s service) SetUserPassword(ctx context.Context, userID string, password string) error {
+	return s.keycloak.SetPassword(ctx, userID, password, true)
+}
+
+func (s service) AssignUserRole(ctx context.Context, userID string, role string) error {
+	return s.keycloak.AssignRole(ctx, userID, role)
+}
+
+func (s service) UpdateEmployeeKeycloakID(ctx context.Context, employeeID string, keycloakUserID string) error {
+	return s.repository.PatchEmployee(employeeID, keycloakUserID)
+}
+
+func (s service) RollbackEmployee(ctx context.Context, employeeID string) error {
+	return s.repository.DeleteEmployee(employeeID)
+}
+
+func (s service) RollbackKeycloakUser(ctx context.Context, KeycloakUserID string) error {
+	return s.keycloak.DeleteUser(ctx, KeycloakUserID)
 }
