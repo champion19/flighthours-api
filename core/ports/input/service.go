@@ -10,7 +10,7 @@ import (
 type Service interface {
 	RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error)
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
-
+  LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error)
 	SaveEmployeeToDB(ctx context.Context, employee domain.Employee) error
 	CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error)
 	SetUserPassword(ctx context.Context, userID string, password string) error

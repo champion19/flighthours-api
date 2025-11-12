@@ -15,3 +15,13 @@ type UserSyncStatus struct {
 	IsSynced       bool   `json:"is_synced"`
 	LastSyncAt     string `json:"last_sync_at"`
 }
+
+
+
+func FromDomainToDTO(employee *domain.Employee) *RegisterEmployee {
+	return &RegisterEmployee{
+		Employee: *employee,
+		Message:  "Employee located successfully",
+	}
+}
+

@@ -69,3 +69,19 @@ func (s service) RollbackEmployee(ctx context.Context, employeeID string) error 
 func (s service) RollbackKeycloakUser(ctx context.Context, KeycloakUserID string) error {
 	return s.keycloak.DeleteUser(ctx, KeycloakUserID)
 }
+
+func (s service) LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
+	employee, err := s.repository.GetEmployeeByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if employee == nil {
+		return nil, err
+	}
+
+	return &dto.RegisterEmployee{
+		Employee: *employee,
+		Message:  "Employee located successfully",
+	}, nil
+}

@@ -73,3 +73,11 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	return result, nil
 }
 
+
+func (i *Interactor) Locate(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
+	result, err := i.service.LocateEmployee(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
