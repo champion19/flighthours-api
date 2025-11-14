@@ -49,29 +49,23 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 		}
 		result := schema.Validate(data)
 		if !result.IsValid() {
-			// Collect all field names with errors
 			var fieldNames []string
 
-			// Process all errors to extract field names
+
 			for _, validationError := range result.Errors {
 				if validationError.Params != nil {
-					// Try "properties" (plural) first - for multiple fields
 					if properties, exists := validationError.Params["properties"]; exists {
 						propertiesStr := fmt.Sprintf("%v", properties)
-						// Parse multiple properties: "'email', 'role'" -> ["email", "role"]
 						fields := strings.Split(propertiesStr, ",")
 						for _, field := range fields {
 							field = strings.TrimSpace(field)
-							// Remove quotes
 							field = strings.Trim(field, "'\"")
 							if field != "" {
 								fieldNames = append(fieldNames, field)
 							}
 						}
 					} else if property, exists := validationError.Params["property"]; exists {
-						// Single property
 						propertyName := fmt.Sprintf("%v", property)
-						// Remove quotes if present
 						propertyName = strings.Trim(propertyName, "'\"")
 						if propertyName != "" {
 							fieldNames = append(fieldNames, propertyName)
@@ -83,7 +77,6 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 			var schemaError *json_schema.SchemaError
 
 			if len(fieldNames) == 1 {
-				// Single field error - get the error type from the first error
 				var firstError *jsonschema.EvaluationError
 				for _, err := range result.Errors {
 					firstError = err
@@ -102,10 +95,8 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 					schemaError = json_schema.NewFieldSchemaError(json_schema.ErrValidationFailed, fieldName)
 				}
 			} else if len(fieldNames) > 1 {
-				// Multiple field errors
 				schemaError = json_schema.NewMultipleFieldSchemaError(fieldNames)
 			} else {
-				// No specific field information
 				schemaError = json_schema.ErrValidationFailed
 			}
 

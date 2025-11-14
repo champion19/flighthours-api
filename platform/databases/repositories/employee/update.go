@@ -4,19 +4,20 @@ import (
 	"context"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
 
 
-func (r *repository) UpdateEmployee(employee domain.Employee) error {
+func (r *repository) UpdateEmployee(ctx context.Context,tx output.Tx,employee domain.Employee) error {
 	employeeToUpdate := FromDomain(employee)
 
-	tx, err := r.db.BeginTx(context.Background(), nil)
+	dbTx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(context.Background(), QueryUpdate,
+	_, err = dbTx.ExecContext(ctx, QueryUpdate,
 
 		employeeToUpdate.Name,
 		employeeToUpdate.Airline,
@@ -32,11 +33,11 @@ func (r *repository) UpdateEmployee(employee domain.Employee) error {
 	)
 
 	if err != nil {
-		tx.Rollback()
+			dbTx.Rollback()
 		return domain.ErrUserCannotSave
 	}
 
- err = tx.Commit()
+ err = dbTx.Commit()
  if err != nil {
 	return err
 }

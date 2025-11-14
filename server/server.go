@@ -30,10 +30,12 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	{
 		// Registro de usuario
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
+    //GET/accounts/:id
+    //public.GET("/accounts/:id", handler.GetEmployeeByID())
 
 		// Login - devuelve tokens JWT
 		//public.POST("/login", handler.LoginEmployee())
-		public.GET("/user/email/:email", handler.GetEmployeeByEmail())
+		//public.GET("/user/email/:email", handler.GetEmployeeByEmail())
 
 	}
 

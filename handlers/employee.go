@@ -34,8 +34,9 @@ type EmployeeResponse struct {
 }
 
 type RegisterEmployeeResponse struct {
-	User    EmployeeResponse `json:"user"`
+	
 	Message string           `json:"message"`
+	Links   []Link           `json:"_links"`
 }
 
 type ResponseEmail struct {

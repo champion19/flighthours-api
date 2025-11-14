@@ -5,36 +5,53 @@ import (
 
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
 const (
 	QueryPatch = "UPDATE employee SET keycloak_user_id=? WHERE id=?"
 )
 
-func (r *repository) PatchEmployee( id string, keycloakUserID string) error {
-	tx, err := r.db.BeginTx(context.Background(), nil)
-	if err != nil {
-		return err
+func (r *repository) PatchEmployee( ctx context.Context,tx output.Tx,id string, keycloakUserID string) error {
+var dbTx *sqlTx
+	var shouldCommit bool
+
+	if tx != nil {
+		// Usar la transacción existente
+		dbTx = tx.(*sqlTx)
+		shouldCommit = false
+	} else {
+		// Crear nueva transacción
+		newTx, err := r.db.BeginTx(ctx, nil)
+		if err != nil {
+			return err
+		}
+		dbTx = &sqlTx{Tx: newTx}
+		shouldCommit = true
 	}
-	result, err := tx.ExecContext(context.Background(), QueryPatch,keycloakUserID,id)
+
+
+	result, err := dbTx.ExecContext(ctx, QueryPatch,keycloakUserID,id)
 	if err != nil {
-		tx.Rollback()
+		dbTx.Rollback()
 		return domain.ErrUserCannotSave
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		tx.Rollback()
+		dbTx.Rollback()
 		return 	err
 	}
 	if rowsAffected == 0 {
-		tx.Rollback()
+		dbTx.Rollback()
 		return 	err
 	}
 
-	err=tx.Commit()
-	if err != nil {
-		return err
+	if shouldCommit {
+		err=dbTx.Commit()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

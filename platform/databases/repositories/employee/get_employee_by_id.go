@@ -1,19 +1,18 @@
 package employee
 
-
-import(
-
+import (
 	"context"
 	"database/sql"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
 
-func (r *repository) GetEmployeeByID(id string) (*domain.Employee, error) {
+func (r *repository) GetEmployeeByID(ctx context.Context, tx output.Tx, id string) (*domain.Employee, error) {
 
 	var e Employee
-	err := r.db.QueryRowContext(context.Background(),QueryByID,id).Scan(
+	err := r.db.QueryRowContext(ctx,QueryByID,id).Scan(
 		&e.ID,
 		&e.Name,
 		&e.Airline,

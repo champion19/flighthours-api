@@ -1,8 +1,8 @@
 package employee
 
 import (
+	"context"
 	"database/sql"
-
 
 	"github.com/champion19/flighthours-api/core/ports/output"
 )
@@ -15,6 +15,17 @@ const (
 	QueryDelete  = "DELETE FROM employee WHERE id=?"
 )
 
+type sqlTx struct {
+	*sql.Tx
+}
+
+func (t *sqlTx) Commit() error {
+	return t.Tx.Commit()
+}
+
+func (t *sqlTx) Rollback() error {
+	return t.Tx.Rollback()
+}
 type repository struct {
 	keycloak       output.AuthClient
 	db             *sql.DB
@@ -26,4 +37,12 @@ func NewClientRepository(db *sql.DB, keycloak output.AuthClient) (*repository, e
 		db:             db,
 
 	}, nil
+}
+
+func (r *repository) BeginTx(ctx context.Context) (output.Tx, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	return &sqlTx{Tx: tx}, nil
 }

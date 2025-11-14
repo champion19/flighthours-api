@@ -20,51 +20,68 @@ func NewInteractor(service input.Service) *Interactor {
 	}
 }
 func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error) {
-	var (
-		employeeSaved      bool
-		keycloakUserID   string
-	)
-
   result,err:=i.service.RegisterEmployee(ctx, employee)
 	if err != nil {
 		return nil, err
 	}
 	employee.SetID()
 
-  err =i.service.SaveEmployeeToDB(ctx, employee)
+  tx,err:=i.service.BeginTx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	employeeSaved	= true
+	if err = i.service.SaveEmployeeToDB(ctx, tx, employee); err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
 
-	keycloakUserID,err = i.service.CreateUserInKeycloak(ctx, &employee)
+	keycloakUserID,err := i.service.CreateUserInKeycloak(ctx, &employee)
 	if err != nil {
-		if employeeSaved {
-			_= i.service.RollbackEmployee(ctx, employee.ID)
-		}
+		_ = tx.Rollback()
 		return nil, err
 	}
 
 	err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password)
 	if err != nil {
 		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = i.service.RollbackEmployee(ctx, employee.ID)
+		_ = tx.Rollback()
 		return nil, err
 	}
 
 	err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role)
 	if err != nil {
 		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = i.service.RollbackEmployee(ctx, employee.ID)
+		_ = tx.Rollback()
 		return nil, err
 	}
 
-  err = i.service.UpdateEmployeeKeycloakID(ctx, employee.ID, keycloakUserID)
+
+	err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password)
 	if err != nil {
 		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = i.service.RollbackEmployee(ctx, employee.ID)
+		_ = tx.Rollback()
 		return nil, err
 	}
+
+	err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role)
+	if err != nil {
+		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+  err = i.service.UpdateEmployeeKeycloakID(ctx, tx, employee.ID, keycloakUserID)
+	if err != nil {
+		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
+		_ = tx.Rollback()
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+
 
 	employee.KeycloakUserID = keycloakUserID
 	result.Employee=employee

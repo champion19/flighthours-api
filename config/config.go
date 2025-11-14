@@ -149,14 +149,14 @@ func (c *Config) IsProduction() bool {
 	return c.Environment == "production" || c.Environment == "railway"
 }
 
-// Helper para obtener la URL completa del auth endpoint de Keycloak
+
 func (c *Config) GetKeycloakAuthURL() string {
 	return fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token",
 		c.Keycloak.ServerURL,
 		c.Keycloak.Realm)
 }
 
-// Helper para obtener la URL del admin API
+
 func (c *Config) GetKeycloakAdminURL() string {
 	return fmt.Sprintf("%s/admin/realms/%s",
 		c.Keycloak.ServerURL,

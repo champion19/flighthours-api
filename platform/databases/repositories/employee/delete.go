@@ -1,26 +1,26 @@
 package employee
 
-import(
+import (
 	"context"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
-func (r *repository) DeleteEmployee(id string) error {
+func (r *repository) DeleteEmployee(ctx context.Context, tx output.Tx, id string) error {
 
-tx, err := r.db.BeginTx(context.Background(), nil)
+dbtx, err := r.db.BeginTx(context.Background(), nil)
 if err != nil {
 	return err
 }
 
-	_,err = tx.ExecContext(context.Background(),QueryDelete,id)
+	_, err = dbtx.ExecContext(context.Background(),QueryDelete,id)
   if err!=nil{
 		tx.Rollback()
 		return domain.ErrUserCannotSave
 	}
 
-
-	if err = tx.Commit(); err != nil {
+	if err = dbtx.Commit(); err != nil {
 		return err
 	}
 	return nil

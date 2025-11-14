@@ -6,19 +6,6 @@ import (
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/gin-gonic/gin"
 )
-func (h handler) GetEmployeeByEmail() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		email := c.Param("email")
-
-		person, err := h.EmployeeService.GetEmployeeByEmail(c,email)
-		if err != nil {
-			c.Error(err)
-			return
-		}
-
-		c.JSON(http.StatusOK, person)
-	}
-}
 
 
 func (h handler) RegisterEmployee() func(c *gin.Context) {
@@ -35,20 +22,23 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			return
 		}
 
+		scheme := "http"
+		if c.Request.TLS != nil {
+			scheme = "https"
+		}
+		baseURL := scheme + "://" + c.Request.Host
+		links := BuildAccountLinks(baseURL, result.Employee.ID)
+
+
+		locationURL := baseURL + "/flighthours/api/v1/accounts/" + result.Employee.ID
+		c.Header("Location", locationURL)
+
+
+
+
 		response := RegisterEmployeeResponse{
-			User: EmployeeResponse{
-				ID:                   result.Employee.ID,
-				Name:                 result.Employee.Name,
-				Email:                result.Employee.Email,
-				Airline:              result.Employee.Airline,
-				IdentificationNumber: result.Employee.IdentificationNumber,
-				Bp:                   result.Employee.Bp,
-				StartDate:            result.Employee.StartDate,
-				EndDate:              result.Employee.EndDate,
-				Active:               result.Employee.Active,
-				Role:                 result.Employee.Role,
-			},
 			Message: result.Message,
+			Links:links,
 		}
 
 		c.JSON(http.StatusCreated, response)
