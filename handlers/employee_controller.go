@@ -22,6 +22,17 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			return
 		}
 
+		//TODO;TENERLO EN CUENTA, ESTO ES DE COOKIES HTTTPONLY
+		c.SetCookie(
+            "employee_id",               // name
+            result.Employee.ID,          // value
+            3600,                        // expira en 1 hora
+            "/",                         // path
+            c.Request.Host,              // domain
+            c.Request.TLS != nil,        // secure
+            true,                        // httpOnly
+        )
+
 		scheme := "http"
 		if c.Request.TLS != nil {
 			scheme = "https"
@@ -29,12 +40,8 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 		baseURL := scheme + "://" + c.Request.Host
 		links := BuildAccountLinks(baseURL, result.Employee.ID)
 
-
 		locationURL := baseURL + "/flighthours/api/v1/accounts/" + result.Employee.ID
 		c.Header("Location", locationURL)
-
-
-
 
 		response := RegisterEmployeeResponse{
 			Message: result.Message,

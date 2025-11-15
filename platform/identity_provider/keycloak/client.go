@@ -132,7 +132,6 @@ func (c *client) GetUserByEmail(ctx context.Context, email string) (*gocloak.Use
 		return nil, err
 	}
 
-	//TODO: implementar busqueda por email cuando se usa este metodo?
 	users, err := c.gocloak.GetUsers(
 		ctx,
 		c.token.AccessToken,
