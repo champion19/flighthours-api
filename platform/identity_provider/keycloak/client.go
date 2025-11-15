@@ -8,8 +8,8 @@ import (
 
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/config"
-	"github.com/champion19/flighthours-api/core/domain"
-	"github.com/champion19/flighthours-api/core/ports"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
 type client struct {
@@ -20,7 +20,7 @@ type client struct {
 	tokenMutex     sync.RWMutex
 }
 
-func NewClient(cfg *config.KeycloakConfig) (ports.AuthClient, error) {
+func NewClient(cfg *config.KeycloakConfig) (output.AuthClient, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("keycloak config cannot be nil")
 	}
@@ -44,9 +44,10 @@ func NewClient(cfg *config.KeycloakConfig) (ports.AuthClient, error) {
 
 	return authClient, nil
 }
+
 func (c *client) ensureValidToken(ctx context.Context) error {
 	c.tokenMutex.RLock()
-	// Refrescar el token si expira en los próximos 30 segundos
+
 	needsRefresh := time.Now().Add(30 * time.Second).After(c.tokenExpiresAt)
 	c.tokenMutex.RUnlock()
 
@@ -57,12 +58,10 @@ func (c *client) ensureValidToken(ctx context.Context) error {
 	c.tokenMutex.Lock()
 	defer c.tokenMutex.Unlock()
 
-	// Verificar nuevamente por si otro goroutine ya refrescó el token
 	if time.Now().Add(30 * time.Second).Before(c.tokenExpiresAt) {
 		return nil
 	}
 
-	// Refrescar el token de admin
 	token, err := c.gocloak.LoginAdmin(ctx, c.config.AdminUser, c.config.AdminPass, c.config.Realm)
 	if err != nil {
 		return fmt.Errorf("failed to refresh admin token: %w", err)
@@ -133,7 +132,6 @@ func (c *client) GetUserByEmail(ctx context.Context, email string) (*gocloak.Use
 		return nil, err
 	}
 
-	//TODO: implementar busqueda por email cuando se usa este metodo?
 	users, err := c.gocloak.GetUsers(
 		ctx,
 		c.token.AccessToken,

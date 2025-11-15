@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+
 	"github.com/champion19/flighthours-api/tools/utils"
 )
 
@@ -23,13 +24,17 @@ type Verification struct {
 }
 
 type Database struct {
-	Driver   string `json:"driver"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
-	SSL      string `json:"ssl,omitempty"`
+	Driver          string `json:"driver"`
+	Host            string `json:"host"`
+	Port            string `json:"port"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	Name            string `json:"name"`
+	SSL             string `json:"ssl,omitempty"`
+	MaxOpenConns    int    `json:"max_open_conns,omitempty"`
+	MaxIdleConns    int    `json:"max_idle_conns,omitempty"`
+	ConnMaxLifetime int    `json:"conn_max_lifetime,omitempty"`
+	ConnMaxIdleTime int    `json:"conn_max_idle_time,omitempty"`
 }
 
 type Server struct {
@@ -144,14 +149,14 @@ func (c *Config) IsProduction() bool {
 	return c.Environment == "production" || c.Environment == "railway"
 }
 
-// Helper para obtener la URL completa del auth endpoint de Keycloak
+
 func (c *Config) GetKeycloakAuthURL() string {
 	return fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token",
 		c.Keycloak.ServerURL,
 		c.Keycloak.Realm)
 }
 
-// Helper para obtener la URL del admin API
+
 func (c *Config) GetKeycloakAdminURL() string {
 	return fmt.Sprintf("%s/admin/realms/%s",
 		c.Keycloak.ServerURL,

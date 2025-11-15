@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -21,47 +21,59 @@ var (
 	ErrValidationUserAlreadyExists = errors.New("user already exists")
 )
 
-type SchemaError struct {
-	Code    string
-	Message string
-	err     error
-}
-
-func (e *SchemaError) Error() string {
-	return e.Message
-}
-
-func (e *SchemaError) Unwrap() error {
-	return e.err
-}
-
-func NewSchemaError(code, message string) *SchemaError {
-	return &SchemaError{
-		Code:    code,
-		Message: message,
-		err:     errors.New(message),
+func ValidateError(c *gin.Context, err error, details interface{}, statusCode int) {
+	if details == nil {
+		c.JSON(statusCode, gin.H{
+			"error": err.Error(),
+		})
+		c.Abort()
+		return
 	}
-}
 
-// NewFieldSchemaError creates a schema error with field-specific information
-func NewFieldSchemaError(baseError *SchemaError, fieldName string) *SchemaError {
-	message := fmt.Sprintf("%s: %s", baseError.Message, fieldName)
-	return &SchemaError{
-		Code:    baseError.Code,
-		Message: message,
-		err:     errors.New(message),
+	detailsMap, ok := details.(map[string]interface{})
+	if !ok {
+		c.JSON(statusCode, gin.H{
+			"error":   err.Error(),
+			"details": details,
+		})
+		c.Abort()
+		return
 	}
-}
 
-// NewMultipleFieldSchemaError creates a schema error for multiple fields
-func NewMultipleFieldSchemaError(fieldNames []string) *SchemaError {
-	message := "Errores de validación en los campos: " + fieldNames[0]
-	for i := 1; i < len(fieldNames); i++ {
-		message += ", " + fieldNames[i]
+	fieldErrors := make(map[string]string)
+
+
+	if detailsList, exists := detailsMap["details"].([]interface{}); exists {
+		for _, item := range detailsList {
+			fieldDetail, ok := item.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			if valid, exists := fieldDetail["valid"].(bool); exists && !valid {
+
+				path := ""
+				if instanceLoc, exists := fieldDetail["instanceLocation"].(string); exists {
+					path = instanceLoc
+					if len(path) > 0 && path[0] == '/' {
+						path = path[1:]
+					}
+				}
+
+				if errorsMap, exists := fieldDetail["errors"].(map[string]interface{}); exists && path != "" {
+					for _, msg := range errorsMap {
+						if strMsg, ok := msg.(string); ok {
+							fieldErrors[path] = strMsg
+						}
+					}
+				}
+			}
+		}
 	}
-	return &SchemaError{
-		Code:    "MOD_V_VAL_ERR_00011",
-		Message: message,
-		err:     errors.New(message),
-	}
+
+	c.JSON(statusCode, gin.H{
+		"error":   err.Error(),
+		"invalid": fieldErrors,
+	})
+	c.Abort()
 }

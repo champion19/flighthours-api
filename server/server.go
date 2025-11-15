@@ -15,11 +15,12 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	slog.Info("Setting up routes")
 
 	app.Use(middleware.ErrorHandler())
-	handler := handlers.New(dependencies.EmployeeService)
+	handler := handlers.New(dependencies.EmployeeService, dependencies.Interactor)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
 	if err != nil {
 		slog.Error("Error creating validator", slog.String("error", err.Error()))
+		log.Fatalf("failed to initialize schema validator: %v", err)
 		return
 	}
 	validator := middleware.NewMiddlewareValidator(validators)
@@ -29,10 +30,12 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	{
 		// Registro de usuario
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
+    //GET/accounts/:id
+    //public.GET("/accounts/:id", handler.GetEmployeeByID())
 
 		// Login - devuelve tokens JWT
-		public.POST("/login", handler.LoginEmployee())
-		public.GET("/user/email/:email", handler.GetEmployeeByEmail())
+		//public.POST("/login", handler.LoginEmployee())
+		//public.GET("/user/email/:email", handler.GetEmployeeByEmail())
 
 	}
 
@@ -41,7 +44,6 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 func Bootstrap(app *gin.Engine) *dependency.Dependencies {
 	dependencies, err := dependency.Init()
 	if err != nil {
-		slog.Error("Failed to initialize dependencies", slog.String("error", err.Error()))
 		log.Fatal("failed to init dependencies")
 		return nil
 	}

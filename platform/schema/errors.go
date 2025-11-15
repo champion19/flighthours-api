@@ -27,7 +27,7 @@ func NewSchemaError(code, message string) *SchemaError {
 	}
 }
 
-// NewFieldSchemaError creates a schema error with field-specific information
+
 func NewFieldSchemaError(baseError *SchemaError, fieldName string) *SchemaError {
 	message := fmt.Sprintf("%s: %s", baseError.Message, fieldName)
 	return &SchemaError{
@@ -37,7 +37,7 @@ func NewFieldSchemaError(baseError *SchemaError, fieldName string) *SchemaError 
 	}
 }
 
-// NewMultipleFieldSchemaError creates a schema error for multiple fields
+
 func NewMultipleFieldSchemaError(fieldNames []string) *SchemaError {
 	message := "Errores de validación en los campos: " + fieldNames[0]
 	for i := 1; i < len(fieldNames); i++ {

@@ -6,6 +6,7 @@ var (
 	ErrDuplicateUser             = errors.New("user already exists")
 	ErrUserCannotSave            = errors.New("user cannot be saved")
 	ErrPersonNotFound            = errors.New("person not found")
+
 	ErrGettingUserByEmail        = errors.New("error getting user by email")
 	ErrNotFoundUserByEmail       = errors.New("user not found by email")
 	ErrNotFoundUserById          = errors.New("user not found by id")
@@ -22,6 +23,7 @@ var (
 var (
 	ErrInvalidJSONFormat = errors.New("invalid json format")
 	ErrInvalidRequest    = errors.New("invalid request parameters")
+	ErrInvalidID         = errors.New("invalid id")
 )
 
 var (

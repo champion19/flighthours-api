@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"time"
 
-	domain "github.com/champion19/flighthours-api/core/domain"
+	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 )
 
 type EmployeeRequest struct {
@@ -34,8 +34,9 @@ type EmployeeResponse struct {
 }
 
 type RegisterEmployeeResponse struct {
-	User         EmployeeResponse `json:"user"`
-	Message      string           `json:"message"`
+	
+	Message string           `json:"message"`
+	Links   []Link           `json:"_links"`
 }
 
 type ResponseEmail struct {
@@ -54,7 +55,6 @@ type LoginResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	TokenType    string `json:"token_type"`
 }
-
 
 func (e EmployeeRequest) ToDomain() domain.Employee {
 	layout := "2006-01-02"

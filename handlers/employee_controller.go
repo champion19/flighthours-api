@@ -3,22 +3,10 @@ package handlers
 import (
 	"net/http"
 
-	domain "github.com/champion19/flighthours-api/core/domain"
+	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/gin-gonic/gin"
 )
 
-func (h handler) GetEmployeeByEmail() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		email := c.Param("email")
-
-		employee, err := h.EmployeeService.GetEmployeeByEmail(email)
-		if err != nil {
-			c.Error(err)
-			return
-		}
-		c.JSON(http.StatusOK, employee)
-	}
-}
 
 func (h handler) RegisterEmployee() func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -28,52 +16,38 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			return
 		}
 
-		result, err := h.EmployeeService.RegisterEmployee(employeeRequest.ToDomain())
+		result, err := h.Interactor.RegisterEmployee(c,employeeRequest.ToDomain())
 		if err != nil {
 			c.Error(err)
 			return
 		}
 
+		//TODO;TENERLO EN CUENTA, ESTO ES DE COOKIES HTTTPONLY
+		c.SetCookie(
+            "employee_id",               // name
+            result.Employee.ID,          // value
+            3600,                        // expira en 1 hora
+            "/",                         // path
+            c.Request.Host,              // domain
+            c.Request.TLS != nil,        // secure
+            true,                        // httpOnly
+        )
+
+		scheme := "http"
+		if c.Request.TLS != nil {
+			scheme = "https"
+		}
+		baseURL := scheme + "://" + c.Request.Host
+		links := BuildAccountLinks(baseURL, result.Employee.ID)
+
+		locationURL := baseURL + "/flighthours/api/v1/accounts/" + result.Employee.ID
+		c.Header("Location", locationURL)
+
 		response := RegisterEmployeeResponse{
-			User: EmployeeResponse{
-				ID:                   result.Employee.ID,
-				Name:                 result.Employee.Name,
-				Email:                result.Employee.Email,
-				Airline:              result.Employee.Airline,
-				IdentificationNumber: result.Employee.IdentificationNumber,
-				Bp:                   result.Employee.Bp,
-				StartDate:            result.Employee.StartDate,
-				EndDate:              result.Employee.EndDate,
-				Active:               result.Employee.Active,
-				Role:                 result.Employee.Role,
-			},
 			Message: result.Message,
+			Links:links,
 		}
 
 		c.JSON(http.StatusCreated, response)
-	}
-}
-
-func (h handler) LoginEmployee() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		var loginRequest LoginRequest
-		if err := c.ShouldBindJSON(&loginRequest); err != nil {
-			c.Error(domain.ErrInvalidRequest)
-			return
-		}
-
-		token, err := h.EmployeeService.LoginEmployee(loginRequest.Email, loginRequest.Password)
-		if err != nil {
-			c.Error(err)
-			return
-		}
-
-		response := LoginResponse{
-			AccessToken:  token.AccessToken,
-			RefreshToken: token.RefreshToken,
-			ExpiresIn:    token.ExpiresIn,
-			TokenType:    token.TokenType,
-		}
-		c.JSON(http.StatusOK, response)
 	}
 }
