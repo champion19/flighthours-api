@@ -1,8 +1,8 @@
 package server
 
 import (
-	"log"
-	"log/slog"
+
+
 
 	"github.com/champion19/flighthours-api/cmd/dependency"
 	"github.com/champion19/flighthours-api/handlers"
@@ -12,15 +12,16 @@ import (
 )
 
 func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
-	slog.Info("Setting up routes")
+dependencies.Logger.Info("Setting up routes")
 
-	app.Use(middleware.ErrorHandler())
-	handler := handlers.New(dependencies.EmployeeService, dependencies.Interactor)
+	app.Use(middleware.ErrorHandler(dependencies.Logger))
+	handler := handlers.New(dependencies.EmployeeService, dependencies.Interactor, dependencies.Logger)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
 	if err != nil {
-		slog.Error("Error creating validator", slog.String("error", err.Error()))
-		log.Fatalf("failed to initialize schema validator: %v", err)
+
+		dependencies.Logger.Error("failed to initialize schema validator", err)
+		dependencies.Logger.Fatal("failed to initialize schema validator", err)
 		return
 	}
 	validator := middleware.NewMiddlewareValidator(validators)
@@ -44,7 +45,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 func Bootstrap(app *gin.Engine) *dependency.Dependencies {
 	dependencies, err := dependency.Init()
 	if err != nil {
-		log.Fatal("failed to init dependencies")
+		dependencies.Logger.Fatal("failed to init dependencies", err)
 		return nil
 	}
 	routing(app, dependencies)

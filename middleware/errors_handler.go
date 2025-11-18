@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +14,6 @@ var mapError = map[error]ErrorResponse{
 		Message: "User already exists",
 		Status:  http.StatusConflict,
 	},
-	
 }
 
 type ErrorResponse struct {
@@ -22,7 +22,7 @@ type ErrorResponse struct {
 	Status  int    `json:"-"`
 }
 
-func ErrorHandler() gin.HandlerFunc {
+func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
@@ -30,10 +30,23 @@ func ErrorHandler() gin.HandlerFunc {
 			err := c.Errors.Last().Err
 
 			if response, ok := mapError[err]; ok {
+				logger.Warn("Error handling error",
+					"error", err.Error(),
+					"code", response.Code,
+					"status", response.Status,
+					"path", c.Request.URL.Path,
+					"method", c.Request.Method,
+					"employee_ip", c.ClientIP())
 				c.JSON(response.Status, response)
 				return
 			}
 
+			logger.Error("Error handling error",
+				"error", err.Error(),
+				"path", c.Request.URL.Path,
+				"method", c.Request.Method,
+				"employee_ip", c.ClientIP())
+				
 			c.JSON(http.StatusInternalServerError, map[string]any{
 				"success": false,
 				"message": err.Error(),

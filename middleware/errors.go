@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +20,7 @@ var (
 	ErrValidationUserFailed        = errors.New("user validation failed")
 	ErrValidationUserNotFound      = errors.New("user not found")
 	ErrValidationUserAlreadyExists = errors.New("user already exists")
+	ErrDBQueryFailed               = errors.New("database query failed")
 )
 
 func ValidateError(c *gin.Context, err error, details interface{}, statusCode int) {
@@ -41,7 +43,6 @@ func ValidateError(c *gin.Context, err error, details interface{}, statusCode in
 	}
 
 	fieldErrors := make(map[string]string)
-
 
 	if detailsList, exists := detailsMap["details"].([]interface{}); exists {
 		for _, item := range detailsList {
