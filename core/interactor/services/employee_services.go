@@ -7,26 +7,39 @@ import (
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/champion19/flighthours-api/core/ports/output"
+	"github.com/champion19/flighthours-api/platform/logger"
 )
 
 type service struct {
 	repository output.Repository
 	keycloak   output.AuthClient
+	logger     logger.Logger
 }
 
-func NewService(repository output.Repository, keycloak output.AuthClient) input.Service {
+func NewService(repository output.Repository, keycloak output.AuthClient, logger logger.Logger) input.Service {
 	return &service{
 		repository: repository,
 		keycloak:   keycloak,
+		logger:     logger,
 	}
 }
 
 func (s service) GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error) {
-	return s.repository.GetEmployeeByEmail(ctx,nil,email)
+employee, err := s.repository.GetEmployeeByEmail(ctx,nil,email)
+if err != nil {
+	s.logger.Error("Error getting employee by email", err)
+	return nil, err
+}
+return employee, nil
 }
 
 func (s service) GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error) {
-	return s.repository.GetEmployeeByID(ctx,nil,id)
+	employee,err:= s.repository.GetEmployeeByID(ctx,nil,id)
+	if err != nil {
+		s.logger.Error("Error getting employee by id", err)
+		return nil, err
+	}
+	return employee, nil
 }
 
 func(s service) BeginTx(ctx context.Context) (output.Tx, error) {
@@ -37,6 +50,7 @@ func(s service) BeginTx(ctx context.Context) (output.Tx, error) {
 func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error) {
 	existingEmployee, err := s.repository.GetEmployeeByEmail(ctx, nil, employee.Email)
 	if err == nil && existingEmployee != nil {
+		s.logger.Warn("Employee already exists", err)
 		return nil, domain.ErrDuplicateUser
 	}
 
@@ -49,40 +63,77 @@ func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee)
 
 
 func (s service) SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error {
-	return s.repository.Save(ctx, tx, employee)
+	err := s.repository.Save(ctx, tx, employee)
+	if err != nil {
+		s.logger.Error("Error saving employee to database", err)
+		return err
+	}
+	return nil
 }
 
 func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error) {
-	return s.keycloak.CreateUser(ctx, employee)
+	keycloakUserID, err := s.keycloak.CreateUser(ctx, employee)
+	if err != nil {
+		s.logger.Error("Error creating user in keycloak", err)
+		return "", err
+	}
+	return keycloakUserID, nil
 }
 
 func (s service) SetUserPassword(ctx context.Context, userID string, password string) error {
-	return s.keycloak.SetPassword(ctx, userID, password, true)
+	err := s.keycloak.SetPassword(ctx, userID, password, true)
+	if err != nil {
+		s.logger.Error("Error setting user password in keycloak", err)
+		return err
+	}
+	return nil
 }
 
 func (s service) AssignUserRole(ctx context.Context, userID string, role string) error {
-	return s.keycloak.AssignRole(ctx, userID, role)
+	err := s.keycloak.AssignRole(ctx, userID, role)
+	if err != nil {
+		s.logger.Error("Error assigning user role in keycloak", err)
+		return err
+	}
+	return nil
 }
 
 func (s service) UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error {
-	return s.repository.PatchEmployee(ctx, tx, employeeID, keycloakUserID)
+	err := s.repository.PatchEmployee(ctx, tx, employeeID, keycloakUserID)
+	if err != nil {
+		s.logger.Error("Error updating employee keycloak id in database", err)
+		return err
+	}
+	return nil
 }
 
 func (s service) RollbackEmployee(ctx context.Context,  employeeID string) error {
-	return s.repository.DeleteEmployee(ctx,nil, employeeID)
+	err := s.repository.DeleteEmployee(ctx,nil, employeeID)
+	if err != nil {
+		s.logger.Error("Error deleting employee from database", err)
+		return err
+	}
+	return nil
 }
 
 func (s service) RollbackKeycloakUser(ctx context.Context, KeycloakUserID string) error {
-	return s.keycloak.DeleteUser(ctx,KeycloakUserID)
+	err := s.keycloak.DeleteUser(ctx,KeycloakUserID)
+	if err != nil {
+		s.logger.Error("Error deleting user from keycloak", err)
+		return err
+	}
+	return nil
 }
 
 func (s service) LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
 	employee, err := s.repository.GetEmployeeByID(ctx,nil, id)
 	if err != nil {
+		s.logger.Error("Error getting employee by id", err)
 		return nil, err
 	}
 
 	if employee == nil {
+		s.logger.Error("Employee not found", err)
 		return nil, err
 	}
 

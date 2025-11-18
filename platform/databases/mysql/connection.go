@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"github.com/champion19/flighthours-api/config"
+	"github.com/champion19/flighthours-api/platform/logger"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func GetDB(dbConfig config.Database) (*sql.DB, error) {
+func GetDB(dbConfig config.Database,logger logger.Logger) (*sql.DB, error) {
 	var dsn string
-
-
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local",
 		dbConfig.Username,
@@ -26,23 +25,37 @@ func GetDB(dbConfig config.Database) (*sql.DB, error) {
 		dsn += "&tls=" + dbConfig.SSL
 	}
 
-
 	db, err := sql.Open(dbConfig.Driver, dsn)
 	if err != nil {
+		logger.Error("Error connecting to database",
+			"error", err,
+			"host", dbConfig.Host,
+			"database", dbConfig.Name)
 		return nil, fmt.Errorf("error to connect to database: %w", err)
 	}
 
-	 db.SetMaxOpenConns(dbConfig.MaxOpenConns)
-	 db.SetMaxIdleConns(dbConfig.MaxIdleConns)
-	 db.SetConnMaxLifetime(time.Duration(dbConfig.ConnMaxLifetime))
-	 db.SetConnMaxIdleTime(time.Duration(dbConfig.ConnMaxIdleTime))
+	logger.Debug("Database connection established",
+		"max_open_conns", dbConfig.MaxOpenConns,
+		"max_idle_conns", dbConfig.MaxIdleConns,
+		"conn_max_lifetime", dbConfig.ConnMaxLifetime,
+		"conn_max_idle_time", dbConfig.ConnMaxIdleTime,
+	)
 
-
+	db.SetMaxOpenConns(dbConfig.MaxOpenConns)
+	db.SetMaxIdleConns(dbConfig.MaxIdleConns)
+	db.SetConnMaxLifetime(time.Duration(dbConfig.ConnMaxLifetime))
+	db.SetConnMaxIdleTime(time.Duration(dbConfig.ConnMaxIdleTime))
 
 	err = db.Ping()
 	if err != nil {
+		logger.Error("Error pinging database",
+			"error", err,
+			"host", dbConfig.Host,
+			"database", dbConfig.Name)
 		return nil, fmt.Errorf("error pinging database: %w", err)
 	}
-
+	logger.Success("Database pinged successfully",
+		"host", dbConfig.Host,
+		"database", dbConfig.Name)
 	return db, nil
 }

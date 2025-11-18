@@ -3,8 +3,9 @@ package employee
 import (
 	"context"
 	"database/sql"
-
 	"github.com/champion19/flighthours-api/core/ports/output"
+
+
 )
 
 const (
@@ -35,6 +36,7 @@ func NewClientRepository(db *sql.DB, keycloak output.AuthClient) (*repository, e
 	return &repository{
 		keycloak:       keycloak,
 		db:             db,
+
 
 	}, nil
 }

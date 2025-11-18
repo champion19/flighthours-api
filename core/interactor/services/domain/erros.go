@@ -18,6 +18,7 @@ var (
 	ErrTokenAlreadyUsed          = errors.New("token already used")
 	ErrRegistrationFailed        = errors.New("registration failed")
 	ErrRoleRequired              = errors.New("role required")
+	ErrDBQueryFailed             = errors.New("database query failed")
 )
 
 var (
