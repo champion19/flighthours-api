@@ -7,4 +7,5 @@ type Logger interface {
 	Warn(msg string,args ...any)
 	Success(msg string,args ...any)
 	Fatal(msg string,args ...any)
+	Panic(msg string,args ...any)
 }

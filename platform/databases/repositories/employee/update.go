@@ -12,12 +12,12 @@ import (
 func (r *repository) UpdateEmployee(ctx context.Context,tx output.Tx,employee domain.Employee) error {
 	employeeToUpdate := FromDomain(employee)
 
-	dbTx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
+	dbTx, ok := tx.(*sqlTx)
+	if !ok {
+		return domain.ErrInvalidRequest
 	}
 
-	_, err = dbTx.ExecContext(ctx, QueryUpdate,
+	_, err := dbTx.ExecContext(ctx, QueryUpdate,
 
 		employeeToUpdate.Name,
 		employeeToUpdate.Airline,
@@ -33,13 +33,8 @@ func (r *repository) UpdateEmployee(ctx context.Context,tx output.Tx,employee do
 	)
 
 	if err != nil {
-			dbTx.Rollback()
 		return domain.ErrUserCannotSave
 	}
-
- err = dbTx.Commit()
- if err != nil {
-	return err
-}
+	
 return nil
 }

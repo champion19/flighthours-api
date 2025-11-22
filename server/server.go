@@ -20,10 +20,11 @@ dependencies.Logger.Info("Setting up routes")
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
 	if err != nil {
 
-		dependencies.Logger.Error("failed to initialize schema validator", err)
-		dependencies.Logger.Fatal("failed to initialize schema validator", err)
-		return
+		dependencies.Logger.Error("failed to initialize schema validator","error", err)
+		dependencies.Logger.Fatal("failed to initialize schema validator","error", err)
 	}
+
+	dependencies.Logger.Success("schema validator initialized successfully")
 	validator := middleware.NewMiddlewareValidator(validators)
 
 	// Rutas públicas (sin autenticación)
@@ -37,6 +38,8 @@ dependencies.Logger.Info("Setting up routes")
 		// Login - devuelve tokens JWT
 		//public.POST("/login", handler.LoginEmployee())
 		//public.GET("/user/email/:email", handler.GetEmployeeByEmail())
+
+		dependencies.Logger.Success("routes set successfully")
 
 	}
 

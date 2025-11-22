@@ -6,6 +6,7 @@ var (
 	ErrDuplicateUser             = errors.New("user already exists")
 	ErrUserCannotSave            = errors.New("user cannot be saved")
 	ErrPersonNotFound            = errors.New("person not found")
+	ErrInvalidTransaction        = errors.New("invalid transaction")
 
 	ErrGettingUserByEmail        = errors.New("error getting user by email")
 	ErrNotFoundUserByEmail       = errors.New("user not found by email")

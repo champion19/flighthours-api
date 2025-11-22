@@ -38,3 +38,8 @@ func (s *SlogLogger) Fatal(msg string, args ...any) {
     s.logger.Error(msg, args...)
 }
 
+func (s *SlogLogger) Panic(msg string, args ...any) {
+    s.logger.Error(msg, args...)
+}
+
+

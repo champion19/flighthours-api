@@ -29,6 +29,7 @@ func Init() (*Dependencies, error) {
 		log.Error("Failed to load config", err)
 		return nil, err
 	}
+	log.Info("Config loaded successfully")
 
 	db, err := mysql.GetDB(cfg.Database, log)
 	if err != nil {
@@ -44,7 +45,7 @@ func Init() (*Dependencies, error) {
 	}
 	log.Success("Keycloak client created successfully")
 
-	employeeRepo, err := repo.NewClientRepository(db, keycloakClient)
+	employeeRepo, err := repo.NewClientRepository(db)
 	if err != nil {
 		log.Error("Failed to create employee repository", err)
 		return nil, err

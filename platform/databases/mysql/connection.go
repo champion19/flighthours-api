@@ -11,6 +11,12 @@ import (
 )
 
 func GetDB(dbConfig config.Database,logger logger.Logger) (*sql.DB, error) {
+	logger.Info("Connecting to database",
+		"host", dbConfig.Host,
+		"port", dbConfig.Port,
+		"database", dbConfig.Name,
+		"driver", dbConfig.Driver)
+
 	var dsn string
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local",
@@ -22,6 +28,7 @@ func GetDB(dbConfig config.Database,logger logger.Logger) (*sql.DB, error) {
 	)
 
 	if dbConfig.SSL != "" {
+		logger.Debug("SSL enabled","ssl",dbConfig.SSL)
 		dsn += "&tls=" + dbConfig.SSL
 	}
 
@@ -45,6 +52,8 @@ func GetDB(dbConfig config.Database,logger logger.Logger) (*sql.DB, error) {
 	db.SetMaxIdleConns(dbConfig.MaxIdleConns)
 	db.SetConnMaxLifetime(time.Duration(dbConfig.ConnMaxLifetime))
 	db.SetConnMaxIdleTime(time.Duration(dbConfig.ConnMaxIdleTime))
+
+	logger.Info("Database connection set")
 
 	err = db.Ping()
 	if err != nil {
