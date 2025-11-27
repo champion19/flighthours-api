@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
 )
 
 type Employee struct {
@@ -26,11 +25,18 @@ func (e *Employee) SetID() {
 	e.ID = uuid.New().String()
 }
 
-
-
 type Airline struct {
 	ID     string
 	Name   string
 	Code   string
 	Status string
+}
+
+
+func(e *Employee)ToLogger() []string{
+	return []string{
+		"id" + e.ID,
+		"email" + e.Email,
+		"role" + e.Role,
+	}
 }

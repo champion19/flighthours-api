@@ -1,26 +1,13 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
 )
-
-var mapError = map[error]ErrorResponse{
-	domain.ErrDuplicateUser: {
-		Code:    "MODE_U_USU_ERR_00001",
-		Message: "User already exists",
-		Status:  http.StatusConflict,
-	},
-}
-
-type ErrorResponse struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
-	Status  int    `json:"-"`
-}
 
 func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -29,26 +16,32 @@ func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
 
-			if response, ok := mapError[err]; ok {
+			var appErr *domain.AppError
+
+			if errors.As(err, &appErr) {
 				logger.Warn("Error handling error",
 					"error", err.Error(),
-					"code", response.Code,
-					"status", response.Status,
+					"code", appErr.Code,
+					"status", appErr.StatusCode,
 					"path", c.Request.URL.Path,
 					"method", c.Request.Method,
 					"employee_ip", c.ClientIP())
-				c.JSON(response.Status, response)
+
+				c.JSON(appErr.StatusCode, gin.H{
+					"code":    appErr.Code,
+					"message": appErr.Message,
+				})
 				return
 			}
 
-			logger.Error("Error handling error",
+			logger.Error("Unhandled error",
 				"error", err.Error(),
 				"path", c.Request.URL.Path,
 				"method", c.Request.Method,
 				"employee_ip", c.ClientIP())
-				
-			c.JSON(http.StatusInternalServerError, map[string]any{
-				"success": false,
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    "INTERNAL_SERVER_ERROR",
 				"message": err.Error(),
 			})
 

@@ -33,7 +33,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	if err != nil {
 		i.log.Error("Error beginning transaction")
 	}
-   var keycloakUserID string
+	var keycloakUserID string
 	var keycloakCreated bool
 
 	defer func() {
@@ -52,7 +52,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 					i.log.Error("ROLLBACK KEYCLOAK FALLÓ - ALERTA CRÍTICA",
 						"keycloak_error", kcErr,
 						"keycloak_user_id", keycloakUserID)
-						} else {
+				} else {
 					i.log.Warn("Rollback Keycloak ejecutado correctamente")
 				}
 			}
@@ -100,8 +100,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 		"id", employee.ID,
 		"Keycloak_id", keycloakUserID)
 
-
-		err = nil
+	err = nil
 	return result, nil
 
 }

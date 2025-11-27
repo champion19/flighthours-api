@@ -1,13 +1,17 @@
 package dependency
 
 import (
+	"context"
+
 	"github.com/champion19/flighthours-api/config"
 	"github.com/champion19/flighthours-api/core/interactor"
 	"github.com/champion19/flighthours-api/core/interactor/services"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/champion19/flighthours-api/core/ports/output"
 	mysql "github.com/champion19/flighthours-api/platform/databases/mysql"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
+	"github.com/champion19/flighthours-api/platform/databases/repositories/messages"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
 	"github.com/champion19/flighthours-api/platform/logger"
 )
@@ -19,6 +23,7 @@ type Dependencies struct {
 	KeycloakClient  output.AuthClient
 	Config          *config.Config
 	Logger          logger.Logger
+	MessageManager  *domain.MessageManager
 }
 
 func Init() (*Dependencies, error) {
@@ -56,6 +61,23 @@ func Init() (*Dependencies, error) {
 
 	interactorFacade := interactor.NewInteractor(employeeService, log)
 
+	// Initialize message repository and manager
+	messageRepo := messages.NewMessageRepository(db)
+	messageRepoAdapter := messages.NewMessageRepositoryAdapter(messageRepo)
+	messageManager := domain.NewMessageManager(messageRepoAdapter)
+
+	// Load messages initially
+	if err := messageManager.LoadMessages(context.Background()); err != nil {
+		log.Error("Failed to load messages", err)
+		return nil, err
+	}
+	log.Success("Messages loaded from database successfully")
+
+	// Initialize global errors with loaded messages
+	domain.Messages = messageManager
+	domain.InitErrors()
+	log.Success("Error messages initialized successfully")
+
 	log.Success("Dependencies initialized successfully")
 
 	return &Dependencies{
@@ -65,5 +87,6 @@ func Init() (*Dependencies, error) {
 		KeycloakClient:  keycloakClient,
 		Config:          cfg,
 		Logger:          log,
+		MessageManager:  messageManager,
 	}, nil
 }
