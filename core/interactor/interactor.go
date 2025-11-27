@@ -20,11 +20,11 @@ func NewInteractor(service input.Service, log logger.Logger) *Interactor {
 		log:     log,
 	}
 }
-func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error) {
-	result, err := i.service.RegisterEmployee(ctx, employee)
+func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Employee) (result *dto.RegisterEmployee,err error) {
+	result, err = i.service.RegisterEmployee(ctx, employee)
 	if err != nil {
 		i.log.Error("failed to register employee", err)
-		return nil, err
+		return
 	}
 	employee.SetID()
 	i.log.Success("employee registered successfully")
@@ -32,6 +32,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	tx, err := i.service.BeginTx(ctx)
 	if err != nil {
 		i.log.Error("Error beginning transaction")
+		return
 	}
 	var keycloakUserID string
 	var keycloakCreated bool
@@ -44,7 +45,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 					"rollback_error", rbErr,
 					"original_error", err)
 			} else {
-				i.log.Warn("Rollback BD ejecutado correctamente")
+				i.log.Warn("Rollback BD executed successfully")
 			}
 
 			if keycloakCreated {
@@ -53,7 +54,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 						"keycloak_error", kcErr,
 						"keycloak_user_id", keycloakUserID)
 				} else {
-					i.log.Warn("Rollback Keycloak ejecutado correctamente")
+					i.log.Warn("Rollback Keycloak executed successfully")
 				}
 			}
 		}
@@ -61,34 +62,34 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 
 	if err = i.service.SaveEmployeeToDB(ctx, tx, employee); err != nil {
 		i.log.Error("failed to save employee in database")
-		return nil, err
+		return
 	}
 
 	keycloakUserID, err = i.service.CreateUserInKeycloak(ctx, &employee)
 	if err != nil {
 		i.log.Error("failed to create user in keycloak")
-		return nil, err
+		return
 	}
 
 	keycloakCreated = true
 	if err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password); err != nil {
 		i.log.Error("failed to set user password in keycloak")
-		return nil, err
+		return
 	}
 
 	if err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role); err != nil {
 		i.log.Error("failed to assign user role in keycloak")
-		return nil, err
+		return
 	}
 
 	if err = i.service.UpdateEmployeeKeycloakID(ctx, tx, employee.ID, keycloakUserID); err != nil {
 		i.log.Error("failed to update employee keycloak id in database")
-		return nil, err
+		return
 	}
 
 	if err = tx.Commit(); err != nil {
 		i.log.Error("failed to commit transaction")
-		return nil, err
+		return
 	}
 
 	employee.KeycloakUserID = keycloakUserID
@@ -96,8 +97,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	result.Message = "user registered successfully"
 
 	i.log.Success("user registered successfully",
-		"email", employee.Email,
-		"id", employee.ID,
+	employee.ToLogger(),
 		"Keycloak_id", keycloakUserID)
 
 	err = nil

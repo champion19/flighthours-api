@@ -15,7 +15,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 dependencies.Logger.Info("Setting up routes")
 
 	app.Use(middleware.ErrorHandler(dependencies.Logger))
-	handler := handlers.New(dependencies.EmployeeService, dependencies.Interactor, dependencies.Logger, dependencies.MessageManager)
+	handler := handlers.New(dependencies.EmployeeService, dependencies.Interactor, dependencies.Logger, dependencies.MessageManager,dependencies.IDEncoder)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
 	if err != nil {

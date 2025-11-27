@@ -12,7 +12,8 @@ type Service interface {
 	BeginTx(ctx context.Context) (output.Tx, error)
 	RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error)
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
-  LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error)
+  GetEmployeeByID(ctx context.Context,id string)(*domain.Employee,error)
+	LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error)
 	SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error
 	CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error)
 	SetUserPassword(ctx context.Context, userID string, password string) error

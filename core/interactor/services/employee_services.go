@@ -80,10 +80,10 @@ func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Empl
 	s.logger.Info("Creating user in keycloak", employee.ToLogger())
 	userID, err := s.keycloak.CreateUser(ctx, employee)
 	if err != nil {
-		s.logger.Error("Error creating user in keycloak", "error", err)
+		s.logger.Error("Error creating user in keycloak",employee.ToLogger(), "error", err)
 		return "", err
 	}
-	s.logger.Success("User created in keycloak", "user_id", userID)
+	s.logger.Success("User created in keycloak", employee.ToLogger(), "user_id", userID)
 	return userID, nil
 }
 

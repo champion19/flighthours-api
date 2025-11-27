@@ -30,6 +30,10 @@
     "client_secret": "M9HfWmIWf6huAnpKPXIGNdDeTfrwcNMt",
     "admin_user": "go-admin",
     "admin_pass": "1997"
+  },
+  "id_encoder": {
+    "secret": "1997",
+    "min_length": 6
   }
 }
 

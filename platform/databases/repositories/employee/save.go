@@ -14,7 +14,7 @@ func (r *repository) Save(ctx context.Context, tx output.Tx, 	employee domain.Em
 	employeeToSave := FromDomain(employee)
 	dbTx,ok := tx.(*sqlTx)
 	if !ok {
-		return domain.ErrInvalidRequest
+		return domain.ErrInvalidTransaction
 	}
 
 	_, err := dbTx.ExecContext(ctx,QuerySave,

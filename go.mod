@@ -51,5 +51,6 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/kaptinlin/jsonschema v0.4.14
+	github.com/speps/go-hashids/v2 v2.0.1
 	golang.org/x/crypto v0.42.0 // indirect
 )

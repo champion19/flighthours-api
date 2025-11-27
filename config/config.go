@@ -17,6 +17,12 @@ type Config struct {
 	Resend       Resend         `json:"resend"`
 	Verification Verification   `json:"verification"`
 	Keycloak     KeycloakConfig `json:"keycloak"`
+	IDEncoder    IDEncoder      `json:"id_encoder"`
+}
+
+type IDEncoder struct {
+	Secret string `json:"secret"`
+	MinLength int `json:"min_length"`
 }
 
 type Verification struct {

@@ -14,6 +14,7 @@ import (
 	"github.com/champion19/flighthours-api/platform/databases/repositories/messages"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
 	"github.com/champion19/flighthours-api/platform/logger"
+	idencoder "github.com/champion19/flighthours-api/tools/idencoder"
 )
 
 type Dependencies struct {
@@ -24,6 +25,7 @@ type Dependencies struct {
 	Config          *config.Config
 	Logger          logger.Logger
 	MessageManager  *domain.MessageManager
+	IDEncoder       *idencoder.HashidsEncoder
 }
 
 func Init() (*Dependencies, error) {
@@ -61,6 +63,17 @@ func Init() (*Dependencies, error) {
 
 	interactorFacade := interactor.NewInteractor(employeeService, log)
 
+	encoder, err := idencoder.NewHashidsEncoder(idencoder.Config{
+		Secret:    cfg.IDEncoder.Secret,
+		MinLength: cfg.IDEncoder.MinLength,
+	})
+	if err != nil {
+		log.Error("Error inicializando ID encoder", "error", err)
+		return nil, err
+	}
+	log.Success("ID Encoder inicializado correctamente")
+
+
 	// Initialize message repository and manager
 	messageRepo := messages.NewMessageRepository(db)
 	messageRepoAdapter := messages.NewMessageRepositoryAdapter(messageRepo)
@@ -88,5 +101,6 @@ func Init() (*Dependencies, error) {
 		Config:          cfg,
 		Logger:          log,
 		MessageManager:  messageManager,
+		IDEncoder:       encoder,
 	}, nil
 }

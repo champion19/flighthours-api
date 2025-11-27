@@ -29,7 +29,7 @@ func (t *sqlTx) Commit() error {
 
 func (t *sqlTx) Rollback() error {
 	if t.closed {
-		panic("sqlTx: rollback on closed")
+		panic("sqlTx: rollback on closed transaction")
 	}
 	t.closed = true
 	return t.tx.Rollback()

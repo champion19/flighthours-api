@@ -11,10 +11,10 @@ import (
 func (r *repository) DeleteEmployee(ctx context.Context, tx output.Tx, id string) error {
 	dbtx, ok := tx.(*sql.Tx)
 	if !ok {
-		return domain.ErrInvalidRequest
+		return domain.ErrInvalidTransaction
 	}
 
-	_, err := dbtx.ExecContext(context.Background(), QueryDelete, id)
+	_, err := dbtx.ExecContext(ctx, QueryDelete, id)
 	if err != nil {
 		return domain.ErrUserCannotSave
 	}

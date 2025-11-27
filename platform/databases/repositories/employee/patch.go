@@ -16,7 +16,7 @@ func (r *repository) PatchEmployee( ctx context.Context,tx output.Tx,id string, 
   dbTx, ok := tx.(*sqlTx)
 
 	if !ok {
-		return domain.ErrInvalidRequest
+		return domain.ErrInvalidTransaction
 	}
 
 
@@ -30,7 +30,7 @@ func (r *repository) PatchEmployee( ctx context.Context,tx output.Tx,id string, 
 		return 	err
 	}
 	if rowsAffected == 0 {
-		return 	domain.ErrUserCannotSave
+		return 	domain.ErrPersonNotFound
 	}
 	return nil
 }

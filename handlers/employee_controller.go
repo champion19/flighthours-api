@@ -38,11 +38,17 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 		if c.Request.TLS != nil {
 			scheme = "https"
 		}
+
+		encodedID, err := h.EncodeID(result.Employee.ID)
+		if err != nil {
+			h.HandleIDEncodingError(c, result.Employee.ID, err)
+			return
+		}
+
+
 		baseURL := scheme + "://" + c.Request.Host
 		links := BuildAccountLinks(baseURL, result.Employee.ID)
-
-		locationURL := baseURL + "/flighthours/api/v1/accounts/" + result.Employee.ID
-		c.Header("Location", locationURL)
+		SetLocationHeader(c, baseURL, "accounts", encodedID)
 
 		response := RegisterEmployeeResponse{
 			Message: result.Message,
