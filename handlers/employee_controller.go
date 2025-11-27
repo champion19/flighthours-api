@@ -5,9 +5,7 @@ import (
 
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/gin-gonic/gin"
-
 )
-
 
 func (h handler) RegisterEmployee() func(c *gin.Context) {
 	return func(c *gin.Context) {
@@ -18,7 +16,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			return
 		}
 
-		result, err := h.Interactor.RegisterEmployee(c,employeeRequest.ToDomain())
+		result, err := h.Interactor.RegisterEmployee(c, employeeRequest.ToDomain())
 		if err != nil {
 			h.Logger.Error("Error registering employee", err)
 			c.Error(err)
@@ -27,14 +25,14 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 
 		//TODO;TENERLO EN CUENTA, ESTO ES DE COOKIES HTTTPONLY
 		c.SetCookie(
-            "employee_id",               // name
-            result.Employee.ID,          // value
-            3600,                        // expira en 1 hora
-            "/",                         // path
-            c.Request.Host,              // domain
-            c.Request.TLS != nil,        // secure
-            true,                        // httpOnly
-        )
+			"employee_id",        // name
+			result.Employee.ID,   // value
+			3600,                 // expira en 1 hora
+			"/",                  // path
+			c.Request.Host,       // domain
+			c.Request.TLS != nil, // secure
+			true,                 // httpOnly
+		)
 
 		scheme := "http"
 		if c.Request.TLS != nil {
@@ -48,7 +46,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 
 		response := RegisterEmployeeResponse{
 			Message: result.Message,
-			Links:links,
+			Links:   links,
 		}
 		h.Logger.Success("Employee registered successfully", result.Employee.ID)
 

@@ -5,11 +5,11 @@ import (
 	"database/sql"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
-	"github.com/champion19/flighthours-api/core/ports/output"
+
 )
 
 
-func (r *repository) GetEmployeeByEmail(ctx context.Context, tx output.Tx, email string) (*domain.Employee, error) {
+func (r *repository) GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error) {
 
 	var e Employee
 	err := r.db.QueryRowContext(context.Background(),QueryByEmail,email).Scan(

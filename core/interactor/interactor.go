@@ -32,63 +32,62 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	tx, err := i.service.BeginTx(ctx)
 	if err != nil {
 		i.log.Error("Error beginning transaction")
-		return nil, err
 	}
+	var keycloakUserID string
+	var keycloakCreated bool
+
+	defer func() {
+		if err != nil {
+
+			if rbErr := tx.Rollback(); rbErr != nil {
+				i.log.Error("ROLLBACK BD FALLÓ - ALERTA CRÍTICA",
+					"rollback_error", rbErr,
+					"original_error", err)
+			} else {
+				i.log.Warn("Rollback BD ejecutado correctamente")
+			}
+
+			if keycloakCreated {
+				if kcErr := i.service.RollbackKeycloakUser(ctx, keycloakUserID); kcErr != nil {
+					i.log.Error("ROLLBACK KEYCLOAK FALLÓ - ALERTA CRÍTICA",
+						"keycloak_error", kcErr,
+						"keycloak_user_id", keycloakUserID)
+				} else {
+					i.log.Warn("Rollback Keycloak ejecutado correctamente")
+				}
+			}
+		}
+	}()
+
 	if err = i.service.SaveEmployeeToDB(ctx, tx, employee); err != nil {
 		i.log.Error("failed to save employee in database")
-		_ = tx.Rollback()
 		return nil, err
 	}
 
-	keycloakUserID, err := i.service.CreateUserInKeycloak(ctx, &employee)
+	keycloakUserID, err = i.service.CreateUserInKeycloak(ctx, &employee)
 	if err != nil {
 		i.log.Error("failed to create user in keycloak")
-		_ = tx.Rollback()
 		return nil, err
 	}
 
-	err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password)
-	if err != nil {
+	keycloakCreated = true
+	if err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password); err != nil {
 		i.log.Error("failed to set user password in keycloak")
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
 		return nil, err
 	}
 
-	err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role)
-	if err != nil {
+	if err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role); err != nil {
 		i.log.Error("failed to assign user role in keycloak")
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
 		return nil, err
 	}
 
-	err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password)
-	if err != nil {
-		i.log.Error("failed to set user password in keycloak")
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
-		return nil, err
-	}
-
-	err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role)
-	if err != nil {
-		i.log.Error("failed to assign user role in keycloak")
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
-		return nil, err
-	}
-
-	err = i.service.UpdateEmployeeKeycloakID(ctx, tx, employee.ID, keycloakUserID)
-	if err != nil {
+	if err = i.service.UpdateEmployeeKeycloakID(ctx, tx, employee.ID, keycloakUserID); err != nil {
 		i.log.Error("failed to update employee keycloak id in database")
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
 		return nil, err
 	}
+
 	if err = tx.Commit(); err != nil {
 		i.log.Error("failed to commit transaction")
-		_ = tx.Rollback()
 		return nil, err
 	}
 
@@ -101,7 +100,9 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 		"id", employee.ID,
 		"Keycloak_id", keycloakUserID)
 
+	err = nil
 	return result, nil
+
 }
 
 func (i *Interactor) Locate(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
