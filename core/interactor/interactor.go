@@ -26,14 +26,18 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 		i.log.Error("failed to register employee", err)
 		return
 	}
+	i.log.Success("Register validation passed")
+
 	employee.SetID()
-	i.log.Success("employee registered successfully")
+	i.log.Debug("employee registered successfully","employee_id",employee.ID)
 
 	tx, err := i.service.BeginTx(ctx)
 	if err != nil {
 		i.log.Error("Error beginning transaction")
 		return
 	}
+	i.log.Success("Transaction started successfully")
+
 	var keycloakUserID string
 	var keycloakCreated bool
 
@@ -61,36 +65,44 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	}()
 
 	if err = i.service.SaveEmployeeToDB(ctx, tx, employee); err != nil {
-		i.log.Error("failed to save employee in database")
+		i.log.Error("failed to save employee in database", "error", err)
 		return
 	}
+	i.log.Success("Employee saved successfully")
 
 	keycloakUserID, err = i.service.CreateUserInKeycloak(ctx, &employee)
 	if err != nil {
-		i.log.Error("failed to create user in keycloak")
+		i.log.Error("failed to create user in keycloak", "error", err)
 		return
 	}
 
 	keycloakCreated = true
+	i.log.Success("User created in keycloak","keycloak_user_id",keycloakUserID)
+
 	if err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password); err != nil {
-		i.log.Error("failed to set user password in keycloak")
+		i.log.Error("failed to set user password in keycloak", "error", err)
 		return
 	}
+
+	i.log.Success("User password set in keycloak","keycloak_user_id",keycloakUserID)
 
 	if err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role); err != nil {
-		i.log.Error("failed to assign user role in keycloak")
+		i.log.Error("failed to assign user role in keycloak", "error", err)
 		return
 	}
+	i.log.Success("User role assigned successfully","role",employee.Role)
 
 	if err = i.service.UpdateEmployeeKeycloakID(ctx, tx, employee.ID, keycloakUserID); err != nil {
-		i.log.Error("failed to update employee keycloak id in database")
+		i.log.Error("failed to update employee keycloak id in database", "error", err)
 		return
 	}
+	i.log.Success("Employee keycloak id updated in database")
 
 	if err = tx.Commit(); err != nil {
 		i.log.Error("failed to commit transaction")
 		return
 	}
+	i.log.Success("Transaction committed successfully")
 
 	employee.KeycloakUserID = keycloakUserID
 	result.Employee = employee

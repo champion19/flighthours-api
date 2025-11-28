@@ -57,7 +57,7 @@ func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee)
 		s.logger.Warn("Employee already exists", err)
 		return nil, domain.ErrDuplicateUser
 	}
-	s.logger.Success("Register validation passed")
+	s.logger.Info("Register validation passed")
 
 	return &dto.RegisterEmployee{
 		Employee: employee,
@@ -110,7 +110,7 @@ func (s service) AssignUserRole(ctx context.Context, userID string, role string)
 }
 
 func (s service) UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error {
-	s.logger.Info("Updating employee keycloak id in database", "employee_id", employeeID, "keycloak_user_id", keycloakUserID)
+	s.logger.Debug("Updating employee keycloak id in database", "employee_id", employeeID, "keycloak_user_id", keycloakUserID)
 	err := s.repository.PatchEmployee(ctx, tx, employeeID, keycloakUserID)
 	if err != nil {
 		s.logger.Error("Error updating employee keycloak id in database", "employee_id", employeeID, "error", err)

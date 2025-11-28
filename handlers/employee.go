@@ -5,7 +5,7 @@ import (
 	"time"
 
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
-	"github.com/champion19/flighthours-api/platform/logger"
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -101,7 +101,7 @@ func GetBaseURL(c *gin.Context) string {
 func (h *handler) EncodeID(uuid string) (string, error) {
 	encodedID, err := h.IDEncoder.Encode(uuid)
 	if err != nil {
-		h.Logger.Error(logger.Messages.IDErrorEncoding,
+		h.Logger.Error("Error ofuscando ID",
 			"uuid", uuid,
 			"error", err)
 		return "", err
@@ -114,7 +114,7 @@ func (h *handler) EncodeID(uuid string) (string, error) {
 func (h *handler) DecodeID(encodedID string) (string, error) {
 	uuid, err := h.IDEncoder.Decode(encodedID)
 	if err != nil {
-		h.Logger.Error(logger.Messages.IDErrorDecoding,
+		h.Logger.Error("Error decodificando ID",
 			"encoded_id", encodedID,
 			"error", err)
 		return "", err
@@ -124,7 +124,7 @@ func (h *handler) DecodeID(encodedID string) (string, error) {
 
 // HandleIDEncodingError maneja errores de ofuscamiento y envía respuesta apropiada
 func (h *handler) HandleIDEncodingError(c *gin.Context, uuid string, err error) {
-	h.Logger.Error(logger.Messages.IDErrorEncoding,
+	h.Logger.Error("Error ofuscando ID",
 		"uuid", uuid,
 		"error", err,
 		"client_ip", c.ClientIP())
@@ -133,7 +133,7 @@ func (h *handler) HandleIDEncodingError(c *gin.Context, uuid string, err error) 
 
 // HandleIDDecodingError maneja errores de desofuscamiento y envía respuesta apropiada
 func (h *handler) HandleIDDecodingError(c *gin.Context, encodedID string, err error) {
-	h.Logger.Error(logger.Messages.IDErrorDecoding,
+	h.Logger.Error("Error decodificando ID",
 		"encoded_id", encodedID,
 		"error", err,
 		"client_ip", c.ClientIP())
