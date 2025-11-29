@@ -23,30 +23,30 @@ type Dependencies struct {
 
 func Init() (*Dependencies, error) {
 	log := logger.NewSlogLogger()
-	log.Info("Starting application")
+	log.Info(logger.LogAppStarting)
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Error("Failed to load config", err)
+		log.Error(logger.LogAppConfigError, err)
 		return nil, err
 	}
 
 	db, err := mysql.GetDB(cfg.Database, log)
 	if err != nil {
-		log.Error("Failed to connect to database", err)
+		log.Error(logger.LogAppDatabaseError, err)
 		return nil, err
 	}
-	log.Success("Database connection established successfully")
+	log.Success(logger.LogAppDatabaseConnected)
 
 	keycloakClient, err := keycloak.NewClient(&cfg.Keycloak, log)
 	if err != nil {
-		log.Error("Failed to create keycloak client", err)
+		log.Error(logger.LogKeycloakClientError, err)
 		return nil, err
 	}
-	log.Success("Keycloak client created successfully")
+	log.Success(logger.LogKeycloakClientCreated)
 
 	employeeRepo, err := repo.NewClientRepository(db, keycloakClient)
 	if err != nil {
-		log.Error("Failed to create employee repository", err)
+		log.Error(logger.LogEmployeeRepoInitError, err)
 		return nil, err
 	}
 
@@ -55,7 +55,7 @@ func Init() (*Dependencies, error) {
 
 	interactorFacade := interactor.NewInteractor(employeeService, log)
 
-	log.Success("Dependencies initialized successfully")
+	log.Success(logger.LogDepInitComplete)
 
 	return &Dependencies{
 		EmployeeService: employeeService,

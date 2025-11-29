@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 
+	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/champion19/flighthours-api/server"
 	"github.com/gin-gonic/gin"
 )
@@ -15,10 +16,10 @@ func main() {
 
 	dependencies := server.Bootstrap(app)
 	serverAddr := dependencies.Config.GetServerAddress()
-	slog.Info("Starting server", slog.String("address", serverAddr))
+	slog.Info(logger.LogAppServerStarting, slog.String("address", serverAddr))
 
 	if err := app.Run(serverAddr); err != nil {
-		slog.Error("Server failed to start", slog.String("error", err.Error()))
+		slog.Error(logger.LogAppServerStartError, slog.String("error", err.Error()))
 		return
 	}
 

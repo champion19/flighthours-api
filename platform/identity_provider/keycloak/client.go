@@ -24,7 +24,7 @@ type client struct {
 
 func NewClient(cfg *config.KeycloakConfig, log logger.Logger) (output.AuthClient, error) {
 	if cfg == nil {
-		log.Error("keycloak config cannot be nil")
+		log.Error(logger.LogKeycloakConfigNil)
 		return nil, fmt.Errorf("keycloak config cannot be nil")
 	}
 
@@ -41,7 +41,7 @@ func NewClient(cfg *config.KeycloakConfig, log logger.Logger) (output.AuthClient
 
 	token, err := authClient.gocloak.LoginAdmin(ctx, authClient.config.AdminUser, authClient.config.AdminPass, authClient.config.Realm)
 	if err != nil {
-		authClient.logger.Error("failed to initialize admin token", err)
+		authClient.logger.Error(logger.LogKeycloakAdminTokenInitError, err)
 		return nil, fmt.Errorf("failed to initialize admin token: %w", err)
 	}
 	authClient.token = token
@@ -69,7 +69,7 @@ func (c *client) ensureValidToken(ctx context.Context) error {
 
 	token, err := c.gocloak.LoginAdmin(ctx, c.config.AdminUser, c.config.AdminPass, c.config.Realm)
 	if err != nil {
-		c.logger.Error("failed to refresh admin token", err)
+		c.logger.Error(logger.LogKeycloakTokenRefreshErr, err)
 		return fmt.Errorf("failed to refresh admin token: %w", err)
 	}
 
@@ -81,7 +81,7 @@ func (c *client) ensureValidToken(ctx context.Context) error {
 
 func (c *client) LoginUser(ctx context.Context, username, password string) (*gocloak.JWT, error) {
 	if username == "" || password == "" {
-		c.logger.Error("username and password cannot be empty")
+		c.logger.Error(logger.LogKeycloakUsernameEmpty)
 		return nil, fmt.Errorf("username and password cannot be empty")
 	}
 
@@ -94,7 +94,7 @@ func (c *client) LoginUser(ctx context.Context, username, password string) (*goc
 		password,
 	)
 	if err != nil {
-		c.logger.Error("user login failed", err)
+		c.logger.Error(logger.LogKeycloakUserLoginFailed, err)
 		return nil, fmt.Errorf("user login failed: %w", err)
 	}
 
@@ -103,12 +103,12 @@ func (c *client) LoginUser(ctx context.Context, username, password string) (*goc
 
 func (c *client) CreateUser(ctx context.Context, employee *domain.Employee) (string, error) {
 	if employee == nil {
-		c.logger.Error("person cannot be nil")
+		c.logger.Error(logger.LogKeycloakUserNil)
 		return "", fmt.Errorf("person cannot be nil")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return "", err
 	}
 
@@ -127,22 +127,22 @@ func (c *client) CreateUser(ctx context.Context, employee *domain.Employee) (str
 		keycloakUser,
 	)
 	if err != nil {
-		c.logger.Error("failed to create user in keycloak", err)
+		c.logger.Error(logger.LogKeycloakUserCreateError, err)
 		return "", fmt.Errorf("failed to create user in keycloak: %w", err)
 	}
 
-	c.logger.Success("user created successfully", userID)
+	c.logger.Success(logger.LogKeycloakUserCreateOK, userID)
 	return userID, nil
 }
 
 func (c *client) GetUserByEmail(ctx context.Context, email string) (*gocloak.User, error) {
 	if email == "" {
-		c.logger.Error("email cannot be empty")
+		c.logger.Error(logger.LogKeycloakEmailEmpty)
 		return nil, fmt.Errorf("email cannot be empty")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return nil, err
 	}
 
@@ -156,12 +156,12 @@ func (c *client) GetUserByEmail(ctx context.Context, email string) (*gocloak.Use
 		},
 	)
 	if err != nil {
-		c.logger.Error("failed to get user by email", err)
+		c.logger.Error(logger.LogKeycloakUserGetByEmailError, err)
 		return nil, fmt.Errorf("failed to get user by email: %w", err)
 	}
 
 	if len(users) == 0 {
-		c.logger.Error("user with email %s not found", email)
+		c.logger.Error(logger.LogKeycloakUserNotFound, email)
 		return nil, fmt.Errorf("user with email %s not found", email)
 	}
 
@@ -214,12 +214,12 @@ func (c *client) UpdateUser(ctx context.Context, user *gocloak.User) error {
 
 func (c *client) DeleteUser(ctx context.Context, userID string) error {
 	if userID == "" {
-		c.logger.Error("userID cannot be empty")
+		c.logger.Error(logger.LogKeycloakUserIDEmpty)
 		return fmt.Errorf("userID cannot be empty")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return err
 	}
 
@@ -238,12 +238,12 @@ func (c *client) DeleteUser(ctx context.Context, userID string) error {
 
 func (c *client) SetPassword(ctx context.Context, userID string, password string, temporary bool) error {
 	if userID == "" || password == "" {
-		c.logger.Error("userID and password cannot be empty")
+		c.logger.Error(logger.LogKeycloakPasswordEmpty)
 		return fmt.Errorf("userID and password cannot be empty")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return err
 	}
 
@@ -264,12 +264,12 @@ func (c *client) SetPassword(ctx context.Context, userID string, password string
 
 func (c *client) AssignRole(ctx context.Context, userID string, roleName string) error {
 	if userID == "" || roleName == "" {
-		c.logger.Error("userID and roleName cannot be empty")
+		c.logger.Error(logger.LogKeycloakRoleNameEmpty)
 		return fmt.Errorf("userID and roleName cannot be empty")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return err
 	}
 
@@ -299,12 +299,12 @@ func (c *client) AssignRole(ctx context.Context, userID string, roleName string)
 
 func (c *client) RemoveRole(ctx context.Context, userID string, roleName string) error {
 	if userID == "" || roleName == "" {
-		c.logger.Error("userID and roleName cannot be empty")
+		c.logger.Error(logger.LogKeycloakRoleNameEmpty)
 		return fmt.Errorf("userID and roleName cannot be empty")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return err
 	}
 
@@ -334,12 +334,12 @@ func (c *client) RemoveRole(ctx context.Context, userID string, roleName string)
 
 func (c *client) GetUserRoles(ctx context.Context, userID string) ([]*gocloak.Role, error) {
 	if userID == "" {
-		c.logger.Error("userID cannot be empty")
+		c.logger.Error(logger.LogKeycloakUserIDEmpty)
 		return nil, fmt.Errorf("userID cannot be empty")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return nil, err
 	}
 
@@ -358,12 +358,12 @@ func (c *client) GetUserRoles(ctx context.Context, userID string) ([]*gocloak.Ro
 
 func (c *client) SendVerificationEmail(ctx context.Context, userID string) error {
 	if userID == "" {
-		c.logger.Error("userID cannot be empty")
+		c.logger.Error(logger.LogKeycloakUserIDEmpty)
 		return fmt.Errorf("userID cannot be empty")
 	}
 
 	if err := c.ensureValidToken(ctx); err != nil {
-		c.logger.Error("failed to ensure valid token", err)
+		c.logger.Error(logger.LogKeycloakTokenEnsureError, err)
 		return err
 	}
 
@@ -388,13 +388,13 @@ func (c *client) SendVerificationEmail(ctx context.Context, userID string) error
 
 func (c *client) VerifyEmail(ctx context.Context, userID string) error {
 	if userID == "" {
-		c.logger.Error("userID cannot be empty")
+		c.logger.Error(logger.LogKeycloakUserIDEmpty)
 		return fmt.Errorf("userID cannot be empty")
 	}
 
 	user, err := c.GetUserByID(ctx, userID)
 	if err != nil {
-		c.logger.Error("failed to get user by ID", err)
+		c.logger.Error(logger.LogKeycloakUserGetByIDError, err)
 		return err
 	}
 
@@ -416,7 +416,7 @@ func (c *client) VerifyEmail(ctx context.Context, userID string) error {
 
 func (c *client) Logout(ctx context.Context, refreshToken string) error {
 	if refreshToken == "" {
-		c.logger.Error("refreshToken cannot be empty")
+		c.logger.Error(logger.LogKeycloakRefreshTokenEmpty)
 		return fmt.Errorf("refreshToken cannot be empty")
 	}
 
@@ -436,7 +436,7 @@ func (c *client) Logout(ctx context.Context, refreshToken string) error {
 
 func (c *client) RefreshToken(ctx context.Context, refreshToken string) (*gocloak.JWT, error) {
 	if refreshToken == "" {
-		c.logger.Error("refreshToken cannot be empty")
+		c.logger.Error(logger.LogKeycloakRefreshTokenEmpty)
 		return nil, fmt.Errorf("refreshToken cannot be empty")
 	}
 
