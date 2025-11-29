@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
-	"github.com/champion19/flighthours-api/platform/logger"
+	loggerPkg "github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +22,7 @@ type ErrorResponse struct {
 	Status  int    `json:"-"`
 }
 
-func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
+func ErrorHandler(logger loggerPkg.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
@@ -30,7 +30,7 @@ func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 			err := c.Errors.Last().Err
 
 			if response, ok := mapError[err]; ok {
-				logger.Warn("Error handling error",
+				logger.Warn(loggerPkg.LogMiddlewareErrorCaught,
 					"error", err.Error(),
 					"code", response.Code,
 					"status", response.Status,
@@ -41,12 +41,12 @@ func ErrorHandler(logger logger.Logger) gin.HandlerFunc {
 				return
 			}
 
-			logger.Error("Error handling error",
+			logger.Error(loggerPkg.LogMiddlewareInternalErr,
 				"error", err.Error(),
 				"path", c.Request.URL.Path,
 				"method", c.Request.Method,
 				"employee_ip", c.ClientIP())
-				
+
 			c.JSON(http.StatusInternalServerError, map[string]any{
 				"success": false,
 				"message": err.Error(),

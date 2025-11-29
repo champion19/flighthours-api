@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/champion19/flighthours-api/tools/utils"
 )
 
@@ -78,7 +79,7 @@ func LoadConfig() (*Config, error) {
 	configPath := filepath.Join(root, "config", configFile)
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		slog.Warn("Config file not found, falling back to default",
+		slog.Warn(logger.LogConfigFileNotFound,
 			slog.String("requested_file", configFile),
 			slog.String("fallback_file", "local-config.json"))
 		configPath = filepath.Join(root, "config", "local-config.json")
@@ -115,7 +116,7 @@ func LoadConfig() (*Config, error) {
 		config.Keycloak.AdminPass = adminPass
 	}
 
-	slog.Info("Configuration loaded successfully",
+	slog.Info(logger.LogAppConfigLoaded,
 		slog.String("config_file", configFile),
 		slog.String("environment", config.Environment),
 		slog.String("config_path", configPath),
@@ -149,13 +150,11 @@ func (c *Config) IsProduction() bool {
 	return c.Environment == "production" || c.Environment == "railway"
 }
 
-
 func (c *Config) GetKeycloakAuthURL() string {
 	return fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token",
 		c.Keycloak.ServerURL,
 		c.Keycloak.Realm)
 }
-
 
 func (c *Config) GetKeycloakAdminURL() string {
 	return fmt.Sprintf("%s/admin/realms/%s",
