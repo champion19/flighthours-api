@@ -1,16 +1,18 @@
 package schema
+
 import (
 	"io"
 	"os"
 	"path/filepath"
+
 	"github.com/champion19/flighthours-api/tools/utils"
 	"github.com/kaptinlin/jsonschema"
-
 )
 
 type Validators struct {
 	FileReader        FileReaderInterface
 	RegisterValidator *jsonschema.Schema
+	MessageValidator  *jsonschema.Schema
 }
 
 type FileReaderInterface interface {
@@ -46,8 +48,13 @@ func NewValidator(fileReader FileReaderInterface) (*Validators, error) {
 	if err != nil {
 		return nil, err
 	}
+	message, err := validator.createSchema("message_schema.json")
+	if err != nil {
+		return nil, err
+	}
 
 	validator.RegisterValidator = register
+	validator.MessageValidator = message
 
 	return validator, nil
 
@@ -58,16 +65,16 @@ func (v *Validators) createSchema(resourcePath string) (*jsonschema.Schema, erro
 	compiler.AssertFormat = true
 	schemaJSON, err := v.FileReader.ReadJsonSchema(resourcePath)
 	if err != nil {
-		return nil, NewSchemaError("MOD_V_VAL_ERR_00003", "Error leyendo esquema JSON: "+err.Error())
+		return nil, ErrSchemaReadFailed
 	}
 
 	if schemaJSON == nil {
-		return nil, NewSchemaError("MOD_V_VAL_ERR_00004", "El esquema JSON está vacío o es nulo")
+		return nil, ErrSchemaEmpty
 	}
 
 	schema, err := compiler.Compile(schemaJSON)
 	if err != nil {
-		return nil, NewSchemaError("MOD_V_VAL_ERR_00005", "Error compilando esquema: "+err.Error())
+		return nil, ErrSchemaCompileFailed
 	}
 
 	return schema, nil
@@ -76,7 +83,7 @@ func (v *Validators) createSchema(resourcePath string) (*jsonschema.Schema, erro
 // ValidateRegister validates data against the register person schema
 func (v *Validators) ValidateRegister(data interface{}) error {
 	if v.RegisterValidator == nil {
-		return NewSchemaError("MOD_V_VAL_ERR_00004", "Validador de registro no inicializado")
+		return ErrSchemaEmpty
 	}
 
 	result := v.RegisterValidator.Validate(data)
@@ -88,7 +95,7 @@ func (v *Validators) ValidateRegister(data interface{}) error {
 		}
 
 		if len(errorMessages) > 0 {
-			return NewSchemaError("MOD_V_VAL_ERR_00006", "Errores de validación: "+errorMessages[0])
+			return ErrValidationFailed
 		}
 	}
 

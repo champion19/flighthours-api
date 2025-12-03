@@ -2,7 +2,10 @@ module github.com/champion19/flighthours-api
 
 go 1.25
 
-require github.com/go-sql-driver/mysql v1.9.3
+require (
+	github.com/go-sql-driver/mysql v1.9.3
+	github.com/speps/go-hashids/v2 v2.0.1
+)
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect

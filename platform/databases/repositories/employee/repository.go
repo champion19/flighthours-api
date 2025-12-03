@@ -3,9 +3,9 @@ package employee
 import (
 	"context"
 	"database/sql"
+
 	"github.com/champion19/flighthours-api/core/ports/output"
-
-
+	"github.com/champion19/flighthours-api/platform/databases/common"
 )
 
 const (
@@ -14,19 +14,10 @@ const (
 	QueryByID    = "SELECT id,name,airline,email,identification_number,bp,start_date,end_date,active,role,keycloak_user_id FROM employee WHERE id=? LIMIT 1"
 	QueryUpdate  = "UPDATE employee SET name=?,airline=?,email=?,identification_number=?,bp=?,start_date=?,end_date=?,active=?,role=?,keycloak_user_id=? WHERE id=?"
 	QueryDelete  = "DELETE FROM employee WHERE id=?"
+	QueryPatch   = "UPDATE employee SET keycloak_user_id=? WHERE id=?"
 )
 
-type sqlTx struct {
-	*sql.Tx
-}
 
-func (t *sqlTx) Commit() error {
-	return t.Tx.Commit()
-}
-
-func (t *sqlTx) Rollback() error {
-	return t.Tx.Rollback()
-}
 type repository struct {
 	keycloak       output.AuthClient
 	db             *sql.DB
@@ -46,5 +37,5 @@ func (r *repository) BeginTx(ctx context.Context) (output.Tx, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &sqlTx{Tx: tx}, nil
+	return common.NewSQLTx(tx), nil
 }

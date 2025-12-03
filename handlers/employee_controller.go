@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"net/http"
-
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
@@ -35,22 +33,16 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			true,                 // httpOnly
 		)
 
-		scheme := "http"
-		if c.Request.TLS != nil {
-			scheme = "https"
-		}
-		baseURL := scheme + "://" + c.Request.Host
-		links := BuildAccountLinks(baseURL, result.Employee.ID)
-
-		locationURL := baseURL + "/flighthours/api/v1/accounts/" + result.Employee.ID
-		c.Header("Location", locationURL)
+		// Usar funciones HATEOAS centralizadas
+		baseURL := GetBaseURL(c)
+		SetLocationHeader(c, baseURL, "accounts", result.Employee.ID)
 
 		response := RegisterEmployeeResponse{
 			Message: result.Message,
-			Links:   links,
+			Links:   BuildAccountLinks(baseURL, result.Employee.ID),
 		}
-		h.Logger.Success(logger.LogEmployeeRegisterSuccess, result.Employee.ID)
 
-		c.JSON(http.StatusCreated, response)
+		h.Logger.Success(logger.LogEmployeeRegisterSuccess, result.Employee.ID)
+		h.Response.SuccessWithData(c, domain.MsgUserRegistered, response)
 	}
 }

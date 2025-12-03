@@ -13,7 +13,7 @@ package logger
 // APPLICATION LIFECYCLE
 // ============================================
 const (
-	LogAppStarting          = "Iniciando aplicación MotoGo Backend"
+	LogAppStarting          = "Iniciando aplicación FlighHours Backend"
 	LogAppConfigLoaded      = "Configuración cargada exitosamente"
 	LogAppConfigError       = "Error cargando configuración"
 	LogAppDatabaseConnected = "Conexión a base de datos establecida"

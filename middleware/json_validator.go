@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/champion19/flighthours-api/platform/logger"
 	json_schema "github.com/champion19/flighthours-api/platform/schema"
 	"github.com/gin-gonic/gin"
 	"github.com/kaptinlin/jsonschema"
@@ -15,12 +16,14 @@ import (
 type Builder struct {
 	Validators *json_schema.Validators
 	isLogin    bool
+	log logger.Logger
 }
 
-func NewMiddlewareValidator(validators *json_schema.Validators) *Builder {
+func NewMiddlewareValidator(validators *json_schema.Validators, log logger.Logger) *Builder {
 
 	return &Builder{
 		Validators: validators,
+		log: log,
 	}
 }
 
@@ -28,13 +31,20 @@ func (b *Builder) WithValidateRegister() gin.HandlerFunc {
 	b.isLogin = false
 	return b.jsonValidator(b.Validators.RegisterValidator)
 }
+func (b *Builder) WithValidateMessage() gin.HandlerFunc {
+	return b.jsonValidator(b.Validators.MessageValidator)
+}
+
 
 func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		bodyBytes, err := io.ReadAll(c.Request.Body)
 		if err != nil {
-			c.Error(json_schema.NewFieldSchemaError(json_schema.ErrBodyReadFailed, err.Error()))
+			if b.log != nil {
+				b.log.Error(logger.LogMiddlewareBodyReadError, "error", err, "path", c.Request.URL.Path)
+			}
+			c.Error(json_schema.ErrBadRequest)
 			c.Abort()
 			return
 		}
@@ -43,6 +53,9 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 
 		var data map[string]interface{}
 		if err := json.Unmarshal(bodyBytes, &data); err != nil {
+			if b.log != nil {
+				b.log.Error(logger.LogMiddlewareJSONParseError, "error", err, "path", c.Request.URL.Path)
+			}
 			c.Error(json_schema.ErrBadRequest)
 			c.Abort()
 			return
@@ -50,7 +63,6 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 		result := schema.Validate(data)
 		if !result.IsValid() {
 			var fieldNames []string
-
 
 			for _, validationError := range result.Errors {
 				if validationError.Params != nil {
@@ -74,36 +86,53 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 				}
 			}
 
-			var schemaError *json_schema.SchemaError
+			var validationError error
 
-			if len(fieldNames) == 1 {
+			// If multiple fields failed, use specific multiple fields error
+			if len(fieldNames) > 1 {
+				validationError = json_schema.ErrMultipleFields
+			} else {
+				// Single field error - determine specific error type
 				var firstError *jsonschema.EvaluationError
 				for _, err := range result.Errors {
 					firstError = err
 					break
 				}
 
-				fieldName := fieldNames[0]
-				switch firstError.Code {
-				case "property_mismatch":
-					schemaError = json_schema.NewFieldSchemaError(json_schema.ErrFieldPropertyMismatch, fieldName)
-				case "required":
-					schemaError = json_schema.NewFieldSchemaError(json_schema.ErrFieldRequired, fieldName)
-				case "type":
-					schemaError = json_schema.NewFieldSchemaError(json_schema.ErrFieldTypeInvalid, fieldName)
-				default:
-					schemaError = json_schema.NewFieldSchemaError(json_schema.ErrValidationFailed, fieldName)
+				if firstError != nil {
+					switch firstError.Code {
+					case "property_mismatch":
+						validationError = json_schema.ErrFieldPropertyMismatch
+					case "required":
+						validationError = json_schema.ErrFieldRequired
+					case "type":
+						validationError = json_schema.ErrFieldTypeInvalid
+					default:
+						validationError = json_schema.ErrValidationFailed
+					}
+				} else {
+					validationError = json_schema.ErrValidationFailed
 				}
-			} else if len(fieldNames) > 1 {
-				schemaError = json_schema.NewMultipleFieldSchemaError(fieldNames)
-			} else {
-				schemaError = json_schema.ErrValidationFailed
 			}
 
-			c.Error(schemaError)
+			// Store field names in context for error_handler to use in message parameters
+			if len(fieldNames) > 0 {
+				c.Set("validation_fields", fieldNames)
+			}
+
+			if b.log != nil {
+				b.log.Warn(logger.LogMiddlewareValidationFailed, "path", c.Request.URL.Path, "fields", fieldNames)
+			}
+			c.Error(validationError)
 			c.Abort()
 			return
 		}
+
+		if b.log != nil {
+			b.log.Debug(logger.LogMiddlewareValidationOK, "path", c.Request.URL.Path)
+		}
+
+
 		c.Next()
 	}
 }
