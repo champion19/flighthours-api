@@ -5,6 +5,7 @@ import (
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/champion19/flighthours-api/middleware"
+	"github.com/champion19/flighthours-api/platform/cache/messaging"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/champion19/flighthours-api/tools/idencoder"
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ type handler struct {
 	IDEncoder         *idencoder.HashidsEncoder
 	Response          *middleware.ResponseHandler
 	MessageInteractor *interactor.MessageInteractor
+	MessagingCache    *messaging.MessageCache
 }
 
 func New(
@@ -25,7 +27,8 @@ func New(
 	logger logger.Logger,
 	idEncoder *idencoder.HashidsEncoder,
 	response *middleware.ResponseHandler,
-	messageInteractor *interactor.MessageInteractor) *handler {
+	messageInteractor *interactor.MessageInteractor,
+	messagingCache *messaging.MessageCache) *handler {
 	return &handler{
 		EmployeeService:   service,
 		Interactor:        interactor,
@@ -33,6 +36,7 @@ func New(
 		IDEncoder:         idEncoder,
 		Response:          response,
 		MessageInteractor: messageInteractor,
+		MessagingCache:    messagingCache,
 	}
 }
 func (h *handler) EncodeID(uuid string) (string, error) {

@@ -9,6 +9,7 @@ import (
 	loggerPkg "github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
 )
+
 var errorToMessageCode = map[error]string{
 	// User Management Errors (MOD_U_*)
 	domain.ErrDuplicateUser:             domain.MsgUserDuplicate,
@@ -67,29 +68,28 @@ var errorToMessageCode = map[error]string{
 	domain.ErrMessageCannotDelete:     domain.MsgMessageDeleteError,
 	domain.ErrMessageInvalidType:      domain.MsgMessageInvalidType,
 	domain.ErrMessageListFailed:       domain.MsgMessageListError,
+	domain.ErrMessageNotRegistered:    domain.MsgMessageNotRegistered,
+	domain.ErrMessageInactive:         domain.MsgMessageInactive,
 
 	// General errors
 	domain.ErrInternalServer: domain.MsgServerError,
 }
 
-
-
 type ErrorResponse struct {
 	Success bool   `json:"success"`
 	Code    string `json:"code"`
 	Message string `json:"message"`
-
 }
 
-type ErrorHandler struct{
-	cache *messagingCache.MessageCache
+type ErrorHandler struct {
+	cache  *messagingCache.MessageCache
 	logger loggerPkg.Logger
 }
 
 func NewErrorHandler(cache *messagingCache.MessageCache, log logger.Logger) *ErrorHandler {
 	return &ErrorHandler{
-		cache: cache,
-		logger:   log,
+		cache:  cache,
+		logger: log,
 	}
 }
 
@@ -100,7 +100,7 @@ func (h *ErrorHandler) Handle() gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
 
-					var params []string
+			var params []string
 			if validationFields, exists := c.Get("validation_fields"); exists {
 				if fields, ok := validationFields.([]string); ok {
 					// For multiple fields error, concatenate all field names into one parameter

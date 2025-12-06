@@ -27,6 +27,12 @@ const (
 		WHERE message_code = ? AND is_active = true
 		LIMIT 1`
 
+	queryGetByCodeWithStatus = `
+		SELECT id, message_code, type, category, module, message_title, message_content, is_active, created_at, updated_at
+		FROM system_messages
+		WHERE message_code = ?
+		LIMIT 1`
+
 	queryGetByID = `
 		SELECT id, message_code, type, category, module, message_title, message_content, is_active, created_at, updated_at
 		FROM system_messages

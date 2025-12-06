@@ -281,3 +281,42 @@ func (h handler) ListMessages() func(c *gin.Context) {
 		h.Response.DataOnly(c, response)
 	}
 }
+
+func (h handler) ReloadMessageCache() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		h.Logger.Info("Recargando caché de mensajes",
+			"method", c.Request.Method,
+			"path", c.Request.URL.Path,
+			"client_ip", c.ClientIP())
+
+		// Obtener el conteo antes del reload
+		beforeCount := h.MessagingCache.MessageCount()
+
+		// Recargar el caché desde BD
+		err := h.MessagingCache.ReloadMessages(c.Request.Context())
+		if err != nil {
+			h.Logger.Error("Error al recargar caché de mensajes",
+				"error", err,
+				"client_ip", c.ClientIP())
+			c.Error(domain.ErrInternalServer)
+			return
+		}
+
+		// Obtener el conteo después del reload
+		afterCount := h.MessagingCache.MessageCount()
+
+		response := CacheReloadResponse{
+			Success:     true,
+			BeforeCount: beforeCount,
+			AfterCount:  afterCount,
+			Message:     "Caché de mensajes recargado exitosamente desde la base de datos",
+		}
+
+		h.Logger.Success("Caché de mensajes recargado exitosamente",
+			"before_count", beforeCount,
+			"after_count", afterCount,
+			"client_ip", c.ClientIP())
+
+		h.Response.DataOnly(c, response)
+	}
+}

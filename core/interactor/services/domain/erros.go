@@ -28,7 +28,7 @@ var (
 	ErrInvalidID         = errors.New("Err_INVALID_ID")
 	ErrInternalServer    = errors.New("Err_INTERNAL_SERVER")
 
-		// Schema validation errors
+	// Schema validation errors
 	ErrSchemaBadRequest       = errors.New("ERR_SCHEMA_BAD_REQUEST")
 	ErrSchemaInvalidRequest   = errors.New("ERR_SCHEMA_INVALID_REQUEST")
 	ErrSchemaReadFailed       = errors.New("ERR_SCHEMA_READ_FAILED")
@@ -40,7 +40,6 @@ var (
 	ErrSchemaFieldRequired    = errors.New("ERR_SCHEMA_FIELD_REQUIRED")
 	ErrSchemaFieldType        = errors.New("ERR_SCHEMA_FIELD_TYPE")
 	ErrSchemaMultipleFields   = errors.New("ERR_SCHEMA_MULTIPLE_FIELDS")
-
 )
 
 var (
@@ -65,6 +64,8 @@ var (
 	ErrMessageCannotDelete     = errors.New("ERR_MESSAGE_CANNOT_DELETE")
 	ErrMessageInvalidType      = errors.New("ERR_MESSAGE_INVALID_TYPE")
 	ErrMessageListFailed       = errors.New("ERR_MESSAGE_LIST_FAILED")
+	ErrMessageNotRegistered    = errors.New("ERR_MESSAGE_NOT_REGISTERED")
+	ErrMessageInactive         = errors.New("ERR_MESSAGE_INACTIVE")
 )
 
 // ============================================
@@ -154,6 +155,8 @@ const (
 	MsgMessageInvalidType    = "MOD_M_TYPE_INV_ERR_00012"
 	MsgMessageListError      = "MOD_M_LIST_ERR_00013"
 	MsgMessageCannotDelete   = "MOD_M_DEL_ERR_00014"
+	MsgMessageNotRegistered  = "MOD_M_NOT_REG_ERR_00015"
+	MsgMessageInactive       = "MOD_M_INACTIVE_ERR_00016"
 
 	MsgMessageCreated = "MOD_M_CREATE_EXI_00001"
 	MsgMessageUpdated = "MOD_M_UPDATE_EXI_00002"

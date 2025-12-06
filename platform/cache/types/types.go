@@ -12,15 +12,15 @@ const (
 	TypeDebug   MessageType = "debug"
 )
 
-type CachedMessage struct{
-	ID   string
-	Code string
-	Type MessageType
+type CachedMessage struct {
+	ID       string
+	Code     string
+	Type     MessageType
 	Category string
-	Module string
-	Title  string
-	Content string
-	Active bool
+	Module   string
+	Title    string
+	Content  string
+	Active   bool
 }
 
 type MessageResponse struct {
@@ -33,5 +33,5 @@ type MessageResponse struct {
 type MessageCacheRepository interface {
 	GetAllActiveForCache(ctx context.Context) ([]CachedMessage, error)
 	GetByCodeForCache(ctx context.Context, code string) (*CachedMessage, error)
+	GetByCodeWithStatusForCache(ctx context.Context, code string) (*CachedMessage, error)
 }
-
