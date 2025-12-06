@@ -7,6 +7,7 @@ import (
 	"github.com/champion19/flighthours-api/core/ports/output"
 	cachetypes "github.com/champion19/flighthours-api/platform/cache/types"
 	"github.com/champion19/flighthours-api/platform/databases/common"
+	"github.com/champion19/flighthours-api/platform/logger"
 )
 
 const (
@@ -57,8 +58,20 @@ const (
 )
 
 // repository implements output.MessageRepository
+
+var log logger.Logger = logger.NewSlogLogger()
+
 type repository struct {
-	db *sql.DB
+	stmtGetAllActive        *sql.Stmt
+	stmtGetByCode           *sql.Stmt
+	stmtGetByCodeForCache   *sql.Stmt
+	stmtGetByCodeWithStatus *sql.Stmt
+	stmtGetByID             *sql.Stmt
+	stmtGetByType           *sql.Stmt
+	stmtGetByModule         *sql.Stmt
+	stmtMessageSave         *sql.Stmt
+	stmtMessageDelete       *sql.Stmt
+	db                      *sql.DB
 }
 
 type MessageRepository interface {
@@ -71,7 +84,73 @@ func NewMessageRepository(db *sql.DB) (MessageRepository, error) {
 	if db == nil {
 		return nil, sql.ErrConnDone
 	}
-	return &repository{db: db}, nil
+
+	stmtGetAllActive, err := db.Prepare(queryGetAllActive)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtGetByCode, err := db.Prepare(queryGetByCode)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtGetByCodeForCache, err := db.Prepare(queryGetByCodeForCache)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtGetByCodeWithStatus, err := db.Prepare(queryGetByCodeWithStatus)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtGetByID, err := db.Prepare(queryGetByID)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtGetByType, err := db.Prepare(queryGetByType)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtGetByModule, err := db.Prepare(queryGetByModule)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtMessageSave, err := db.Prepare(queryMessageSave)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtMessageDelete, err := db.Prepare(queryMessageDelete)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	return &repository{
+		db:                      db,
+		stmtGetAllActive:        stmtGetAllActive,
+		stmtGetByCode:           stmtGetByCode,
+		stmtGetByCodeForCache:   stmtGetByCodeForCache,
+		stmtGetByCodeWithStatus: stmtGetByCodeWithStatus,
+		stmtGetByID:             stmtGetByID,
+		stmtGetByType:           stmtGetByType,
+		stmtGetByModule:         stmtGetByModule,
+		stmtMessageSave:         stmtMessageSave,
+		stmtMessageDelete:       stmtMessageDelete,
+	}, nil
 }
 
 func (r *repository) BeginTx(ctx context.Context) (output.Tx, error) {

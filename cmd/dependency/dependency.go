@@ -56,7 +56,7 @@ func Init() (*Dependencies, error) {
 	}
 	log.Success(logger.LogKeycloakClientCreated)
 
-	employeeRepo, err := repo.NewClientRepository(db, keycloakClient)
+	employeeRepo, err := repo.NewClientRepository(db)
 	if err != nil {
 		log.Error(logger.LogEmployeeRepoInitError, err)
 		return nil, err

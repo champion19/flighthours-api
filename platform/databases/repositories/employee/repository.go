@@ -6,6 +6,7 @@ import (
 
 	"github.com/champion19/flighthours-api/core/ports/output"
 	"github.com/champion19/flighthours-api/platform/databases/common"
+	"github.com/champion19/flighthours-api/platform/logger"
 )
 
 const (
@@ -17,18 +18,61 @@ const (
 	QueryPatch   = "UPDATE employee SET keycloak_user_id=? WHERE id=?"
 )
 
+var log logger.Logger = logger.NewSlogLogger()
 
 type repository struct {
-	keycloak       output.AuthClient
+	stmtSave       *sql.Stmt
+	stmtGetByEmail *sql.Stmt
+	stmtGetByID    *sql.Stmt
+	stmtUpdate     *sql.Stmt
+	stmtDelete     *sql.Stmt
+	stmtPatch      *sql.Stmt
 	db             *sql.DB
 }
 
-func NewClientRepository(db *sql.DB, keycloak output.AuthClient) (*repository, error) {
+func NewClientRepository(db *sql.DB) (*repository, error) {
+	if db == nil {
+		return nil, sql.ErrConnDone
+	}
+	stmtSave, err := db.Prepare(QuerySave)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+	stmtGetByEmail, err := db.Prepare(QueryByEmail)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+	stmtGetByID, err := db.Prepare(QueryByID)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+	stmtUpdate, err := db.Prepare(QueryUpdate)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+	stmtDelete, err := db.Prepare(QueryDelete)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtPatch, err := db.Prepare(QueryPatch)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
 	return &repository{
-		keycloak:       keycloak,
 		db:             db,
-
-
+		stmtSave:       stmtSave,
+		stmtGetByEmail: stmtGetByEmail,
+		stmtGetByID:    stmtGetByID,
+		stmtUpdate:     stmtUpdate,
+		stmtDelete:     stmtDelete,
+		stmtPatch:      stmtPatch,
 	}, nil
 }
 
