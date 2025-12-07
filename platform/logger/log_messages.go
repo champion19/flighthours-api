@@ -56,7 +56,12 @@ const (
 	LogDBTransactionRollback   = "Rollback de transacción"
 	LogDBConnectionPoolInfo    = "Información de connection pool"
 	LogDBConnectionError       = "Error conectando a base de datos"
-	LogDBConnectionEstablished = "Conexión a base de datos establecida"
+  LogDBPoolConfig            = ""
+	LogDBConnecting            = "Conectando a base de datos"
+	LogDBSSLEnabled            = "SSL habilitado"
+	LogDBPinging               = ""
+	LogDBPingError           = "Error haciendo ping a base de datos"
+	LogDBConnected           = "Base de datos conectada exitosamente"
 )
 
 // ============================================

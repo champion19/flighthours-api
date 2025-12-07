@@ -10,7 +10,6 @@ import (
 	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/champion19/flighthours-api/core/ports/output"
 	"github.com/champion19/flighthours-api/middleware"
-	"github.com/champion19/flighthours-api/platform/cache/messaging"
 	messagingCache "github.com/champion19/flighthours-api/platform/cache/messaging"
 	mysql "github.com/champion19/flighthours-api/platform/databases/mysql"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
@@ -29,7 +28,7 @@ type Dependencies struct {
 	Logger            logger.Logger
 	IDEncoder         *idencoder.HashidsEncoder
 	ResponseHandler   *middleware.ResponseHandler
-	MessagingCache    *messaging.MessageCache
+	MessagingCache    *messagingCache.MessageCache
 	MessageInteractor *interactor.MessageInteractor
 }
 
