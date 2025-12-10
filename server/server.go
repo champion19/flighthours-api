@@ -7,15 +7,29 @@ import (
 	"github.com/champion19/flighthours-api/handlers"
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
+	"github.com/champion19/flighthours-api/platform/prometheus"
 	"github.com/champion19/flighthours-api/platform/schema"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	dependencies.Logger.Info(logger.LogRouteConfiguring)
 
+	// Endpoint de métricas de Prometheus
+	app.GET("/metrics", prometheus.Handler())
+
+	// Documentación Swagger
+	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	dependencies.Logger.Info("Swagger UI disponible en: /swagger/index.html")
+
+	// Middleware de Prometheus para capturar métricas
+	app.Use(middleware.PrometheusMiddleware())
+
 	errorHandler := middleware.NewErrorHandler(dependencies.MessagingCache, dependencies.Logger)
 	app.Use(errorHandler.Handle())
+
 	handler := handlers.New(dependencies.EmployeeService, dependencies.Interactor, dependencies.Logger, dependencies.IDEncoder, dependencies.ResponseHandler, dependencies.MessageInteractor, dependencies.MessagingCache)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -59,6 +73,11 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 }
 
 func Bootstrap(app *gin.Engine) *dependency.Dependencies {
+	// Inicializar métricas de Prometheus
+	if err := prometheus.InitMetrics(); err != nil {
+		slog.Error(logger.LogPrometheusInitError, slog.String("error", err.Error()))
+	}
+
 	dependencies, err := dependency.Init()
 	if err != nil {
 		slog.Error(logger.LogDepInitError, slog.String("error", err.Error()))

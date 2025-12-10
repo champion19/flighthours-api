@@ -8,6 +8,7 @@ import (
 
 	"github.com/champion19/flighthours-api/config"
 	loggerPkg "github.com/champion19/flighthours-api/platform/logger"
+	"github.com/champion19/flighthours-api/platform/prometheus"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -16,7 +17,7 @@ func GetDB(dbConfig config.Database, logger loggerPkg.Logger) (*sql.DB, error) {
 		"host", dbConfig.Host,
 		"port", dbConfig.Port,
 		"database", dbConfig.Name,
-	   "driver",dbConfig.Driver)
+		"driver", dbConfig.Driver)
 
 	var dsn string
 
@@ -29,7 +30,7 @@ func GetDB(dbConfig config.Database, logger loggerPkg.Logger) (*sql.DB, error) {
 	)
 
 	if dbConfig.SSL != "" {
-		logger.Debug(loggerPkg.LogDBSSLEnabled,"tsl",dbConfig.SSL)
+		logger.Debug(loggerPkg.LogDBSSLEnabled, "tsl", dbConfig.SSL)
 		dsn += "&tls=" + dbConfig.SSL
 	}
 
@@ -56,7 +57,7 @@ func GetDB(dbConfig config.Database, logger loggerPkg.Logger) (*sql.DB, error) {
 
 	logger.Info(loggerPkg.LogDBPinging)
 
-	ctx,cancel:=context.WithTimeout(context.Background(),5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	err = db.PingContext(ctx)
@@ -70,5 +71,10 @@ func GetDB(dbConfig config.Database, logger loggerPkg.Logger) (*sql.DB, error) {
 	logger.Success(loggerPkg.LogDBConnected,
 		"host", dbConfig.Host,
 		"database", dbConfig.Name)
+
+	// Actualizar métrica de conexiones activas
+	stats := db.Stats()
+	prometheus.DBConnectionsActive.Set(float64(stats.OpenConnections))
+
 	return db, nil
 }

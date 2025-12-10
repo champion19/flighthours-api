@@ -6,6 +6,7 @@ import (
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/output"
 	"github.com/champion19/flighthours-api/platform/databases/common"
+	"github.com/champion19/flighthours-api/platform/prometheus"
 	"github.com/go-sql-driver/mysql"
 )
 
@@ -32,6 +33,8 @@ func (r *repository) Save(ctx context.Context, tx output.Tx, employee domain.Emp
 		employeeToSave.KeycloakUserID)
 
 	if err != nil {
+		// Registrar métrica de query fallida
+		prometheus.DBQueriesTotal.WithLabelValues("INSERT", "error").Inc()
 
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
 			return domain.ErrDuplicateUser
@@ -39,5 +42,8 @@ func (r *repository) Save(ctx context.Context, tx output.Tx, employee domain.Emp
 			return domain.ErrUserCannotSave
 		}
 	}
+
+	// Registrar métrica de query exitosa
+	prometheus.DBQueriesTotal.WithLabelValues("INSERT", "success").Inc()
 	return nil
 }

@@ -6,7 +6,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateMessage handles POST requests to create a new system message
+// CreateMessage godoc
+// @Summary Crear un nuevo mensaje del sistema
+// @Description Crea un nuevo mensaje del sistema con tipo, categoría y contenido. Los mensajes se utilizan para mostrar información, advertencias y errores a los usuarios.
+// @Tags messages
+// @Accept json
+// @Produce json
+// @Param message body MessageRequest true "Datos del mensaje a crear"
+// @Success 201 {object} MessageCreatedResponse "Mensaje creado exitosamente"
+// @Failure 400 {object} middleware.ErrorResponse "Datos de entrada inválidos"
+// @Failure 409 {object} middleware.ErrorResponse "El código del mensaje ya existe"
+// @Failure 500 {object} middleware.ErrorResponse "Error interno del servidor"
+// @Router /messages [post]
 func (h handler) CreateMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		h.Logger.Info(logger.LogMessageCreate,
@@ -69,7 +80,19 @@ func (h handler) CreateMessage() func(c *gin.Context) {
 	}
 }
 
-// UpdateMessage handles PUT requests to update an existing system message
+// UpdateMessage godoc
+// @Summary Actualizar un mensaje del sistema
+// @Description Actualiza un mensaje del sistema existente. Permite modificar tipo, categoría, contenido y estado activo.
+// @Tags messages
+// @Accept json
+// @Produce json
+// @Param id path string true "ID del mensaje (encoded)"
+// @Param message body MessageRequest true "Datos del mensaje a actualizar"
+// @Success 200 {object} MessageUpdatedResponse "Mensaje actualizado exitosamente"
+// @Failure 400 {object} middleware.ErrorResponse "Datos de entrada inválidos"
+// @Failure 404 {object} middleware.ErrorResponse "Mensaje no encontrado"
+// @Failure 500 {object} middleware.ErrorResponse "Error interno del servidor"
+// @Router /messages/{id} [put]
 func (h handler) UpdateMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		h.Logger.Info(logger.LogMessageUpdate,
@@ -132,7 +155,17 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 	}
 }
 
-// DeleteMessage handles DELETE requests to delete a system message
+// DeleteMessage godoc
+// @Summary Eliminar un mensaje del sistema
+// @Description Elimina un mensaje del sistema de forma permanente. Esta acción no se puede deshacer.
+// @Tags messages
+// @Produce json
+// @Param id path string true "ID del mensaje (encoded)"
+// @Success 200 {object} MessageDeletedResponse "Mensaje eliminado exitosamente"
+// @Failure 400 {object} middleware.ErrorResponse "ID inválido"
+// @Failure 404 {object} middleware.ErrorResponse "Mensaje no encontrado"
+// @Failure 500 {object} middleware.ErrorResponse "Error interno del servidor"
+// @Router /messages/{id} [delete]
 func (h handler) DeleteMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		h.Logger.Info(logger.LogMessageDelete,
@@ -172,7 +205,17 @@ func (h handler) DeleteMessage() func(c *gin.Context) {
 	}
 }
 
-// GetMessageByID handles GET requests to retrieve a message by ID
+// GetMessageByID godoc
+// @Summary Obtener un mensaje por ID
+// @Description Obtiene los detalles de un mensaje del sistema específico por su ID.
+// @Tags messages
+// @Produce json
+// @Param id path string true "ID del mensaje (encoded)"
+// @Success 200 {object} MessageResponse "Mensaje encontrado exitosamente"
+// @Failure 400 {object} middleware.ErrorResponse "ID inválido"
+// @Failure 404 {object} middleware.ErrorResponse "Mensaje no encontrado"
+// @Failure 500 {object} middleware.ErrorResponse "Error interno del servidor"
+// @Router /messages/{id} [get]
 func (h handler) GetMessageByID() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		h.Logger.Debug(logger.LogMessageGet,
@@ -224,7 +267,18 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 	}
 }
 
-// ListMessages handles GET requests to list messages with optional filters
+// ListMessages godoc
+// @Summary Listar mensajes del sistema
+// @Description Obtiene una lista de mensajes del sistema con filtros opcionales. Permite filtrar por módulo, tipo, categoría y estado activo.
+// @Tags messages
+// @Produce json
+// @Param module query string false "Filtrar por módulo (ej: users, flights, bookings)"
+// @Param type query string false "Filtrar por tipo (ERROR, WARNING, INFO, SUCCESS)"
+// @Param category query string false "Filtrar por categoría (usuario_final, sistema, validacion)"
+// @Param active query string false "Filtrar por estado activo (true, false)"
+// @Success 200 {object} MessageListResponse "Lista de mensajes obtenida exitosamente"
+// @Failure 500 {object} middleware.ErrorResponse "Error interno del servidor"
+// @Router /messages [get]
 func (h handler) ListMessages() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		h.Logger.Debug(logger.LogMessageList,
@@ -282,6 +336,14 @@ func (h handler) ListMessages() func(c *gin.Context) {
 	}
 }
 
+// ReloadMessageCache godoc
+// @Summary Recargar caché de mensajes
+// @Description Recarga el caché de mensajes desde la base de datos. Útil después de hacer cambios masivos a mensajes.
+// @Tags messages
+// @Produce json
+// @Success 200 {object} CacheReloadResponse "Caché recargado exitosamente"
+// @Failure 500 {object} middleware.ErrorResponse "Error interno del servidor"
+// @Router /messages/reload [post]
 func (h handler) ReloadMessageCache() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		h.Logger.Info("Recargando caché de mensajes",
