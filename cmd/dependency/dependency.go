@@ -35,29 +35,35 @@ type Dependencies struct {
 func Init() (*Dependencies, error) {
 	log := logger.NewSlogLogger()
 	log.Info(logger.LogAppStarting)
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Error(logger.LogAppConfigError, err)
+		log.Error(logger.LogAppConfigError,"error", err)
 		return nil, err
 	}
+	log.Info(logger.LogAppConfigLoaded)
+
+	//initialize metrics prometheus
+	middleware.PrometheusInit()
+	log.Success(logger.LogPrometheusInitOK)
 
 	db, err := mysql.GetDB(cfg.Database, log)
 	if err != nil {
-		log.Error(logger.LogAppDatabaseError, err)
+		log.Error(logger.LogAppDatabaseError,"error", err)
 		return nil, err
 	}
 	log.Success(logger.LogAppDatabaseConnected)
 
 	keycloakClient, err := keycloak.NewClient(&cfg.Keycloak, log)
 	if err != nil {
-		log.Error(logger.LogKeycloakClientError, err)
+		log.Error(logger.LogKeycloakClientError,"error", err)
 		return nil, err
 	}
-	log.Success(logger.LogKeycloakClientCreated)
+	log.Success(logger.LogKeycloakClientOK)
 
 	employeeRepo, err := repo.NewClientRepository(db)
 	if err != nil {
-		log.Error(logger.LogEmployeeRepoInitError, err)
+		log.Error(logger.LogEmployeeRepoInitError,"error", err)
 		return nil, err
 	}
 
@@ -65,8 +71,8 @@ func Init() (*Dependencies, error) {
 	employeeService := services.NewService(employeeRepo, keycloakClient, log)
 
 	interactorFacade := interactor.NewInteractor(employeeService, log)
-	log.Success(logger.LogDepInitComplete)
 
+	//initialize id encoder
 	encoder, err := idencoder.NewHashidsEncoder(idencoder.Config{
 		Secret:    cfg.IDEncoder.Secret,
 		MinLength: cfg.IDEncoder.MinLength,
@@ -83,7 +89,8 @@ func Init() (*Dependencies, error) {
 		log.Error(logger.LogRepoMsgInitError, "error", err)
 		return nil, err
 	}
-	log.Success("MessageRepository inicializado")
+	log.Success(logger.LogDependencyMessageRepoInit)
+
 	refreshInterval := 5 * time.Minute
 	messagingCache := messagingCache.NewMessageCache(msgRepo, refreshInterval)
 
@@ -101,7 +108,7 @@ func Init() (*Dependencies, error) {
 	// Inicializar servicio de mensajes (msgRepo también implementa output.MessageRepository)
 	messageService := services.NewMessageService(msgRepo, log)
 	messageInteractor := interactor.NewMessageInteractor(messageService, log)
-	log.Success("MessageInteractor inicializado")
+	log.Success(logger.LogDependencyMessageIntInit)
 
 	return &Dependencies{
 		EmployeeService:   employeeService,

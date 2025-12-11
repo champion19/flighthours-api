@@ -22,6 +22,34 @@ services:
       - flighthours-network
     depends_on:
       - prometheus
+      - loki
+
+  loki:
+    image: grafana/loki:latest
+    container_name: flighthours-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./platform/loki/loki-config.yml:/etc/loki/loki-config.yml
+      - loki-data:/loki
+    networks:
+      - flighthours-network
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: flighthours-promtail
+    restart: unless-stopped
+    volumes:
+      - ./platform/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./logs:/var/log/flighthours:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - flighthours-network
+    depends_on:
+      - loki
 
   prometheus:
     image: prom/prometheus:latest
@@ -44,6 +72,8 @@ volumes:
   grafana-data:
     driver: local
   prometheus-data:
+    driver: local
+  loki-data:
     driver: local
 
 networks:

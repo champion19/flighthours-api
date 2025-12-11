@@ -8,7 +8,6 @@ import (
 
 	"github.com/champion19/flighthours-api/config"
 	loggerPkg "github.com/champion19/flighthours-api/platform/logger"
-	"github.com/champion19/flighthours-api/platform/prometheus"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -71,10 +70,6 @@ func GetDB(dbConfig config.Database, logger loggerPkg.Logger) (*sql.DB, error) {
 	logger.Success(loggerPkg.LogDBConnected,
 		"host", dbConfig.Host,
 		"database", dbConfig.Name)
-
-	// Actualizar métrica de conexiones activas
-	stats := db.Stats()
-	prometheus.DBConnectionsActive.Set(float64(stats.OpenConnections))
 
 	return db, nil
 }

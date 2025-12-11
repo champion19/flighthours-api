@@ -11,9 +11,9 @@ package prometheus
 // ============================================
 const (
 	// HTTP Metrics
-	MetricHTTPRequestsTotal   = "motogo_http_requests_total"
-	MetricHTTPRequestDuration = "motogo_http_request_duration_seconds"
-	MetricHTTPErrorsTotal     = "motogo_http_errors_total"
+	MetricHTTPRequestsTotal   = "flighthours_http_requests_total"
+	MetricHTTPRequestDuration = "flighthours_http_request_duration_seconds"
+	MetricHTTPErrorsTotal     = "flighthours_http_errors_total"
 )
 
 

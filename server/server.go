@@ -7,25 +7,28 @@ import (
 	"github.com/champion19/flighthours-api/handlers"
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
-	"github.com/champion19/flighthours-api/platform/prometheus"
 	"github.com/champion19/flighthours-api/platform/schema"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/champion19/flighthours-api/platform/swaggo"
 )
 
 func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	dependencies.Logger.Info(logger.LogRouteConfiguring)
 
 	// Endpoint de métricas de Prometheus
-	app.GET("/metrics", prometheus.Handler())
+	app.GET("/metrics",gin.WrapH(promhttp.Handler()))
 
 	// Documentación Swagger
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	dependencies.Logger.Info("Swagger UI disponible en: /swagger/index.html")
 
 	// Middleware de Prometheus para capturar métricas
-	app.Use(middleware.PrometheusMiddleware())
+	app.Use(middleware.RequestID())
+
+	// Apply Prometheus metrics tracking middleware
+	app.Use(middleware.TrackMetrics())
 
 	errorHandler := middleware.NewErrorHandler(dependencies.MessagingCache, dependencies.Logger)
 	app.Use(errorHandler.Handle())
@@ -39,7 +42,17 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.Logger.Fatal(logger.LogRouteValidatorError, err)
 		return
 	}
+	dependencies.Logger.Success(logger.LogRouteValidatorOK)
 	validator := middleware.NewMiddlewareValidator(validators, dependencies.Logger)
+
+	// Health check endpoint (no authentication required)
+	app.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ok",
+			"service": "motogo-backend",
+		})
+	})
+
 
 	// Rutas públicas (sin autenticación)
 	public := app.Group("flighthours/api/v1")
@@ -68,20 +81,22 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// Query params: ?module=users&type=ERROR&category=usuario_final&active=true
 		public.GET("/messages", handler.ListMessages())
 
+		// POST /messages/cache/reload - Recargar caché de mensajes desde BD
+		// Endpoint administrativo para forzar recarga después de cambios manuales
+		public.POST("/messages/cache/reload", handler.ReloadMessageCache())
+
+		dependencies.Logger.Success(logger.LogRouteConfigured)
+
 	}
 
 }
 
 func Bootstrap(app *gin.Engine) *dependency.Dependencies {
 	// Inicializar métricas de Prometheus
-	if err := prometheus.InitMetrics(); err != nil {
-		slog.Error(logger.LogPrometheusInitError, slog.String("error", err.Error()))
-	}
-
-	dependencies, err := dependency.Init()
+	dependencies,err:=dependency.Init()
 	if err != nil {
 		slog.Error(logger.LogDepInitError, slog.String("error", err.Error()))
-		return nil
+		panic(err)
 	}
 	routing(app, dependencies)
 	return dependencies

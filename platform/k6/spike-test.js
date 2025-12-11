@@ -17,7 +17,7 @@ export const options = {
   },
 };
 
-const BASE_URL = 'http://host.docker.internal:8085/motogo/api/v1';
+const BASE_URL = 'http://host.docker.internal:8085/flighthours/api/v1';
 
 export default function () {
   const messagesRes = http.get(`${BASE_URL}/messages`);

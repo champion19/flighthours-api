@@ -2,8 +2,8 @@ package handlers
 
 import (
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
-	"github.com/champion19/flighthours-api/platform/prometheus"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,18 +20,41 @@ import (
 // @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
 // @Router       /register [post]
 func (h handler) RegisterEmployee() func(c *gin.Context) {
+
 	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := h.Logger.WithTraceID(traceID)
+
+		log.Info(logger.LogRegRequestReceived,
+			"method", c.Request.Method,
+			"path", c.Request.URL.Path,
+			"client_ip", c.ClientIP())
+
 		var employeeRequest EmployeeRequest
 		if err := c.ShouldBindJSON(&employeeRequest); err != nil {
-			h.Logger.Error(logger.LogRegJSONBindError, err)
+			log.Error(logger.LogRegJSONParseError, "error", err, "client_ip", c.ClientIP())
 			c.Error(domain.ErrInvalidJSONFormat)
 			return
 		}
 
+		log.Info(logger.LogRegProcessing,
+			"email", employeeRequest.Email,
+			"role", employeeRequest.Role)
+
 		result, err := h.Interactor.RegisterEmployee(c, employeeRequest.ToDomain())
 		if err != nil {
-			h.Logger.Error(logger.LogEmployeeRegisterError, err)
+			log.Error(logger.LogRegProcessError,
+				"email", employeeRequest.Email,
+				"error", err,
+				"client_ip", c.ClientIP())
 			c.Error(err)
+			return
+		}
+
+		// Ofuscar el ID antes de exponerlo en la API
+		encodedID, err := h.EncodeID(result.Employee.ID)
+		if err != nil {
+			h.HandleIDEncodingError(c, result.Employee.ID, err)
 			return
 		}
 
@@ -48,17 +71,18 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 
 		// Usar funciones HATEOAS centralizadas
 		baseURL := GetBaseURL(c)
-		SetLocationHeader(c, baseURL, "accounts", result.Employee.ID)
+		links := BuildAccountLinks(baseURL, encodedID)
+		SetLocationHeader(c, baseURL, "accounts", encodedID)
 
 		response := RegisterEmployeeResponse{
-			Message: result.Message,
-			Links:   BuildAccountLinks(baseURL, result.Employee.ID),
+			Links: links,
 		}
 
-		// Registrar métrica de empleado registrado
-		prometheus.EmployeesRegistered.Inc()
+		log.Success("register employee success",
+			result.Employee.ToLogger(),
+			"encoded_id", encodedID,
+			"client_ip", c.ClientIP())
 
-		h.Logger.Success(logger.LogEmployeeRegisterSuccess, result.Employee.ID)
 		h.Response.SuccessWithData(c, domain.MsgUserRegistered, response)
 	}
 }

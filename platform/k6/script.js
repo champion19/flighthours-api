@@ -16,7 +16,7 @@ export const options = {
   },
 };
 
-const BASE_URL = 'http://host.docker.internal:8085/motogo/api/v1';
+const BASE_URL = 'http://host.docker.internal:8085/flighthours/api/v1';
 
 export default function () {
   // Test 1: GET Messages List (Success)
@@ -80,7 +80,7 @@ export default function () {
 
     check(metricsRes, {
       'GET /metrics status is 200': (r) => r.status === 200,
-      'GET /metrics has prometheus format': (r) => r.body.includes('motogo_http_requests_total'),
+      'GET /metrics has prometheus format': (r) => r.body.includes('flighthours_http_requests_total'),
       'GET /metrics response time < 200ms': (r) => r.timings.duration < 200,
     });
   });
@@ -91,7 +91,7 @@ export default function () {
 
 // Lifecycle hooks
 export function setup() {
-  console.log('Starting K6 load test for Motogo Backend...');
+  console.log('Starting K6 load test for Flighthours Backend...');
   console.log(`Base URL: ${BASE_URL}`);
 }
 

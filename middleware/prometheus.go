@@ -4,10 +4,11 @@ import (
 	"strconv"
 	"time"
 
+	promConstants "github.com/champion19/flighthours-api/platform/prometheus"
 	"github.com/gin-gonic/gin"
-	promConstants"github.com/champion19/flighthours-api/platform/prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 )
+
 var (
 	// HTTP Request counter
 	httpRequestsTotal = prometheus.NewCounterVec(
@@ -36,12 +37,7 @@ var (
 		},
 		[]string{promConstants.LabelMethod, promConstants.LabelEndpoint, promConstants.LabelStatus, promConstants.LabelErrorType},
 	)
-
-
-
-
 )
-
 
 func PrometheusInit() {
 	prometheus.MustRegister(httpRequestsTotal)
@@ -80,6 +76,7 @@ func TrackMetrics() gin.HandlerFunc {
 		}
 	}
 }
+
 // getErrorType classifies HTTP status codes into error types
 func getErrorType(status int) string {
 	switch {
@@ -102,10 +99,9 @@ func getErrorType(status int) string {
 	}
 }
 
-
 // PrometheusMiddleware captura métricas de cada request HTTP
 func PrometheusMiddleware() gin.HandlerFunc {
-		return func(c *gin.Context) {
+	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.FullPath()
 		if path == "" {

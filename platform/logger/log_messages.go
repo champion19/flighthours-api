@@ -475,7 +475,13 @@ const (
 	LogEmployeeInteractorCleanup_OK           = "Estado inconsistente limpiado exitosamente"
 )
 
-
+//
+//DEPENDENCY INITIALIZATION
+//
+const (
+	LogDependencyMessageRepoInit = "Dependencia de repositorio de mensajes inicializada exitosamente"
+  LogDependencyMessageIntInit = "Error inicializando dependencia de repositorio de mensajes"
+)
 
 // ============================================
 // MESSAGE INTERACTOR
