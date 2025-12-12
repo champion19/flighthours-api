@@ -1,36 +1,24 @@
 package employee
 
-
 import (
 	"context"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/output"
+	"github.com/champion19/flighthours-api/platform/databases/common"
 	"github.com/go-sql-driver/mysql"
 )
 
-func (r *repository) Save(ctx context.Context, tx output.Tx, 	employee domain.Employee) error {
+func (r *repository) Save(ctx context.Context, tx output.Tx, employee domain.Employee) error {
 
 	employeeToSave := FromDomain(employee)
 
-	var dbTx *sqlTx
-	var shouldCommit bool
-
-	if tx != nil {
-		// Usar la transacción existente
-		dbTx = tx.(*sqlTx)
-		shouldCommit = false
-	} else {
-		// Crear nueva transacción
-		newTx, err := r.db.BeginTx(ctx, nil)
-		if err != nil {
-			return err
-		}
-		dbTx = &sqlTx{Tx: newTx}
-		shouldCommit = true
+	dbTx, ok := tx.(*common.SQLTX)
+	if !ok {
+		return domain.ErrInvalidTransaction
 	}
 
-	_, err := dbTx.ExecContext(ctx,QuerySave,
+	_, err := dbTx.ExecContext(ctx, QuerySave,
 		employeeToSave.ID,
 		employeeToSave.Name,
 		employeeToSave.Airline,
@@ -44,21 +32,14 @@ func (r *repository) Save(ctx context.Context, tx output.Tx, 	employee domain.Em
 		employeeToSave.KeycloakUserID)
 
 	if err != nil {
-		if shouldCommit {
-			dbTx.Rollback()
-		}
+		// Registrar métrica de query fallida
+
+
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1062 {
 			return domain.ErrDuplicateUser
 		} else {
 			return domain.ErrUserCannotSave
 		}
 	}
-
-	if shouldCommit {
-		if err = dbTx.Commit(); err != nil {
-			return domain.ErrUserCannotSave
-		}
-	}
-
 	return nil
 }

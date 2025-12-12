@@ -5,14 +5,12 @@ import (
 	"database/sql"
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
-	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
-
-func (r *repository) GetEmployeeByEmail(ctx context.Context, tx output.Tx, email string) (*domain.Employee, error) {
+func (r *repository) GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error) {
 
 	var e Employee
-	err := r.db.QueryRowContext(context.Background(),QueryByEmail,email).Scan(
+	err := r.db.QueryRowContext(context.Background(), QueryByEmail, email).Scan(
 		&e.ID,
 		&e.Name,
 		&e.Airline,
@@ -25,14 +23,14 @@ func (r *repository) GetEmployeeByEmail(ctx context.Context, tx output.Tx, email
 		&e.Role,
 		&e.KeycloakUserID)
 
-   if err != nil {
-		if err== sql.ErrNoRows{
-			return nil,domain.ErrPersonNotFound
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrPersonNotFound
 		}
-		return nil,err
+		return nil, err
 	}
 
-  domainEmployee := e.ToDomain()
-	return &domainEmployee,nil
+	domainEmployee := e.ToDomain()
+	return &domainEmployee, nil
 
 }

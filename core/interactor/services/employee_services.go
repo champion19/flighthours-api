@@ -25,18 +25,18 @@ func NewService(repository output.Repository, keycloak output.AuthClient, logger
 }
 
 func (s service) GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error) {
-	employee, err := s.repository.GetEmployeeByEmail(ctx, nil, email)
+	employee, err := s.repository.GetEmployeeByEmail(ctx, email)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeGetByEmailError, err)
+		s.logger.Error(logger.LogEmployeeGetByEmailError, "error", err)
 		return nil, err
 	}
 	return employee, nil
 }
 
 func (s service) GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error) {
-	employee, err := s.repository.GetEmployeeByID(ctx, nil, id)
+	employee, err := s.repository.GetEmployeeByID(ctx, id)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeGetByIDError, err)
+		s.logger.Error(logger.LogEmployeeGetByIDError, "error", err)
 		return nil, err
 	}
 	return employee, nil
@@ -47,22 +47,81 @@ func (s service) BeginTx(ctx context.Context) (output.Tx, error) {
 }
 
 func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error) {
-	existingEmployee, err := s.repository.GetEmployeeByEmail(ctx, nil, employee.Email)
-	if err == nil && existingEmployee != nil {
-		s.logger.Warn(logger.LogEmployeeExists, err)
-		return nil, domain.ErrDuplicateUser
+	s.logger.Info(logger.LogEmployeeServiceValidationStart, employee.ToLogger())
+	s.logger.Debug(logger.LogDualSystemCheck, "email", employee.Email)
+
+	existingEmployee, errDB := s.repository.GetEmployeeByEmail(ctx, employee.Email)
+	if errDB != nil {
+		if isConnectionError(errDB) || isTimeoutError(errDB) {
+			//TODO: Agregar mensaje de log aquí
+			s.logger.Error(logger.LogDatabaseUnavailable,
+				"email", employee.Email,
+				"error", errDB,
+				"error_type", "connection")
+			return nil, domain.ErrDatabaseUnavailable
+		}
+		// Si el error NO es de conexión, asumimos que el usuario no existe
+		// (errores como "record not found" son normales)
 	}
 
+	dbExists := errDB == nil && existingEmployee != nil
+
+	//TODO: CRÍTICO: Si hay error de conexión/timeout, Keycloak está caído
+	// Check in Keycloak - IMPORTANTE: detectar indisponibilidad
+
+	keycloakUser, errKC := s.keycloak.GetUserByEmail(ctx, employee.Email)
+	// CRÍTICO: Si hay error de conexión/timeout, Keycloak está caído
+
+	if errKC != nil {
+		if isConnectionError(errKC) || isTimeoutError(errKC) {
+			s.logger.Error(logger.LogKeycloakUnavailable,
+				"email", employee.Email,
+				"error", errKC,
+				"error_type", "connection")
+			return nil, domain.ErrKeycloakUnavailable
+		}
+		// Si el error NO es de conexión, asumimos que el usuario no existe
+		// (errores como 404 Not Found son normales)
+	}
+
+	kcExists := errKC == nil && keycloakUser != nil
+
+	// Log where the user exists
+	if dbExists && kcExists {
+		s.logger.Warn(logger.LogUserExistsInBoth, "email", employee.Email)
+		return nil, domain.ErrDuplicateUser // Usuario ya registrado completamente
+	}
+
+	if dbExists && !kcExists {
+		s.logger.Warn(logger.LogUserExistsOnlyInDB,
+			"email", employee.Email,
+			"employee_id", existingEmployee.ID,
+			"action", "will be cleaned")
+		// Retornar error de registro incompleto (mensaje: intente más tarde)
+		return nil, domain.ErrIncompleteRegistration
+	}
+
+	if !dbExists && kcExists {
+		s.logger.Warn(logger.LogUserExistsOnlyInKeycloak,
+			"email", employee.Email,
+			"keycloak_id", *keycloakUser.ID,
+			"action", "will be cleaned")
+		// Retornar error de registro incompleto (mensaje: intente más tarde)
+		return nil, domain.ErrIncompleteRegistration
+	}
+
+	s.logger.Debug(logger.LogUserNotFoundInEither, "email", employee.Email)
+	s.logger.Info(logger.LogEmployeeServiceValidationComplete, employee.ToLogger())
 	return &dto.RegisterEmployee{
 		Employee: employee,
-		Message:  "Employee registered successfully",
+		Message:  "Validaciones exitosas",
 	}, nil
 }
 
 func (s service) SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error {
 	err := s.repository.Save(ctx, tx, employee)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeSaveError, err)
+		s.logger.Error(logger.LogEmployeeSaveError,employee.ToLogger(), "error", err)
 		return err
 	}
 	return nil
@@ -71,16 +130,24 @@ func (s service) SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee do
 func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error) {
 	keycloakUserID, err := s.keycloak.CreateUser(ctx, employee)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakUserCreateError, err)
-		return "", err
+		if isConnectionError(err) || isTimeoutError(err) {
+			s.logger.Error(logger.LogKeycloakUnavailable,
+				employee.ToLogger(),
+				"error", err,
+				"error_type", "connection")
+			return "", domain.ErrKeycloakUnavailable
+		}
+		s.logger.Error(logger.LogEmployeeServiceKeycloakError, employee.ToLogger(), "error", err)
+		return "", domain.ErrKeycloakUserCreationFailed
 	}
+	s.logger.Success(logger.LogEmployeeServiceCreatedKeycloak, employee.ToLogger(), "Keycloak_user_id", keycloakUserID)
 	return keycloakUserID, nil
 }
 
 func (s service) SetUserPassword(ctx context.Context, userID string, password string) error {
 	err := s.keycloak.SetPassword(ctx, userID, password, true)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakPasswordSetError, err)
+		s.logger.Error(logger.LogKeycloakPasswordSetError,"keycloak_user_id", userID, "error", err)
 		return err
 	}
 	return nil
@@ -89,7 +156,7 @@ func (s service) SetUserPassword(ctx context.Context, userID string, password st
 func (s service) AssignUserRole(ctx context.Context, userID string, role string) error {
 	err := s.keycloak.AssignRole(ctx, userID, role)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakRoleAssignError, err)
+		s.logger.Error(logger.LogKeycloakRoleAssignError, "keycloak_user_id", userID,"role", role, "error", err)
 		return err
 	}
 	return nil
@@ -98,7 +165,7 @@ func (s service) AssignUserRole(ctx context.Context, userID string, role string)
 func (s service) UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error {
 	err := s.repository.PatchEmployee(ctx, tx, employeeID, keycloakUserID)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeUpdateKeycloakIDError, err)
+		s.logger.Error(logger.LogEmployeeUpdateKeycloakIDError,"employee_id", employeeID, "error", err)
 		return err
 	}
 	return nil
@@ -107,7 +174,7 @@ func (s service) UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, emp
 func (s service) RollbackEmployee(ctx context.Context, employeeID string) error {
 	err := s.repository.DeleteEmployee(ctx, nil, employeeID)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeDeleteError, err)
+		s.logger.Error(logger.LogEmployeeDeleteError,"employee_id", employeeID, "error", err)
 		return err
 	}
 	return nil
@@ -116,26 +183,167 @@ func (s service) RollbackEmployee(ctx context.Context, employeeID string) error 
 func (s service) RollbackKeycloakUser(ctx context.Context, KeycloakUserID string) error {
 	err := s.keycloak.DeleteUser(ctx, KeycloakUserID)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakUserDeleteError, err)
+		s.logger.Error(logger.LogKeycloakUserDeleteError,"keycloak_user_id", KeycloakUserID, "error", err)
 		return err
 	}
 	return nil
 }
 
 func (s service) LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
-	employee, err := s.repository.GetEmployeeByID(ctx, nil, id)
+	employee, err := s.repository.GetEmployeeByID(ctx, id)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeGetByIDError, err)
+		s.logger.Error(logger.LogEmployeeGetByIDError, "error", err)
 		return nil, err
 	}
 
 	if employee == nil {
-		s.logger.Error(logger.LogEmployeeNotFound, err)
-		return nil, err
+		s.logger.Warn(logger.LogEmployeeNotFound, "id", id)
+		return nil, domain.ErrPersonNotFound
 	}
 
 	return &dto.RegisterEmployee{
 		Employee: *employee,
 		Message:  "Employee located successfully",
 	}, nil
+}
+
+func (s service) CheckAndCleanInconsistentState(ctx context.Context, email string) error {
+	s.logger.Debug(logger.LogDualSystemCheck, "email", email)
+
+	// Check if user exists in business DB
+	employeeInDB, errDB := s.repository.GetEmployeeByEmail(ctx, email)
+	dbExists := errDB == nil && employeeInDB != nil
+
+	// Check if user exists in Keycloak
+	keycloakUser, errKC := s.keycloak.GetUserByEmail(ctx, email)
+	kcExists := errKC == nil && keycloakUser != nil
+
+	// Both exist or neither exist - consistent state
+	if (dbExists && kcExists) || (!dbExists && !kcExists) {
+		if dbExists && kcExists {
+			s.logger.Debug(logger.LogUserExistsInBoth, "email", email)
+		} else {
+			s.logger.Debug(logger.LogUserNotFoundInEither, "email", email)
+		}
+		return nil
+	}
+
+	// Log inconsistent state with details
+	s.logger.Warn(logger.LogInconsistentStateDetect,
+		"email", email,
+		"in_database", dbExists,
+		"in_keycloak", kcExists,
+		"db_person_id", func() string {
+			if dbExists {
+				return employeeInDB.ID
+			}
+			return "N/A"
+		}(),
+		"kc_user_id", func() string {
+			if kcExists {
+				return *keycloakUser.ID
+			}
+			return "N/A"
+		}())
+
+	// User exists only in Keycloak - clean it
+	if !dbExists && kcExists {
+		s.logger.Info(logger.LogEmployeeServiceCleaningOrphan,
+			"email", email,
+			"source", "keycloak",
+			"keycloak_user_id", *keycloakUser.ID,
+			"reason", "missing in business database")
+
+		if err := s.keycloak.DeleteUser(ctx, *keycloakUser.ID); err != nil {
+			s.logger.Error(logger.LogEmployeeServiceOrphanCleanError,
+				"email", email,
+				"source", "keycloak",
+				"keycloak_user_id", *keycloakUser.ID,
+				"error", err)
+			return domain.ErrKeycloakCleanupFailed
+		}
+
+		s.logger.Success(logger.LogEmployeeServiceOrphanCleaned,
+			"email", email,
+			"source", "keycloak",
+			"action", "deleted from Keycloak")
+		return nil // Limpiado exitosamente, puede reintentar
+	}
+
+	// User exists only in DB - clean it
+	if dbExists && !kcExists {
+		s.logger.Info(logger.LogEmployeeServiceCleaningOrphan,
+			"email", email,
+			"source", "database",
+			"person_id", employeeInDB.ID,
+			"reason", "missing in Keycloak")
+
+		if err := s.repository.DeleteEmployee(ctx, nil, employeeInDB.ID); err != nil {
+			s.logger.Error(logger.LogEmployeeServiceOrphanCleanError,
+				"email", email,
+				"source", "database",
+				"person_id", employeeInDB.ID,
+				"error", err)
+			return domain.ErrKeycloakCleanupFailed
+		}
+
+		s.logger.Success(logger.LogEmployeeServiceOrphanCleaned,
+			"email", email,
+			"source", "database",
+			"action", "deleted from business database")
+		return nil // Limpiado exitosamente, puede reintentar
+	}
+
+	return nil
+}
+
+func isConnectionError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	// Check for common connection error patterns
+	return contains(errStr, "connection refused") ||
+		contains(errStr, "no such host") ||
+		contains(errStr, "connection reset") ||
+		contains(errStr, "network is unreachable") ||
+		contains(errStr, "connect: connection refused")
+}
+
+// isTimeoutError checks if an error is a timeout-related error
+func isTimeoutError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	return contains(errStr, "timeout") ||
+		contains(errStr, "deadline exceeded") ||
+		contains(errStr, "context deadline exceeded")
+}
+
+// contains is a case-insensitive substring check
+func contains(s, substr string) bool {
+	// Simple case-insensitive check
+	for i := 0; i+len(substr) <= len(s); i++ {
+		match := true
+		for j := 0; j < len(substr); j++ {
+			c1 := s[i+j]
+			c2 := substr[j]
+			// Convert to lowercase for comparison
+			if c1 >= 'A' && c1 <= 'Z' {
+				c1 += 32
+			}
+			if c2 >= 'A' && c2 <= 'Z' {
+				c2 += 32
+			}
+			if c1 != c2 {
+				match = false
+				break
+			}
+		}
+		if match {
+			return true
+		}
+	}
+	return false
 }

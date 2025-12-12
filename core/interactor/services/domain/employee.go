@@ -26,6 +26,14 @@ func (e *Employee) SetID() {
 	e.ID = uuid.New().String()
 }
 
+func(e *Employee) ToLogger()[]string{
+return[]string{
+	"id:"+e.ID,
+	"email:"+e.Email,
+	"role:"+e.Role,
+}
+
+}
 
 
 type Airline struct {

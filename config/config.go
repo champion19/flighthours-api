@@ -18,6 +18,7 @@ type Config struct {
 	Resend       Resend         `json:"resend"`
 	Verification Verification   `json:"verification"`
 	Keycloak     KeycloakConfig `json:"keycloak"`
+	IDEncoder    IDEncoderConfig `json:"id_encoder"`
 }
 
 type Verification struct {
@@ -55,6 +56,11 @@ type KeycloakConfig struct {
 	ClientSecret string `json:"client_secret"`
 	AdminUser    string `json:"admin_user"`
 	AdminPass    string `json:"admin_pass"`
+}
+
+type IDEncoderConfig struct {
+	Secret    string `json:"secret"`
+	MinLength int    `json:"min_length"`
 }
 
 func LoadConfig() (*Config, error) {

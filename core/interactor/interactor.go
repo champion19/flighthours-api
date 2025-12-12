@@ -11,103 +11,139 @@ import (
 
 type Interactor struct {
 	service input.Service
-	log     logger.Logger
+	logger  logger.Logger
 }
 
 func NewInteractor(service input.Service, log logger.Logger) *Interactor {
 	return &Interactor{
 		service: service,
-		log:     log,
+		logger:  log,
 	}
 }
-func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error) {
-	result, err := i.service.RegisterEmployee(ctx, employee)
+func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Employee) (result *dto.RegisterEmployee, err error) {
+	i.logger.Info(logger.LogEmployeeInteractorRegStart, employee.ToLogger())
+	//paso 1
+	result, err = i.service.RegisterEmployee(ctx, employee)
 	if err != nil {
-		i.log.Error(logger.LogEmployeeRegisterError, err)
-		return nil, err
-	}
-	employee.SetID()
-	i.log.Success(logger.LogEmployeeRegisterSuccess)
+		if err == domain.ErrIncompleteRegistration {
+			i.logger.Warn(logger.LogEmployeeInteractorIncompleteDetected, "email", employee.Email)
 
+			if cleanErr := i.service.CheckAndCleanInconsistentState(ctx, employee.Email); cleanErr != nil {
+				i.logger.Error(logger.LogEmployeeInteractorCleanup_Error, "email", employee.Email, "error", cleanErr)
+				return nil, cleanErr
+			}
+
+			i.logger.Success(logger.LogEmployeeInteractorCleanup_OK, "email", employee.Email)
+			return nil, err
+		}
+		i.logger.Error(logger.LogEmployeeInteractorStep1_Error, "error", err)
+		return
+	}
+	i.logger.Success(logger.LogEmployeeInteractorStep1_OK)
+
+	employee.SetID()
+	i.logger.Debug(logger.LogEmployeeInteractorIDGenerated, "employee_id", employee.ID)
+
+	//paso 1.5
+	if err = i.service.CheckAndCleanInconsistentState(ctx, employee.Email); err != nil {
+		i.logger.Error(logger.LogEmployeeInteractorStep15_Error, "email", employee.Email, "error", err)
+		return
+	}
+	i.logger.Success(logger.LogEmployeeInteractorStep15_OK, "email", employee.Email)
+
+	//paso 2
 	tx, err := i.service.BeginTx(ctx)
 	if err != nil {
-		i.log.Error(logger.LogDBTransactionBeginErr)
-		return nil, err
+		i.logger.Error(logger.LogEmployeeInteractorStep2_Error, "error", err)
+		return
 	}
+	i.logger.Success(logger.LogEmployeeInteractorStep2_OK)
+
+	var keycloakUserID string
+	var keycloakCreated bool
+
+	defer func() {
+		if err != nil {
+
+			if rbErr := tx.Rollback(); rbErr != nil {
+				i.logger.Error(logger.LogEmployeeInteractorRollbackDB_Error,
+					"rollback_error", rbErr,
+					"original_error", err)
+			} else {
+				i.logger.Warn(logger.LogEmployeeInteractorRollbackDB_OK)
+			}
+
+			if keycloakCreated {
+				if kcErr := i.service.RollbackKeycloakUser(ctx, keycloakUserID); kcErr != nil {
+					i.logger.Error(logger.LogEmployeeInteractorRollbackKeycloak_Err,
+						"keycloak_error", kcErr,
+						"keycloak_user_id", keycloakUserID)
+				} else {
+					i.logger.Warn(logger.LogEmployeeInteractorRollbackKeycloak_OK)
+				}
+			}
+		}
+	}()
+	//paso 3
 	if err = i.service.SaveEmployeeToDB(ctx, tx, employee); err != nil {
-		i.log.Error(logger.LogEmployeeSaveError)
-		_ = tx.Rollback()
-		return nil, err
+		i.logger.Error(logger.LogEmployeeInteractorStep3_Error, "error", err)
+		return
 	}
+	i.logger.Success(logger.LogEmployeeInteractorStep3_OK)
 
-	keycloakUserID, err := i.service.CreateUserInKeycloak(ctx, &employee)
+	//paso 4
+	keycloakUserID, err = i.service.CreateUserInKeycloak(ctx, &employee)
 	if err != nil {
-		i.log.Error(logger.LogKeycloakUserCreateError)
-		_ = tx.Rollback()
-		return nil, err
+		i.logger.Error(logger.LogEmployeeInteractorStep4_Error, "error", err)
+		err = domain.ErrKeycloakUserCreationFailed
+		return
 	}
+	keycloakCreated = true
+	i.logger.Success(logger.LogEmployeeInteractorStep4_OK, "keycloak_user_id", keycloakUserID)
 
-	err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password)
-	if err != nil {
-		i.log.Error(logger.LogKeycloakPasswordSetError)
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
-		return nil, err
+	//paso 5
+	if err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password); err != nil {
+		i.logger.Error(logger.LogEmployeeInteractorStep5_Error, "error", err)
+		return
 	}
+	i.logger.Success(logger.LogEmployeeInteractorStep5_OK)
 
-	err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role)
-	if err != nil {
-		i.log.Error(logger.LogKeycloakRoleAssignError)
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
-		return nil, err
+	//paso 6
+	if err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role); err != nil {
+		i.logger.Error(logger.LogEmployeeInteractorStep6_Error, "error", err)
+		return
 	}
+	i.logger.Success(logger.LogEmployeeInteractorStep6_OK, "role", employee.Role)
 
-	err = i.service.SetUserPassword(ctx, keycloakUserID, employee.Password)
-	if err != nil {
-		i.log.Error(logger.LogKeycloakPasswordSetError)
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
-		return nil, err
+	//paso 7
+	if err = i.service.UpdateEmployeeKeycloakID(ctx, tx, employee.ID, keycloakUserID); err != nil {
+		i.logger.Error(logger.LogEmployeeInteractorStep7_Error, "error", err)
+		return
 	}
+	i.logger.Success(logger.LogEmployeeInteractorStep7_OK)
 
-	err = i.service.AssignUserRole(ctx, keycloakUserID, employee.Role)
-	if err != nil {
-		i.log.Error(logger.LogKeycloakRoleAssignError)
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
-		return nil, err
-	}
-
-	err = i.service.UpdateEmployeeKeycloakID(ctx, tx, employee.ID, keycloakUserID)
-	if err != nil {
-		i.log.Error(logger.LogEmployeeUpdateKeycloakIDError)
-		_ = i.service.RollbackKeycloakUser(ctx, keycloakUserID)
-		_ = tx.Rollback()
-		return nil, err
-	}
+	//paso 8
 	if err = tx.Commit(); err != nil {
-		i.log.Error(logger.LogDBTransactionCommitErr)
-		_ = tx.Rollback()
-		return nil, err
+		i.logger.Error(logger.LogEmployeeInteractorCommit_Error, "error", err)
+		return
 	}
+	i.logger.Success(logger.LogEmployeeInteractorCommit_OK)
 
 	employee.KeycloakUserID = keycloakUserID
 	result.Employee = employee
 	result.Message = "user registered successfully"
 
-	i.log.Success(logger.LogRegSuccess,
-		"email", employee.Email,
-		"id", employee.ID,
+	i.logger.Success(logger.LogEmployeeInteractorRegComplete, employee.ToLogger(),
 		"Keycloak_id", keycloakUserID)
+	err = nil
 
-	return result, nil
+	return 
 }
 
 func (i *Interactor) Locate(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
 	result, err := i.service.LocateEmployee(ctx, id)
 	if err != nil {
-		i.log.Error(logger.LogEmployeeLocateError)
+		i.logger.Error(logger.LogEmployeeLocateError, "error", err)
 		return nil, err
 	}
 	return result, nil
