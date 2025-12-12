@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/champion19/flighthours-api/tools/utils"
 )
 
 type SlogLogger struct {
@@ -14,7 +16,14 @@ type SlogLogger struct {
 }
 
 func NewSlogLogger() *SlogLogger {
-	logDir := filepath.Join("/var/log/flighthours")
+	logDir := os.Getenv("LOG_DIR")
+	if logDir == "" {
+		if root, err := utils.FindModuleRoot(); err == nil {
+			logDir = filepath.Join(root, "logs")
+		} else {
+			logDir = filepath.Join("/var/log/flighthours")
+		}
+	}
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		// If we can't create the directory, just log to stdout
 		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{

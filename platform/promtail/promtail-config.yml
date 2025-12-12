@@ -36,7 +36,7 @@ scrape_configs:
             source_line: source.line
       - timestamp:
           source: timestamp
-          format: RFC3339
+          format: RFC3339Nano
       - labels:
           level:
           msg:
@@ -67,7 +67,7 @@ scrape_configs:
             source_line: source.line
       - timestamp:
           source: timestamp
-          format: RFC3339
+          format: RFC3339Nano
       - labels:
           level:
           msg:
