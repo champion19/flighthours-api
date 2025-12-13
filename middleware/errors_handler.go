@@ -6,7 +6,6 @@ import (
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	messagingCache "github.com/champion19/flighthours-api/platform/cache/messaging"
 	"github.com/champion19/flighthours-api/platform/logger"
-	loggerPkg "github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -95,13 +94,13 @@ type ErrorResponse struct {
 
 type ErrorHandler struct {
 	cache  *messagingCache.MessageCache
-	logger loggerPkg.Logger
 }
 
-func NewErrorHandler(cache *messagingCache.MessageCache, log logger.Logger) *ErrorHandler {
+var log logger.Logger = logger.NewSlogLogger()
+
+func NewErrorHandler(cache *messagingCache.MessageCache) *ErrorHandler {
 	return &ErrorHandler{
 		cache:  cache,
-		logger: log,
 	}
 }
 
@@ -136,7 +135,7 @@ func (h *ErrorHandler) Handle() gin.HandlerFunc {
 				status := h.cache.GetHTTPStatus(messageCode)
 
 				if msg != nil {
-					h.logger.Warn(logger.LogMiddlewareErrorCaught,
+					log.Warn(logger.LogMiddlewareErrorCaught,
 						"error", err.Error(),
 						"code", msg.Code,
 						"status", status,
@@ -155,7 +154,7 @@ func (h *ErrorHandler) Handle() gin.HandlerFunc {
 			}
 
 			// Fallback for unmapped errors
-			h.logger.Error(logger.LogMiddlewareInternalErr,
+			log.Error(logger.LogMiddlewareInternalErr,
 				"error", err.Error(),
 				"path", c.Request.URL.Path,
 				"method", c.Request.Method,

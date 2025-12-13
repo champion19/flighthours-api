@@ -13,17 +13,18 @@ import (
 	"github.com/kaptinlin/jsonschema"
 )
 
+
 type Builder struct {
 	Validators *json_schema.Validators
 	isLogin    bool
-	log logger.Logger
+
 }
 
-func NewMiddlewareValidator(validators *json_schema.Validators, log logger.Logger) *Builder {
+func NewMiddlewareValidator(validators *json_schema.Validators) *Builder {
 
 	return &Builder{
 		Validators: validators,
-		log: log,
+
 	}
 }
 
@@ -41,8 +42,8 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 
 		bodyBytes, err := io.ReadAll(c.Request.Body)
 		if err != nil {
-			if b.log != nil {
-				b.log.Error(logger.LogMiddlewareBodyReadError, "error", err, "path", c.Request.URL.Path)
+			if log != nil {
+				log.Error(logger.LogMiddlewareBodyReadError, "error", err, "path", c.Request.URL.Path)
 			}
 			c.Error(json_schema.ErrBadRequest)
 			c.Abort()
@@ -53,8 +54,8 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 
 		var data map[string]interface{}
 		if err := json.Unmarshal(bodyBytes, &data); err != nil {
-			if b.log != nil {
-				b.log.Error(logger.LogMiddlewareJSONParseError, "error", err, "path", c.Request.URL.Path)
+			if log != nil {
+				log.Error(logger.LogMiddlewareJSONParseError, "error", err, "path", c.Request.URL.Path)
 			}
 			c.Error(json_schema.ErrBadRequest)
 			c.Abort()
@@ -120,16 +121,16 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 				c.Set("validation_fields", fieldNames)
 			}
 
-			if b.log != nil {
-				b.log.Warn(logger.LogMiddlewareValidationFailed, "path", c.Request.URL.Path, "fields", fieldNames)
+			if log != nil {
+				log.Warn(logger.LogMiddlewareValidationFailed, "path", c.Request.URL.Path, "fields", fieldNames)
 			}
 			c.Error(validationError)
 			c.Abort()
 			return
 		}
 
-		if b.log != nil {
-			b.log.Debug(logger.LogMiddlewareValidationOK, "path", c.Request.URL.Path)
+		if log != nil {
+			log.Debug(logger.LogMiddlewareValidationOK, "path", c.Request.URL.Path)
 		}
 
 

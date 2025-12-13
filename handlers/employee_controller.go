@@ -23,7 +23,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 
 	return func(c *gin.Context) {
 		traceID := middleware.GetRequestID(c)
-		log := h.Logger.WithTraceID(traceID)
+		log := Logger.WithTraceID(traceID)
 
 		log.Info(logger.LogRegRequestReceived,
 			"method", c.Request.Method,
