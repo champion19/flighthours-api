@@ -4,9 +4,9 @@ import (
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/champion19/flighthours-api/middleware"
 )
 
-var log logger.Logger = logger.NewSlogLogger()
 
 // CreateMessage godoc
 // @Summary Crear un nuevo mensaje del sistema
@@ -22,6 +22,9 @@ var log logger.Logger = logger.NewSlogLogger()
 // @Router /messages [post]
 func (h handler) CreateMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
 		log.Info(logger.LogMessageCreate,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
@@ -97,6 +100,9 @@ func (h handler) CreateMessage() func(c *gin.Context) {
 // @Router /messages/{id} [put]
 func (h handler) UpdateMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
 		log.Info(logger.LogMessageUpdate,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
@@ -170,6 +176,9 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 // @Router /messages/{id} [delete]
 func (h handler) DeleteMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
 		log.Info(logger.LogMessageDelete,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
@@ -220,6 +229,9 @@ func (h handler) DeleteMessage() func(c *gin.Context) {
 // @Router /messages/{id} [get]
 func (h handler) GetMessageByID() func(c *gin.Context) {
 	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
 		log.Debug(logger.LogMessageGet,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
@@ -283,6 +295,9 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 // @Router /messages [get]
 func (h handler) ListMessages() func(c *gin.Context) {
 	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
 		log.Debug(logger.LogMessageList,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
@@ -348,6 +363,9 @@ func (h handler) ListMessages() func(c *gin.Context) {
 // @Router /messages/reload [post]
 func (h handler) ReloadMessageCache() func(c *gin.Context) {
 	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
 		log.Info("Recargando caché de mensajes",
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,

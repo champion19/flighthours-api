@@ -51,6 +51,29 @@ services:
     depends_on:
       - loki
 
+  log-rotator:
+    build:
+      context: ./platform/log-rotator
+      dockerfile: Dockerfile
+    image: flighthours-log-rotator:latest
+    container_name: flighthours-log-rotator
+    restart: unless-stopped
+    volumes:
+      # Logs del backend (read-write para poder rotar)
+      - /tmp/flighthours-logs:/var/log/flighthours
+      # Volúmenes Docker (read-write para limpieza)
+      - prometheus-data:/prometheus
+      - loki-data:/loki
+      - grafana-data:/grafana
+      # Socket de Docker (para comandos de limpieza adicionales si necesario)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=America/Bogota
+      - RETENTION_DAYS=7
+    networks:
+      - flighthours-network
+
+
   prometheus:
     image: prom/prometheus:latest
     container_name: flighthours-prometheus

@@ -45,23 +45,23 @@ const (
 // DATABASE OPERATIONS
 // ============================================
 const (
-	LogDBQueryExecuting        = "Ejecutando query de base de datos"
-	LogDBQuerySuccess          = "Query ejecutado exitosamente"
-	LogDBQueryError            = "Error ejecutando query"
-	LogDBTransactionStart      = "Iniciando transacción de base de datos"
-	LogDBTransactionBegin      = "Comenzando transacción"
-	LogDBTransactionBeginErr   = "Error comenzando transacción"
-	LogDBTransactionCommit     = "Commit de transacción exitoso"
-	LogDBTransactionCommitErr  = "Error haciendo commit de transacción"
-	LogDBTransactionRollback   = "Rollback de transacción"
-	LogDBConnectionPoolInfo    = "Información de connection pool"
-	LogDBConnectionError       = "Error conectando a base de datos"
-  LogDBPoolConfig            = ""
-	LogDBConnecting            = "Conectando a base de datos"
-	LogDBSSLEnabled            = "SSL habilitado"
-	LogDBPinging               = ""
-	LogDBPingError           = "Error haciendo ping a base de datos"
-	LogDBConnected           = "Base de datos conectada exitosamente"
+	LogDBQueryExecuting       = "Ejecutando query de base de datos"
+	LogDBQuerySuccess         = "Query ejecutado exitosamente"
+	LogDBQueryError           = "Error ejecutando query"
+	LogDBTransactionStart     = "Iniciando transacción de base de datos"
+	LogDBTransactionBegin     = "Comenzando transacción"
+	LogDBTransactionBeginErr  = "Error comenzando transacción"
+	LogDBTransactionCommit    = "Commit de transacción exitoso"
+	LogDBTransactionCommitErr = "Error haciendo commit de transacción"
+	LogDBTransactionRollback  = "Rollback de transacción"
+	LogDBConnectionPoolInfo   = "Información de connection pool"
+	LogDBConnectionError      = "Error conectando a base de datos"
+	LogDBPoolConfig           = ""
+	LogDBConnecting           = "Conectando a base de datos"
+	LogDBSSLEnabled           = "SSL habilitado"
+	LogDBPinging              = ""
+	LogDBPingError            = "Error haciendo ping a base de datos"
+	LogDBConnected            = "Base de datos conectada exitosamente"
 )
 
 // ============================================
@@ -161,7 +161,7 @@ const (
 	LogKeycloakUsernameEmpty       = "Nombre de usuario no puede estar vacío"
 )
 
-//============================================
+// ============================================
 // KEYCLOAK AVAILABILITY
 // ============================================
 const (
@@ -308,6 +308,7 @@ const (
 	LogMiddlewareResponseCacheError = "Error obteniendo mensaje de cache"
 	LogMiddlewareResponseSuccess    = "Respuesta enviada exitosamente"
 	LogMiddlewareErrorHandling      = "Manejando error de middleware"
+	LogMiddlewareNotFound           = "Endpoint no encontrado"
 )
 
 // ============================================
@@ -475,12 +476,10 @@ const (
 	LogEmployeeInteractorCleanup_OK           = "Estado inconsistente limpiado exitosamente"
 )
 
-//
-//DEPENDENCY INITIALIZATION
-//
+// DEPENDENCY INITIALIZATION
 const (
 	LogDependencyMessageRepoInit = "Dependencia de repositorio de mensajes inicializada exitosamente"
-  LogDependencyMessageIntInit = "Error inicializando dependencia de repositorio de mensajes"
+	LogDependencyMessageIntInit  = "Error inicializando dependencia de repositorio de mensajes"
 )
 
 // ============================================

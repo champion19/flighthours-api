@@ -60,6 +60,8 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		})
 	})
 
+	app.NoRoute(middleware.NotFoundHandler())
+
 	// Rutas públicas (sin autenticación)
 	public := app.Group("flighthours/api/v1")
 	{

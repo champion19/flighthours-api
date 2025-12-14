@@ -37,13 +37,31 @@ var (
 		},
 		[]string{promConstants.LabelMethod, promConstants.LabelEndpoint, promConstants.LabelStatus, promConstants.LabelErrorType},
 	)
+
+	// Business metrics - User registrations
+	userRegistrationsTotal = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: promConstants.MetricUserRegistrationsTotal,
+			Help: promConstants.MetricUserRegistrationsTotalHelp,
+		},
+	)
+
+	// Business metrics - Messages created
+	messagesCreatedTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: promConstants.MetricMessagesCreatedTotal,
+			Help: promConstants.MetricMessagesCreatedTotalHelp,
+		},
+		[]string{promConstants.LabelModule, promConstants.LabelType},
+	)
 )
 
 func PrometheusInit() {
 	prometheus.MustRegister(httpRequestsTotal)
 	prometheus.MustRegister(httpRequestDuration)
 	prometheus.MustRegister(httpErrorsTotal)
-
+	prometheus.MustRegister(userRegistrationsTotal)
+	prometheus.MustRegister(messagesCreatedTotal)
 }
 
 // TrackMetrics is a Gin middleware that tracks HTTP metrics
@@ -97,6 +115,16 @@ func getErrorType(status int) string {
 	default:
 		return promConstants.ErrorTypeClientError
 	}
+}
+
+// RecordPersonRegistration increments the person registration counter
+func RecordPersonRegistration() {
+	userRegistrationsTotal.Inc()
+}
+
+// RecordMessageCreated increments the message creation counter
+func RecordMessageCreated(module, msgType string) {
+	messagesCreatedTotal.WithLabelValues(module, msgType).Inc()
 }
 
 // PrometheusMiddleware captura métricas de cada request HTTP

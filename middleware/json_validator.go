@@ -40,12 +40,15 @@ func (b *Builder) WithValidateMessage() gin.HandlerFunc {
 func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
+		traceId := GetRequestID(c)
+		log := log.WithTraceID(traceId)
+
 		bodyBytes, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			if log != nil {
 				log.Error(logger.LogMiddlewareBodyReadError, "error", err, "path", c.Request.URL.Path)
 			}
-			c.Error(json_schema.ErrBadRequest)
+			c.Error(json_schema.ErrBodyReadFailed)
 			c.Abort()
 			return
 		}

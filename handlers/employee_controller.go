@@ -83,6 +83,9 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			"encoded_id", encodedID,
 			"client_ip", c.ClientIP())
 
+			// Record Prometheus metric for person registration
+
+
 		h.Response.SuccessWithData(c, domain.MsgUserRegistered, response)
 	}
 }

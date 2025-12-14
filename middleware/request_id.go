@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -17,6 +19,9 @@ const (
 	TraceIDKey = "traceID"
 )
 
+type contextKey string
+const traceIDContextKey contextKey = "traceID"
+
 // RequestID is a middleware that generates a unique ID for each request
 // and adds it to the context and response headers
 func RequestID() gin.HandlerFunc {
@@ -31,6 +36,9 @@ func RequestID() gin.HandlerFunc {
 
 		// Store in context for use in handlers and logs
 		c.Set(RequestIDKey, requestID)
+
+		ctx:=context.WithValue(c.Request.Context(), traceIDContextKey, requestID)
+		c.Request = c.Request.WithContext(ctx)
 
 		// Add to response headers
 		c.Header(RequestIDHeader, requestID)
@@ -48,3 +56,13 @@ func GetRequestID(c *gin.Context) string {
 	}
 	return ""
 }
+
+func GetTraceIDFromContext(ctx context.Context) string {
+
+		if traceID, ok := ctx.Value(traceIDContextKey).(string); ok {
+			return traceID
+		}
+		return ""
+	}
+
+

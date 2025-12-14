@@ -70,7 +70,7 @@ var errorToMessageCode = map[error]string{
 	domain.ErrMessageNotRegistered:    domain.MsgMessageNotRegistered,
 	domain.ErrMessageInactive:         domain.MsgMessageInactive,
 
-// Infrastructure errors (MOD_INFRA_*)
+	// Infrastructure errors (MOD_INFRA_*)
 	domain.ErrKeycloakInconsistentState:  domain.MsgKeycloakInconsistentState,
 	domain.ErrKeycloakUserCreationFailed: domain.MsgKeycloakCreateError,
 	domain.ErrKeycloakCleanupFailed:      domain.MsgKeycloakCleanupError,
@@ -93,14 +93,14 @@ type ErrorResponse struct {
 }
 
 type ErrorHandler struct {
-	cache  *messagingCache.MessageCache
+	cache *messagingCache.MessageCache
 }
 
 var log logger.Logger = logger.NewSlogLogger()
 
 func NewErrorHandler(cache *messagingCache.MessageCache) *ErrorHandler {
 	return &ErrorHandler{
-		cache:  cache,
+		cache: cache,
 	}
 }
 
@@ -110,6 +110,9 @@ func (h *ErrorHandler) Handle() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
+
+			traceID := GetRequestID(c)
+			log := log.WithTraceID(traceID)
 
 			var params []string
 			if validationFields, exists := c.Get("validation_fields"); exists {
