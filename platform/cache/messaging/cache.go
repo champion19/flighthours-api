@@ -204,6 +204,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_P_NOT_FOUND_ERR_00001":  http.StatusNotFound,
 	"MOD_U_GET_ERR_00003":        http.StatusNotFound,
 	"MOD_U_TOKEN_NF_ERR_00007":   http.StatusNotFound,
+	"MOD_M_NOT_FOUND_ERR_00001":  http.StatusNotFound,
 	"GEN_MSG_INACTIVE_ERR_00002": http.StatusServiceUnavailable,
 
 	"MOD_V_VAL_ERR_00001":  http.StatusBadRequest,
@@ -221,7 +222,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_U_TOKEN_EXP_ERR_00008":  http.StatusUnauthorized,
 	"MOD_U_TOKEN_USED_ERR_00009": http.StatusUnauthorized,
 
-  // Infrastructure errors - HTTP 423 (Locked) for dependency failures
+	// Infrastructure errors - HTTP 423 (Locked) for dependency failures
 	"MOD_INFRA_KC_UNAVAIL_ERR_00004": http.StatusLocked, // 423
 	"MOD_INFRA_DB_UNAVAIL_ERR_00005": http.StatusLocked, // 423
 	"MOD_INFRA_DEP_FAIL_ERR_00006":   http.StatusLocked, // 423

@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -47,6 +48,10 @@ func newTestCache(t *testing.T) *messaging.MessageCache {
 	repo := fakeMessageCacheRepo{messages: []cachetypes.CachedMessage{
 		{Code: domain.MsgUserDuplicate, Type: cachetypes.TypeError, Content: "duplicate"},
 		{Code: domain.MsgValFieldRequired, Type: cachetypes.TypeError, Content: "missing ${0}"},
+		{Code: domain.MsgPersonNotFound, Type: cachetypes.TypeError, Content: "person not found"},
+		{Code: domain.MsgMessageNotFound, Type: cachetypes.TypeError, Content: "message not found"},
+		{Code: domain.MsgMessageCodeDuplicate, Type: cachetypes.TypeError, Content: "message code duplicate"},
+		{Code: domain.MsgValIDInvalid, Type: cachetypes.TypeError, Content: "invalid ID"},
 	}}
 	c := messaging.NewMessageCache(repo, 0)
 	if err := c.LoadMessages(context.Background()); err != nil {
@@ -112,5 +117,174 @@ func TestErrorHandler_ValidationFieldsParam(t *testing.T) {
 	}
 	if resp.Message != "missing a, b" {
 		t.Fatalf("expected substituted message, got %q", resp.Message)
+	}
+}
+
+func TestErrorHandler_UnmappedError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cache := newTestCache(t)
+	errHandler := NewErrorHandler(cache)
+
+	r := gin.New()
+	r.Use(errHandler.Handle())
+	r.GET("/", func(c *gin.Context) {
+		c.Error(errors.New("unmapped custom error"))
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected %d got %d", http.StatusInternalServerError, w.Code)
+	}
+
+	var resp ErrorResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if resp.Success {
+		t.Fatal("expected success=false")
+	}
+	if resp.Code != domain.MsgServerError {
+		t.Fatalf("expected code %q got %q", domain.MsgServerError, resp.Code)
+	}
+}
+
+func TestErrorHandler_NoErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cache := newTestCache(t)
+	errHandler := NewErrorHandler(cache)
+
+	r := gin.New()
+	r.Use(errHandler.Handle())
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"ok": true})
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected %d got %d", http.StatusOK, w.Code)
+	}
+}
+
+func TestErrorHandler_SingleFieldValidation(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cache := newTestCache(t)
+	errHandler := NewErrorHandler(cache)
+
+	r := gin.New()
+	r.Use(errHandler.Handle())
+	r.GET("/", func(c *gin.Context) {
+		c.Set("validation_fields", []string{"email"})
+		c.Error(domain.ErrSchemaFieldRequired)
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected %d got %d", http.StatusBadRequest, w.Code)
+	}
+
+	var resp ErrorResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if resp.Message != "missing email" {
+		t.Fatalf("expected 'missing email', got %q", resp.Message)
+	}
+}
+
+func TestErrorHandler_PersonNotFound(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cache := newTestCache(t)
+	errHandler := NewErrorHandler(cache)
+
+	r := gin.New()
+	r.Use(errHandler.Handle())
+	r.GET("/", func(c *gin.Context) {
+		c.Error(domain.ErrPersonNotFound)
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.ServeHTTP(w, req)
+
+	var resp ErrorResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if resp.Success {
+		t.Fatal("expected success=false")
+	}
+	if resp.Code != domain.MsgPersonNotFound {
+		t.Fatalf("expected code %s, got %s", domain.MsgPersonNotFound, resp.Code)
+	}
+}
+
+func TestErrorHandler_MessageErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cache := newTestCache(t)
+	errHandler := NewErrorHandler(cache)
+
+	tests := []struct {
+		name         string
+		err          error
+		expectedCode string
+	}{
+		{"message not found", domain.ErrMessageNotFound, domain.MsgMessageNotFound},
+		{"message code duplicate", domain.ErrMessageCodeDuplicate, domain.MsgMessageCodeDuplicate},
+		{"invalid ID", domain.ErrInvalidID, domain.MsgValIDInvalid},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := gin.New()
+			r.Use(errHandler.Handle())
+			r.GET("/", func(c *gin.Context) {
+				c.Error(tt.err)
+			})
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			r.ServeHTTP(w, req)
+
+			var resp ErrorResponse
+			if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+				t.Fatalf("invalid json: %v", err)
+			}
+			if resp.Success {
+				t.Fatal("expected success=false")
+			}
+			if resp.Code != tt.expectedCode {
+				t.Fatalf("expected code %s, got %s", tt.expectedCode, resp.Code)
+			}
+		})
+	}
+}
+
+func TestErrorHandler_ValidationFieldsNonSlice(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	cache := newTestCache(t)
+	errHandler := NewErrorHandler(cache)
+
+	r := gin.New()
+	r.Use(errHandler.Handle())
+	r.GET("/", func(c *gin.Context) {
+		c.Set("validation_fields", "not a slice")
+		c.Error(domain.ErrSchemaFieldRequired)
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected %d got %d", http.StatusBadRequest, w.Code)
 	}
 }
