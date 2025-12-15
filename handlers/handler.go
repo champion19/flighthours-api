@@ -14,7 +14,6 @@ import (
 type handler struct {
 	EmployeeService   input.Service
 	Interactor        *interactor.Interactor
-	Logger            logger.Logger
 	IDEncoder         *idencoder.HashidsEncoder
 	Response          *middleware.ResponseHandler
 	MessageInteractor *interactor.MessageInteractor
@@ -24,7 +23,6 @@ type handler struct {
 func New(
 	service input.Service,
 	interactor *interactor.Interactor,
-	logger logger.Logger,
 	idEncoder *idencoder.HashidsEncoder,
 	response *middleware.ResponseHandler,
 	messageInteractor *interactor.MessageInteractor,
@@ -32,17 +30,18 @@ func New(
 	return &handler{
 		EmployeeService:   service,
 		Interactor:        interactor,
-		Logger:            logger,
 		IDEncoder:         idEncoder,
 		Response:          response,
 		MessageInteractor: messageInteractor,
 		MessagingCache:    messagingCache,
 	}
 }
+
+var Logger = logger.NewSlogLogger()
 func (h *handler) EncodeID(uuid string) (string, error) {
 	encodedID, err := h.IDEncoder.Encode(uuid)
 	if err != nil {
-		h.Logger.Error(logger.LogMessageIDEncodeError,
+		Logger.Error(logger.LogMessageIDEncodeError,
 			"uuid", uuid,
 			"error", err)
 		return "", err
@@ -55,7 +54,7 @@ func (h *handler) EncodeID(uuid string) (string, error) {
 func (h *handler) DecodeID(encodedID string) (string, error) {
 	uuid, err := h.IDEncoder.Decode(encodedID)
 	if err != nil {
-		h.Logger.Error(logger.LogMessageIDDecodeError,
+		Logger.Error(logger.LogMessageIDDecodeError,
 			"encoded_id", encodedID,
 			"error", err)
 		return "", err
@@ -65,7 +64,7 @@ func (h *handler) DecodeID(encodedID string) (string, error) {
 
 // HandleIDEncodingError maneja errores de ofuscamiento y envía respuesta apropiada
 func (h *handler) HandleIDEncodingError(c *gin.Context, uuid string, err error) {
-	h.Logger.Error(logger.LogMessageIDEncodeError,
+	Logger.Error(logger.LogMessageIDEncodeError,
 		"uuid", uuid,
 		"error", err,
 		"client_ip", c.ClientIP())
@@ -74,7 +73,7 @@ func (h *handler) HandleIDEncodingError(c *gin.Context, uuid string, err error) 
 
 // HandleIDDecodingError maneja errores de desofuscamiento y envía respuesta apropiada
 func (h *handler) HandleIDDecodingError(c *gin.Context, encodedID string, err error) {
-	h.Logger.Error(logger.LogMessageIDDecodeError,
+	Logger.Error(logger.LogMessageIDDecodeError,
 		"encoded_id", encodedID,
 		"error", err,
 		"client_ip", c.ClientIP())

@@ -4,7 +4,9 @@ import (
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/champion19/flighthours-api/middleware"
 )
+
 
 // CreateMessage godoc
 // @Summary Crear un nuevo mensaje del sistema
@@ -20,21 +22,24 @@ import (
 // @Router /messages [post]
 func (h handler) CreateMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		h.Logger.Info(logger.LogMessageCreate,
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		log.Info(logger.LogMessageCreate,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
 
 		var messageRequest MessageRequest
 		if err := c.ShouldBindJSON(&messageRequest); err != nil {
-			h.Logger.Error(logger.LogMiddlewareJSONParseError,
+			log.Error(logger.LogMiddlewareJSONParseError,
 				"error", err,
 				"client_ip", c.ClientIP())
 			c.Error(domain.ErrInvalidJSONFormat)
 			return
 		}
 
-		h.Logger.Info(logger.LogMessageCreateProcessing,
+		log.Info(logger.LogMessageCreateProcessing,
 			"code", messageRequest.Code,
 			"type", messageRequest.Type)
 
@@ -43,7 +48,7 @@ func (h handler) CreateMessage() func(c *gin.Context) {
 
 		result, err := h.MessageInteractor.CreateMessage(c, message)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageCreateError,
+			log.Error(logger.LogMessageCreateError,
 				"code", messageRequest.Code,
 				"error", err,
 				"client_ip", c.ClientIP())
@@ -70,7 +75,7 @@ func (h handler) CreateMessage() func(c *gin.Context) {
 			Links: links,
 		}
 
-		h.Logger.Success("Mensaje creado exitosamente",
+		log.Success("Mensaje creado exitosamente",
 			"id", result.ID,
 			"encoded_id", encodedID,
 			"code", result.Code,
@@ -95,7 +100,10 @@ func (h handler) CreateMessage() func(c *gin.Context) {
 // @Router /messages/{id} [put]
 func (h handler) UpdateMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		h.Logger.Info(logger.LogMessageUpdate,
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		log.Info(logger.LogMessageUpdate,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
@@ -104,7 +112,7 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 		encodedID := c.Param("id")
 		uuid, err := h.IDEncoder.Decode(encodedID)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageInvalidID,
+			log.Error(logger.LogMessageInvalidID,
 				"encoded_id", encodedID,
 				"error", err,
 				"client_ip", c.ClientIP())
@@ -114,14 +122,14 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 
 		var messageRequest MessageRequest
 		if err := c.ShouldBindJSON(&messageRequest); err != nil {
-			h.Logger.Error(logger.LogMiddlewareJSONParseError,
+			log.Error(logger.LogMiddlewareJSONParseError,
 				"error", err,
 				"client_ip", c.ClientIP())
 			c.Error(domain.ErrInvalidJSONFormat)
 			return
 		}
 
-		h.Logger.Info(logger.LogMessageUpdateProcessing,
+		log.Info(logger.LogMessageUpdateProcessing,
 			"id", uuid,
 			"code", messageRequest.Code)
 
@@ -130,7 +138,7 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 
 		result, err := h.MessageInteractor.UpdateMessage(c, message)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageUpdateError,
+			log.Error(logger.LogMessageUpdateError,
 				"id", uuid,
 				"error", err,
 				"client_ip", c.ClientIP())
@@ -146,7 +154,7 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 			Links: links,
 		}
 
-		h.Logger.Success("Mensaje actualizado exitosamente",
+		log.Success("Mensaje actualizado exitosamente",
 			"id", result.ID,
 			"code", result.Code,
 			"client_ip", c.ClientIP())
@@ -168,7 +176,10 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 // @Router /messages/{id} [delete]
 func (h handler) DeleteMessage() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		h.Logger.Info(logger.LogMessageDelete,
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		log.Info(logger.LogMessageDelete,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
@@ -177,7 +188,7 @@ func (h handler) DeleteMessage() func(c *gin.Context) {
 		encodedID := c.Param("id")
 		uuid, err := h.IDEncoder.Decode(encodedID)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageInvalidID,
+			log.Error(logger.LogMessageInvalidID,
 				"encoded_id", encodedID,
 				"error", err,
 				"client_ip", c.ClientIP())
@@ -185,11 +196,11 @@ func (h handler) DeleteMessage() func(c *gin.Context) {
 			return
 		}
 
-		h.Logger.Info(logger.LogMessageDeleteProcessing, "id", uuid)
+		log.Info(logger.LogMessageDeleteProcessing, "id", uuid)
 
 		err = h.MessageInteractor.DeleteMessage(c, uuid)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageDeleteError,
+			log.Error(logger.LogMessageDeleteError,
 				"id", uuid,
 				"error", err,
 				"client_ip", c.ClientIP())
@@ -197,7 +208,7 @@ func (h handler) DeleteMessage() func(c *gin.Context) {
 			return
 		}
 
-		h.Logger.Success("Mensaje eliminado exitosamente",
+		log.Success("Mensaje eliminado exitosamente",
 			"id", uuid,
 			"client_ip", c.ClientIP())
 
@@ -218,7 +229,10 @@ func (h handler) DeleteMessage() func(c *gin.Context) {
 // @Router /messages/{id} [get]
 func (h handler) GetMessageByID() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		h.Logger.Debug(logger.LogMessageGet,
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		log.Debug(logger.LogMessageGet,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
@@ -227,7 +241,7 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 		encodedID := c.Param("id")
 		uuid, err := h.IDEncoder.Decode(encodedID)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageInvalidID,
+			log.Error(logger.LogMessageInvalidID,
 				"encoded_id", encodedID,
 				"error", err,
 				"client_ip", c.ClientIP())
@@ -237,7 +251,7 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 
 		message, err := h.MessageInteractor.GetMessageByID(c, uuid)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageGetError,
+			log.Error(logger.LogMessageGetError,
 				"id", uuid,
 				"error", err,
 				"client_ip", c.ClientIP())
@@ -258,7 +272,7 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 		response.ID = encodedIDForResponse // Use encoded ID in response
 		response.Links = BuildMessageLinks(baseURL, encodedIDForResponse)
 
-		h.Logger.Debug(logger.LogMessageGetOK,
+		log.Debug(logger.LogMessageGetOK,
 			"id", uuid,
 			"code", message.Code,
 			"client_ip", c.ClientIP())
@@ -281,7 +295,10 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 // @Router /messages [get]
 func (h handler) ListMessages() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		h.Logger.Debug(logger.LogMessageList,
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		log.Debug(logger.LogMessageList,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
@@ -307,7 +324,7 @@ func (h handler) ListMessages() func(c *gin.Context) {
 
 		messages, err := h.MessageInteractor.ListMessages(c, filters)
 		if err != nil {
-			h.Logger.Error(logger.LogMessageListError,
+			log.Error(logger.LogMessageListError,
 				"error", err,
 				"client_ip", c.ClientIP())
 			c.Error(err)
@@ -328,7 +345,7 @@ func (h handler) ListMessages() func(c *gin.Context) {
 		}
 		response.Links = BuildMessageListLinks(baseURL)
 
-		h.Logger.Debug(logger.LogMessageListOK,
+		log.Debug(logger.LogMessageListOK,
 			"count", len(messages),
 			"client_ip", c.ClientIP())
 
@@ -346,7 +363,10 @@ func (h handler) ListMessages() func(c *gin.Context) {
 // @Router /messages/reload [post]
 func (h handler) ReloadMessageCache() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		h.Logger.Info("Recargando caché de mensajes",
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		log.Info("Recargando caché de mensajes",
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
@@ -357,7 +377,7 @@ func (h handler) ReloadMessageCache() func(c *gin.Context) {
 		// Recargar el caché desde BD
 		err := h.MessagingCache.ReloadMessages(c.Request.Context())
 		if err != nil {
-			h.Logger.Error("Error al recargar caché de mensajes",
+			log.Error("Error al recargar caché de mensajes",
 				"error", err,
 				"client_ip", c.ClientIP())
 			c.Error(domain.ErrInternalServer)
@@ -374,7 +394,7 @@ func (h handler) ReloadMessageCache() func(c *gin.Context) {
 			Message:     "Caché de mensajes recargado exitosamente desde la base de datos",
 		}
 
-		h.Logger.Success("Caché de mensajes recargado exitosamente",
+		log.Success("Caché de mensajes recargado exitosamente",
 			"before_count", beforeCount,
 			"after_count", afterCount,
 			"client_ip", c.ClientIP())

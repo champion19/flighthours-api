@@ -14,8 +14,11 @@ const (
 	MetricHTTPRequestsTotal   = "flighthours_http_requests_total"
 	MetricHTTPRequestDuration = "flighthours_http_request_duration_seconds"
 	MetricHTTPErrorsTotal     = "flighthours_http_errors_total"
-)
 
+	// Business Metrics
+	MetricUserRegistrationsTotal = "flighthours_user_registrations_total"
+	MetricMessagesCreatedTotal   = "flighthours_messages_created_total"
+)
 
 // ============================================
 // METRIC DESCRIPTIONS
@@ -26,6 +29,9 @@ const (
 	MetricHTTPRequestDurationHelp = "Duration of HTTP requests in seconds"
 	MetricHTTPErrorsTotalHelp     = "Total number of HTTP errors (status >= 400)"
 
+	// Business Metrics Descriptions
+	MetricUserRegistrationsTotalHelp = "Total number of user registrations"
+	MetricMessagesCreatedTotalHelp   = "Total number of messages created"
 )
 
 // ============================================

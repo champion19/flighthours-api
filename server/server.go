@@ -8,18 +8,18 @@ import (
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/champion19/flighthours-api/platform/schema"
+	_ "github.com/champion19/flighthours-api/platform/swaggo"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "github.com/champion19/flighthours-api/platform/swaggo"
 )
 
 func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	dependencies.Logger.Info(logger.LogRouteConfiguring)
 
 	// Endpoint de métricas de Prometheus
-	app.GET("/metrics",gin.WrapH(promhttp.Handler()))
+	app.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Documentación Swagger
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -30,10 +30,17 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	// Apply Prometheus metrics tracking middleware
 	app.Use(middleware.TrackMetrics())
 
-	errorHandler := middleware.NewErrorHandler(dependencies.MessagingCache, dependencies.Logger)
+	errorHandler := middleware.NewErrorHandler(dependencies.MessagingCache)
 	app.Use(errorHandler.Handle())
 
-	handler := handlers.New(dependencies.EmployeeService, dependencies.Interactor, dependencies.Logger, dependencies.IDEncoder, dependencies.ResponseHandler, dependencies.MessageInteractor, dependencies.MessagingCache)
+	handler := handlers.New(
+		dependencies.EmployeeService,
+		dependencies.Interactor,
+		dependencies.IDEncoder,
+		dependencies.ResponseHandler,
+		dependencies.MessageInteractor,
+		dependencies.MessagingCache,
+	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
 	if err != nil {
@@ -43,16 +50,17 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		return
 	}
 	dependencies.Logger.Success(logger.LogRouteValidatorOK)
-	validator := middleware.NewMiddlewareValidator(validators, dependencies.Logger)
+	validator := middleware.NewMiddlewareValidator(validators)
 
 	// Health check endpoint (no authentication required)
 	app.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":  "ok",
-			"service": "motogo-backend",
+			"service": "flighthours-backend",
 		})
 	})
 
+	app.NoRoute(middleware.NotFoundHandler())
 
 	// Rutas públicas (sin autenticación)
 	public := app.Group("flighthours/api/v1")
@@ -93,7 +101,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 func Bootstrap(app *gin.Engine) *dependency.Dependencies {
 	// Inicializar métricas de Prometheus
-	dependencies,err:=dependency.Init()
+	dependencies, err := dependency.Init()
 	if err != nil {
 		slog.Error(logger.LogDepInitError, slog.String("error", err.Error()))
 		panic(err)

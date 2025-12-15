@@ -204,6 +204,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_P_NOT_FOUND_ERR_00001":  http.StatusNotFound,
 	"MOD_U_GET_ERR_00003":        http.StatusNotFound,
 	"MOD_U_TOKEN_NF_ERR_00007":   http.StatusNotFound,
+	"MOD_M_NOT_FOUND_ERR_00001":  http.StatusNotFound,
 	"GEN_MSG_INACTIVE_ERR_00002": http.StatusServiceUnavailable,
 
 	"MOD_V_VAL_ERR_00001":  http.StatusBadRequest,
@@ -221,21 +222,25 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_U_TOKEN_EXP_ERR_00008":  http.StatusUnauthorized,
 	"MOD_U_TOKEN_USED_ERR_00009": http.StatusUnauthorized,
 
-  // Infrastructure errors - HTTP 423 (Locked) for dependency failures
+	// Infrastructure errors - HTTP 423 (Locked) for dependency failures
 	"MOD_INFRA_KC_UNAVAIL_ERR_00004": http.StatusLocked, // 423
 	"MOD_INFRA_DB_UNAVAIL_ERR_00005": http.StatusLocked, // 423
 	"MOD_INFRA_DEP_FAIL_ERR_00006":   http.StatusLocked, // 423
+	"MOD_INFRA_KC_CREATE_ERR_00002": http.StatusLocked, // 423
+	"MOD_INFRA_KC_CLEANUP_ERR_00003": http.StatusLocked, // 423
 
 	// Incomplete registration error - HTTP 409 (Conflict)
 	"MOD_INFRA_INCOMPLETE_REG_ERR_00009": http.StatusConflict, // 409
 
 	//Existing Infrastructure errors - HTTP 500
 	"MOD_INFRA_KC_INCONSISTENT_ERR_00001": http.StatusInternalServerError,
-	"MOD_INFRA_KC_CREATE_ERR_00002":       http.StatusInternalServerError,
-	"MOD_INFRA_KC_CLEANUP_ERR_00003":      http.StatusInternalServerError,
 
 	"GEN_AUTH_ERR_00002":      http.StatusUnauthorized,
 	"GEN_FORBIDDEN_ERR_00003": http.StatusForbidden,
+
+	//Message errors
+	"MOD_M_UPDATE_ERR_00010": http.StatusBadRequest,
+	"MOD_M_NOT_FOUND_ERR_00011": http.StatusNotFound,
 }
 
 // GetHTTPStatus returns the HTTP status for a message code
