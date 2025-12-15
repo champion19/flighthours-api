@@ -1,18 +1,18 @@
 package schema
+
 import (
-	"errors"
 	"io"
 	"os"
 	"path/filepath"
 
-	"github.com/champion19/Flighthours_backend/tools/utils"
+	"github.com/champion19/flighthours-api/tools/utils"
 	"github.com/kaptinlin/jsonschema"
-
 )
 
 type Validators struct {
 	FileReader        FileReaderInterface
 	RegisterValidator *jsonschema.Schema
+	MessageValidator  *jsonschema.Schema
 }
 
 type FileReaderInterface interface {
@@ -48,8 +48,13 @@ func NewValidator(fileReader FileReaderInterface) (*Validators, error) {
 	if err != nil {
 		return nil, err
 	}
+	message, err := validator.createSchema("message_schema.json")
+	if err != nil {
+		return nil, err
+	}
 
 	validator.RegisterValidator = register
+	validator.MessageValidator = message
 
 	return validator, nil
 
@@ -60,17 +65,39 @@ func (v *Validators) createSchema(resourcePath string) (*jsonschema.Schema, erro
 	compiler.AssertFormat = true
 	schemaJSON, err := v.FileReader.ReadJsonSchema(resourcePath)
 	if err != nil {
-		return nil, errors.New("error reading json schema" + err.Error())
+		return nil, ErrSchemaReadFailed
 	}
 
 	if schemaJSON == nil {
-		return nil, errors.New("SchemaJSON is nil or empty")
+		return nil, ErrSchemaEmpty
 	}
 
 	schema, err := compiler.Compile(schemaJSON)
 	if err != nil {
-		return nil, errors.New("error compiling schema" + err.Error())
+		return nil, ErrSchemaCompileFailed
 	}
 
 	return schema, nil
+}
+
+// ValidateRegister validates data against the register person schema
+func (v *Validators) ValidateRegister(data interface{}) error {
+	if v.RegisterValidator == nil {
+		return ErrSchemaEmpty
+	}
+
+	result := v.RegisterValidator.Validate(data)
+	if !result.IsValid() {
+		// Collect all validation errors
+		var errorMessages []string
+		for _, err := range result.Errors {
+			errorMessages = append(errorMessages, err.Message)
+		}
+
+		if len(errorMessages) > 0 {
+			return ErrValidationFailed
+		}
+	}
+
+	return nil
 }

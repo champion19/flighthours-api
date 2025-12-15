@@ -6,29 +6,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 var (
-	ErrInvalidJSONFormat       = errors.New("invalid JSON format")
-	ErrUnmarshalBody           = errors.New("failed to process request body")
-	ErrSchemaValidation        = errors.New("validation failed")
-	ErrInternalServer          = errors.New("internal server error")
-	ErrModuleRootNotFound      = errors.New("could not find module root")
-	ErrSchemaFileNotFound      = errors.New("schema file not found")
-	ErrSchemaFileRead          = errors.New("failed to read schema file")
-	ErrSchemaCompilation       = errors.New("failed to compile JSON schema")
-	ErrSchemaEmpty             = errors.New("JSON schema is empty or null")
-	ErrValidatorInitFailed     = errors.New("validator initialization failed")
-	ErrValidationUserFailed    = errors.New("user validation failed")
-	ErrValidationUserNotFound  = errors.New("user not found")
+	ErrInvalidJSONFormat           = errors.New("invalid JSON format")
+	ErrUnmarshalBody               = errors.New("failed to process request body")
+	ErrSchemaValidation            = errors.New("validation failed")
+	ErrInternalServer              = errors.New("internal server error")
+	ErrModuleRootNotFound          = errors.New("could not find module root")
+	ErrSchemaFileNotFound          = errors.New("schema file not found")
+	ErrSchemaFileRead              = errors.New("failed to read schema file")
+	ErrSchemaCompilation           = errors.New("failed to compile JSON schema")
+	ErrSchemaEmpty                 = errors.New("JSON schema is empty or null")
+	ErrValidatorInitFailed         = errors.New("validator initialization failed")
+	ErrValidationUserFailed        = errors.New("user validation failed")
+	ErrValidationUserNotFound      = errors.New("user not found")
 	ErrValidationUserAlreadyExists = errors.New("user already exists")
+	ErrDBQueryFailed               = errors.New("database query failed")
 )
-
-type ErrorResponser struct {
-message string
-code int
-
-}
-
 
 func ValidateError(c *gin.Context, err error, details interface{}, statusCode int) {
 	if details == nil {
@@ -50,7 +43,6 @@ func ValidateError(c *gin.Context, err error, details interface{}, statusCode in
 	}
 
 	fieldErrors := make(map[string]string)
-
 
 	if detailsList, exists := detailsMap["details"].([]interface{}); exists {
 		for _, item := range detailsList {

@@ -6,7 +6,9 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"github.com/champion19/Flighthours_backend/tools/utils"
+
+	"github.com/champion19/flighthours-api/platform/logger"
+	"github.com/champion19/flighthours-api/tools/utils"
 )
 
 type Config struct {
@@ -16,6 +18,7 @@ type Config struct {
 	Resend       Resend         `json:"resend"`
 	Verification Verification   `json:"verification"`
 	Keycloak     KeycloakConfig `json:"keycloak"`
+	IDEncoder    IDEncoderConfig `json:"id_encoder"`
 }
 
 type Verification struct {
@@ -23,13 +26,17 @@ type Verification struct {
 }
 
 type Database struct {
-	Driver   string `json:"driver"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
-	SSL      string `json:"ssl,omitempty"`
+	Driver          string `json:"driver"`
+	Host            string `json:"host"`
+	Port            string `json:"port"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	Name            string `json:"name"`
+	SSL             string `json:"ssl,omitempty"`
+	MaxOpenConns    int    `json:"max_open_conns,omitempty"`
+	MaxIdleConns    int    `json:"max_idle_conns,omitempty"`
+	ConnMaxLifetime int    `json:"conn_max_lifetime,omitempty"`
+	ConnMaxIdleTime int    `json:"conn_max_idle_time,omitempty"`
 }
 
 type Server struct {
@@ -49,6 +56,11 @@ type KeycloakConfig struct {
 	ClientSecret string `json:"client_secret"`
 	AdminUser    string `json:"admin_user"`
 	AdminPass    string `json:"admin_pass"`
+}
+
+type IDEncoderConfig struct {
+	Secret    string `json:"secret"`
+	MinLength int    `json:"min_length"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -73,7 +85,7 @@ func LoadConfig() (*Config, error) {
 	configPath := filepath.Join(root, "config", configFile)
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		slog.Warn("Config file not found, falling back to default",
+		slog.Warn(logger.LogConfigFileNotFound,
 			slog.String("requested_file", configFile),
 			slog.String("fallback_file", "local-config.json"))
 		configPath = filepath.Join(root, "config", "local-config.json")
@@ -110,7 +122,7 @@ func LoadConfig() (*Config, error) {
 		config.Keycloak.AdminPass = adminPass
 	}
 
-	slog.Info("Configuration loaded successfully",
+	slog.Info(logger.LogAppConfigLoaded,
 		slog.String("config_file", configFile),
 		slog.String("environment", config.Environment),
 		slog.String("config_path", configPath),
@@ -144,14 +156,12 @@ func (c *Config) IsProduction() bool {
 	return c.Environment == "production" || c.Environment == "railway"
 }
 
-// Helper para obtener la URL completa del auth endpoint de Keycloak
 func (c *Config) GetKeycloakAuthURL() string {
 	return fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token",
 		c.Keycloak.ServerURL,
 		c.Keycloak.Realm)
 }
 
-// Helper para obtener la URL del admin API
 func (c *Config) GetKeycloakAdminURL() string {
 	return fmt.Sprintf("%s/admin/realms/%s",
 		c.Keycloak.ServerURL,

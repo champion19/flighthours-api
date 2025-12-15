@@ -22,8 +22,8 @@
     "identificationnumber": {
       "type": "string",
       "description": "Identity document number (ID card, passport, DNI, etc.)",
-      "maxLength": 20,
-      "minLength": 1
+      "maxLength": 10,
+      "minLength": 7
     },
     "start_date": {
       "type": "string",
@@ -39,7 +39,9 @@
     "type": "string",
     "description": "Role of the person",
     "maxLength": 10,
-    "minLength": 1
+    "minLength": 1,
+    "enum": ["pilot"],
+    "errorMessage": "the proposed role is invalid.it must be pilot"
   }
   },
   "required": [

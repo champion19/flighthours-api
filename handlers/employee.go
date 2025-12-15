@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"time"
 
-	domain "github.com/champion19/Flighthours_backend/core/domain"
+	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
 )
 
 type EmployeeRequest struct {
@@ -12,7 +12,6 @@ type EmployeeRequest struct {
 	Airline              string `json:"airline"`
 	Email                string `json:"email"`
 	Password             string `json:"password"`
-	Emailconfirmed       bool   `json:"emailconfirmed"`
 	IdentificationNumber string `json:"identificationNumber"`
 	Bp                   string `json:"bp"`
 	StartDate            string `json:"start_date"`
@@ -26,27 +25,35 @@ type EmployeeResponse struct {
 	Name                 string    `json:"name"`
 	Airline              string    `json:"airline,omitempty"`
 	Email                string    `json:"email"`
-	Emailconfirmed       bool      `json:"emailconfirmed"`
 	IdentificationNumber string    `json:"identification_number"`
 	Bp                   string    `json:"bp,omitempty"`
 	StartDate            time.Time `json:"start_date"`
 	EndDate              time.Time `json:"end_date"`
 	Active               bool      `json:"active"`
 	Role                 string    `json:"role,omitempty"`
-	KeycloakUserID       string    `json:"keycloak_user_id,omitempty"`
 }
 
 type RegisterEmployeeResponse struct {
-	User         EmployeeResponse `json:"user"`
-	AccessToken  string           `json:"access_token"`
-	RefreshToken string           `json:"refresh_token"`
-	ExpiresIn    int              `json:"expires_in"`
-	TokenType    string           `json:"token_type"`
+	
+	Message string           `json:"message"`
+	Links   []Link           `json:"_links"`
 }
 
 type ResponseEmail struct {
 	Title   string
 	Content template.HTML
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	TokenType    string `json:"token_type"`
 }
 
 func (e EmployeeRequest) ToDomain() domain.Employee {
@@ -70,7 +77,6 @@ func (e EmployeeRequest) ToDomain() domain.Employee {
 		Airline:              e.Airline,
 		Email:                e.Email,
 		Password:             e.Password,
-		Emailconfirmed:       e.Emailconfirmed,
 		IdentificationNumber: e.IdentificationNumber,
 		Bp:                   e.Bp,
 		StartDate:            startDate,
