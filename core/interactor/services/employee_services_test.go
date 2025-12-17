@@ -86,6 +86,9 @@ func (fakeKeycloak) GetUserRoles(context.Context, string) ([]*gocloak.Role, erro
 func (fakeKeycloak) SendVerificationEmail(context.Context, string) error {
 	return errors.New("not implemented")
 }
+func (fakeKeycloak) SendPasswordResetEmail(context.Context, string) error {
+	return errors.New("not implemented")
+}
 func (fakeKeycloak) VerifyEmail(context.Context, string) error { return errors.New("not implemented") }
 func (fakeKeycloak) Logout(context.Context, string) error      { return errors.New("not implemented") }
 func (fakeKeycloak) RefreshToken(context.Context, string) (*gocloak.JWT, error) {

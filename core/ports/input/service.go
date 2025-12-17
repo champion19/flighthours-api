@@ -14,18 +14,20 @@ type Service interface {
 	//employee-validaciones y consultas
 	RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error)
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
-  GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
+	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
 	LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error)
 	CheckAndCleanInconsistentState(ctx context.Context, email string) error
 
 	//employee- operaciones transaccionales de BD
 	SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error
-  UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error
+	UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error
 
 	//employee-operaciones de keycloak
 	CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error)
 	SetUserPassword(ctx context.Context, userID string, password string) error
 	AssignUserRole(ctx context.Context, userID string, role string) error
+	SendVerificationEmail(ctx context.Context, userID string) error
+	SendPasswordResetEmail(ctx context.Context, email string) error
 
 	//employee- compensaciones (rollback)
 	RollbackEmployee(ctx context.Context, employeeID string) error

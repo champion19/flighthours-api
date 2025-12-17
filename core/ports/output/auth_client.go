@@ -22,6 +22,7 @@ type AuthClient interface {
 	GetUserRoles(ctx context.Context, userID string) ([]*gocloak.Role, error)
 
 	SendVerificationEmail(ctx context.Context, userID string) error
+	SendPasswordResetEmail(ctx context.Context, userID string) error
 	VerifyEmail(ctx context.Context, userID string) error
 
 	Logout(ctx context.Context, refreshToken string) error

@@ -13,18 +13,15 @@ import (
 	"github.com/kaptinlin/jsonschema"
 )
 
-
 type Builder struct {
 	Validators *json_schema.Validators
 	isLogin    bool
-
 }
 
 func NewMiddlewareValidator(validators *json_schema.Validators) *Builder {
 
 	return &Builder{
 		Validators: validators,
-
 	}
 }
 
@@ -35,7 +32,12 @@ func (b *Builder) WithValidateRegister() gin.HandlerFunc {
 func (b *Builder) WithValidateMessage() gin.HandlerFunc {
 	return b.jsonValidator(b.Validators.MessageValidator)
 }
-
+func (b *Builder) WithValidateResendVerificationEmail() gin.HandlerFunc {
+	return b.jsonValidator(b.Validators.ResendVerificationEmailValidator)
+}
+func (b *Builder) WithValidatePasswordResetRequest() gin.HandlerFunc {
+	return b.jsonValidator(b.Validators.PasswordResetRequestValidator)
+}
 
 func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -135,7 +137,6 @@ func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 		if log != nil {
 			log.Debug(logger.LogMiddlewareValidationOK, "path", c.Request.URL.Path)
 		}
-
 
 		c.Next()
 	}

@@ -49,6 +49,12 @@ func (f *fakeServiceForReadOnly) SetUserPassword(context.Context, string, string
 func (f *fakeServiceForReadOnly) AssignUserRole(context.Context, string, string) error {
 	return nil
 }
+func (f *fakeServiceForReadOnly) SendVerificationEmail(context.Context, string) error {
+	return nil
+}
+func (f *fakeServiceForReadOnly) SendPasswordResetEmail(context.Context, string) error {
+	return nil
+}
 func (f *fakeServiceForReadOnly) RollbackEmployee(context.Context, string) error {
 	return nil
 }

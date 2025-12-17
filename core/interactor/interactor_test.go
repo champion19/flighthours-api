@@ -95,6 +95,12 @@ func (f *fakeService) SetUserPassword(ctx context.Context, userID string, passwo
 func (f *fakeService) AssignUserRole(ctx context.Context, userID string, role string) error {
 	return f.assignRoleFn(ctx, userID, role)
 }
+func (f *fakeService) SendVerificationEmail(context.Context, string) error {
+	return nil
+}
+func (f *fakeService) SendPasswordResetEmail(context.Context, string) error {
+	return nil
+}
 func (f *fakeService) RollbackEmployee(context.Context, string) error {
 	return errors.New("not implemented")
 }

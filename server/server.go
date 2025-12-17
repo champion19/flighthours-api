@@ -74,6 +74,10 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		//public.POST("/login", handler.LoginEmployee())
 		//public.GET("/user/email/:email", handler.GetEmployeeByEmail())
 
+		// Email verification and password reset
+		public.POST("/auth/resend-verification", validator.WithValidateResendVerificationEmail(), handler.ResendVerificationEmail())
+		public.POST("/auth/password-reset", validator.WithValidatePasswordResetRequest(), handler.RequestPasswordReset())
+
 		public.POST("/messages", validator.WithValidateMessage(), handler.CreateMessage())
 
 		// PUT /messages/:id - Actualizar mensaje existente

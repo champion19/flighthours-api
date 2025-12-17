@@ -34,9 +34,8 @@ type EmployeeResponse struct {
 }
 
 type RegisterEmployeeResponse struct {
-	
-	Message string           `json:"message"`
-	Links   []Link           `json:"_links"`
+	Message string `json:"message"`
+	Links   []Link `json:"_links"`
 }
 
 type ResponseEmail struct {
@@ -54,6 +53,24 @@ type LoginResponse struct {
 	RefreshToken string `json:"refresh_token"`
 	ExpiresIn    int    `json:"expires_in"`
 	TokenType    string `json:"token_type"`
+}
+
+type ResendVerificationEmailRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type ResendVerificationEmailResponse struct {
+	Message string          `json:"message"`
+	Links   map[string]Link `json:"_links"`
+}
+
+type PasswordResetRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type PasswordResetResponse struct {
+	Message string          `json:"message"`
+	Links   map[string]Link `json:"_links"`
 }
 
 func (e EmployeeRequest) ToDomain() domain.Employee {

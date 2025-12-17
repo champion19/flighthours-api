@@ -67,6 +67,8 @@ func (f *fakeService) CreateUserInKeycloak(context.Context, *domain.Employee) (s
 }
 func (f *fakeService) SetUserPassword(context.Context, string, string) error { return nil }
 func (f *fakeService) AssignUserRole(context.Context, string, string) error  { return nil }
+func (f *fakeService) SendVerificationEmail(context.Context, string) error   { return nil }
+func (f *fakeService) SendPasswordResetEmail(context.Context, string) error  { return nil }
 func (f *fakeService) RollbackEmployee(context.Context, string) error        { return nil }
 func (f *fakeService) RollbackKeycloakUser(context.Context, string) error    { return nil }
 
@@ -101,6 +103,8 @@ func (f *fakeServiceErr) CreateUserInKeycloak(context.Context, *domain.Employee)
 }
 func (f *fakeServiceErr) SetUserPassword(context.Context, string, string) error { return nil }
 func (f *fakeServiceErr) AssignUserRole(context.Context, string, string) error  { return nil }
+func (f *fakeServiceErr) SendVerificationEmail(context.Context, string) error   { return nil }
+func (f *fakeServiceErr) SendPasswordResetEmail(context.Context, string) error  { return nil }
 func (f *fakeServiceErr) RollbackEmployee(context.Context, string) error        { return nil }
 func (f *fakeServiceErr) RollbackKeycloakUser(context.Context, string) error    { return nil }
 

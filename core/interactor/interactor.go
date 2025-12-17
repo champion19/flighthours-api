@@ -8,7 +8,6 @@ import (
 	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
-	
 )
 
 type Interactor struct {
@@ -134,6 +133,19 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	}
 	log.Success(logger.LogEmployeeInteractorCommit_OK)
 
+	// Paso 9: Enviar email de verificación
+	log.Info(logger.LogKeycloakSendVerificationEmail, "keycloak_user_id", keycloakUserID)
+	if err = i.service.SendVerificationEmail(ctx, keycloakUserID); err != nil {
+		// No retornar error, solo loguear advertencia
+		// El usuario ya está creado, el email se puede reenviar después
+		log.Warn(logger.LogKeycloakSendVerificationEmailError,
+			"keycloak_user_id", keycloakUserID,
+			"error", err,
+			"note", "User created successfully, but email verification failed. User can request resend.")
+	} else {
+		log.Success(logger.LogKeycloakSendVerificationEmailOK, "keycloak_user_id", keycloakUserID)
+	}
+
 	employee.KeycloakUserID = keycloakUserID
 	result.Employee = employee
 	result.Message = "user registered successfully"
@@ -155,4 +167,55 @@ func (i *Interactor) Locate(ctx context.Context, id string) (*dto.RegisterEmploy
 		return nil, err
 	}
 	return result, nil
+}
+
+func (i *Interactor) ResendVerificationEmail(ctx context.Context, email string) error {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogKeycloakSearchUserByEmail, "email", email)
+
+	// Buscar empleado por email en la base de datos
+	employee, err := i.service.GetEmployeeByEmail(ctx, email)
+	if err != nil {
+		log.Error(logger.LogEmployeeGetByEmailError, "email", email, "error", err)
+		return err
+	}
+
+	if employee == nil {
+		log.Error(logger.LogEmployeeNotFound, "email", email)
+		return domain.ErrPersonNotFound
+	}
+
+	if employee.KeycloakUserID == "" {
+		log.Error(logger.LogKeycloakUserIDEmpty, "email", email, "employee_id", employee.ID)
+		return domain.ErrKeycloakInconsistentState
+	}
+
+	log.Success(logger.LogKeycloakSearchUserByEmailOK, "email", email, "keycloak_user_id", employee.KeycloakUserID)
+
+	// Enviar email de verificación
+	if err = i.service.SendVerificationEmail(ctx, employee.KeycloakUserID); err != nil {
+		log.Error(logger.LogKeycloakSendVerificationEmailError, "email", email, "error", err)
+		return err
+	}
+
+	log.Success(logger.LogKeycloakSendVerificationEmailOK, "email", email)
+	return nil
+}
+
+func (i *Interactor) RequestPasswordReset(ctx context.Context, email string) error {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogKeycloakSendPasswordReset, "email", email)
+
+	// Llamar al servicio que busca el usuario y envía el email
+	if err := i.service.SendPasswordResetEmail(ctx, email); err != nil {
+		log.Error(logger.LogKeycloakSendPasswordResetError, "email", email, "error", err)
+		return err
+	}
+
+	log.Success(logger.LogKeycloakSendPasswordResetOK, "email", email)
+	return nil
 }

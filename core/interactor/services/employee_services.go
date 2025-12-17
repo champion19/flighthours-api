@@ -121,7 +121,7 @@ func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee)
 func (s service) SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error {
 	err := s.repository.Save(ctx, tx, employee)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeSaveError,employee.ToLogger(), "error", err)
+		s.logger.Error(logger.LogEmployeeSaveError, employee.ToLogger(), "error", err)
 		return err
 	}
 	return nil
@@ -147,7 +147,7 @@ func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Empl
 func (s service) SetUserPassword(ctx context.Context, userID string, password string) error {
 	err := s.keycloak.SetPassword(ctx, userID, password, true)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakPasswordSetError,"keycloak_user_id", userID, "error", err)
+		s.logger.Error(logger.LogKeycloakPasswordSetError, "keycloak_user_id", userID, "error", err)
 		return err
 	}
 	return nil
@@ -156,16 +156,57 @@ func (s service) SetUserPassword(ctx context.Context, userID string, password st
 func (s service) AssignUserRole(ctx context.Context, userID string, role string) error {
 	err := s.keycloak.AssignRole(ctx, userID, role)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakRoleAssignError, "keycloak_user_id", userID,"role", role, "error", err)
+		s.logger.Error(logger.LogKeycloakRoleAssignError, "keycloak_user_id", userID, "role", role, "error", err)
 		return err
 	}
+	return nil
+}
+
+func (s service) SendVerificationEmail(ctx context.Context, userID string) error {
+	s.logger.Info(logger.LogKeycloakSendVerificationEmail, "keycloak_user_id", userID)
+
+	err := s.keycloak.SendVerificationEmail(ctx, userID)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakSendVerificationEmailError, "keycloak_user_id", userID, "error", err)
+		return err
+	}
+
+	s.logger.Success(logger.LogKeycloakSendVerificationEmailOK, "keycloak_user_id", userID)
+	return nil
+}
+
+func (s service) SendPasswordResetEmail(ctx context.Context, email string) error {
+	s.logger.Info(logger.LogKeycloakSearchUserByEmail, "email", email)
+
+	// Buscar usuario por email
+	user, err := s.keycloak.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
+		return domain.ErrNotFoundUserByEmail
+	}
+
+	if user == nil || user.ID == nil {
+		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email)
+		return domain.ErrNotFoundUserByEmail
+	}
+
+	s.logger.Success(logger.LogKeycloakSearchUserByEmailOK, "email", email, "keycloak_user_id", *user.ID)
+
+	// Enviar email de reset
+	err = s.keycloak.SendPasswordResetEmail(ctx, *user.ID)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakSendPasswordResetError, "email", email, "keycloak_user_id", *user.ID, "error", err)
+		return err
+	}
+
+	s.logger.Success(logger.LogKeycloakSendPasswordResetOK, "email", email, "keycloak_user_id", *user.ID)
 	return nil
 }
 
 func (s service) UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error {
 	err := s.repository.PatchEmployee(ctx, tx, employeeID, keycloakUserID)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeUpdateKeycloakIDError,"employee_id", employeeID, "error", err)
+		s.logger.Error(logger.LogEmployeeUpdateKeycloakIDError, "employee_id", employeeID, "error", err)
 		return err
 	}
 	return nil
@@ -174,7 +215,7 @@ func (s service) UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, emp
 func (s service) RollbackEmployee(ctx context.Context, employeeID string) error {
 	err := s.repository.DeleteEmployee(ctx, nil, employeeID)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeDeleteError,"employee_id", employeeID, "error", err)
+		s.logger.Error(logger.LogEmployeeDeleteError, "employee_id", employeeID, "error", err)
 		return err
 	}
 	return nil
@@ -183,7 +224,7 @@ func (s service) RollbackEmployee(ctx context.Context, employeeID string) error 
 func (s service) RollbackKeycloakUser(ctx context.Context, KeycloakUserID string) error {
 	err := s.keycloak.DeleteUser(ctx, KeycloakUserID)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakUserDeleteError,"keycloak_user_id", KeycloakUserID, "error", err)
+		s.logger.Error(logger.LogKeycloakUserDeleteError, "keycloak_user_id", KeycloakUserID, "error", err)
 		return err
 	}
 	return nil
