@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"html/template"
 	"time"
 
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
@@ -30,17 +29,11 @@ type EmployeeResponse struct {
 	StartDate            time.Time `json:"start_date"`
 	EndDate              time.Time `json:"end_date"`
 	Active               bool      `json:"active"`
-	Role                 string    `json:"role,omitempty"`
+	Role                 string    `json:"role"`
 }
 
 type RegisterEmployeeResponse struct {
-	Message string `json:"message"`
 	Links   []Link `json:"_links"`
-}
-
-type ResponseEmail struct {
-	Title   string
-	Content template.HTML
 }
 
 type LoginRequest struct {
@@ -54,23 +47,27 @@ type LoginResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	TokenType    string `json:"token_type"`
 }
-
+// ResendVerificationEmailRequest - DTO para reenviar email de verificación
 type ResendVerificationEmailRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
-type ResendVerificationEmailResponse struct {
-	Message string          `json:"message"`
-	Links   map[string]Link `json:"_links"`
-}
-
+// PasswordResetRequest - DTO para solicitar recuperación de contraseña
 type PasswordResetRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
-type PasswordResetResponse struct {
-	Message string          `json:"message"`
-	Links   map[string]Link `json:"_links"`
+
+// VerifyEmailRequest - DTO para verificar email mediante token proxy
+// Este token es un JWT que contiene el email del usuario
+type verifyEmailRequest struct {
+	Token string `json:"token" binding:"required"`
+}
+
+// VerifyEmailResponse - Respuesta de verificación de email
+type verifyEmailResponse struct {
+	Verified bool `json:"verified"`
+	Email    string `json:"email,omitempty"`
 }
 
 func (e EmployeeRequest) ToDomain() domain.Employee {

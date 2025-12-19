@@ -3,10 +3,12 @@ package services
 import (
 	"context"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/input"
 	"github.com/champion19/flighthours-api/core/ports/output"
+	"github.com/champion19/flighthours-api/platform/jwt"
 	"github.com/champion19/flighthours-api/platform/logger"
 )
 
@@ -23,22 +25,25 @@ func NewService(repository output.Repository, keycloak output.AuthClient, logger
 		logger:     logger,
 	}
 }
-
 func (s service) GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error) {
+	s.logger.Debug(logger.LogEmployeeServiceSearchByEmail, "email", email)
 	employee, err := s.repository.GetEmployeeByEmail(ctx, email)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeGetByEmailError, "error", err)
+		s.logger.Error(logger.LogEmployeeServiceErrorByEmail, "email", email, "error", err)
 		return nil, err
 	}
+	s.logger.Debug(logger.LogEmployeeServiceFoundByEmail, "email", email,"employee_id", employee.ID)
 	return employee, nil
 }
 
 func (s service) GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error) {
+	s.logger.Debug(logger.LogEmployeeServiceSearchByID, "employee_id", id)
 	employee, err := s.repository.GetEmployeeByID(ctx, id)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeGetByIDError, "error", err)
+		s.logger.Error(logger.LogEmployeeServiceErrorByID, "employee_id", id, "error", err)
 		return nil, err
 	}
+	s.logger.Debug(logger.LogEmployeeServiceFoundByID, "employee_id", id,"email", employee.Email)
 	return employee, nil
 }
 
@@ -119,15 +124,18 @@ func (s service) RegisterEmployee(ctx context.Context, employee domain.Employee)
 }
 
 func (s service) SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error {
+	s.logger.Info(logger.LogEmployeeServiceSavingToDB, employee.ToLogger())
 	err := s.repository.Save(ctx, tx, employee)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeSaveError, employee.ToLogger(), "error", err)
+		s.logger.Error(logger.LogEmployeeServiceSaveError, employee.ToLogger(), "error", err)
 		return err
 	}
+	s.logger.Success(logger.LogEmployeeServiceSavedToDB, employee.ToLogger())
 	return nil
 }
 
 func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error) {
+	s.logger.Info(logger.LogEmployeeServiceCreatingKeycloak, employee.ToLogger())
 	keycloakUserID, err := s.keycloak.CreateUser(ctx, employee)
 	if err != nil {
 		if isConnectionError(err) || isTimeoutError(err) {
@@ -145,107 +153,59 @@ func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Empl
 }
 
 func (s service) SetUserPassword(ctx context.Context, userID string, password string) error {
+	s.logger.Debug(logger.LogEmployeeServicePasswordSet, "keycloak_user_id", userID)
 	err := s.keycloak.SetPassword(ctx, userID, password, true)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakPasswordSetError, "keycloak_user_id", userID, "error", err)
+		s.logger.Error(logger.LogEmployeeServicePasswordError, "keycloak_user_id", userID, "error", err)
 		return err
 	}
+
+	s.logger.Success(logger.LogEmployeeServicePasswordSetOK, "keycloak_user_id", userID)
 	return nil
 }
 
 func (s service) AssignUserRole(ctx context.Context, userID string, role string) error {
+	s.logger.Info(logger.LogEmployeeServiceRoleAssigning, "keycloak_user_id", userID, "role", role)
 	err := s.keycloak.AssignRole(ctx, userID, role)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakRoleAssignError, "keycloak_user_id", userID, "role", role, "error", err)
+		s.logger.Error(logger.LogEmployeeServiceRoleError, "keycloak_user_id", userID, "role", role, "error", err)
 		return err
 	}
-	return nil
-}
-
-func (s service) SendVerificationEmail(ctx context.Context, userID string) error {
-	s.logger.Info(logger.LogKeycloakSendVerificationEmail, "keycloak_user_id", userID)
-
-	err := s.keycloak.SendVerificationEmail(ctx, userID)
-	if err != nil {
-		s.logger.Error(logger.LogKeycloakSendVerificationEmailError, "keycloak_user_id", userID, "error", err)
-		return err
-	}
-
-	s.logger.Success(logger.LogKeycloakSendVerificationEmailOK, "keycloak_user_id", userID)
-	return nil
-}
-
-func (s service) SendPasswordResetEmail(ctx context.Context, email string) error {
-	s.logger.Info(logger.LogKeycloakSearchUserByEmail, "email", email)
-
-	// Buscar usuario por email
-	user, err := s.keycloak.GetUserByEmail(ctx, email)
-	if err != nil {
-		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
-		return domain.ErrNotFoundUserByEmail
-	}
-
-	if user == nil || user.ID == nil {
-		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email)
-		return domain.ErrNotFoundUserByEmail
-	}
-
-	s.logger.Success(logger.LogKeycloakSearchUserByEmailOK, "email", email, "keycloak_user_id", *user.ID)
-
-	// Enviar email de reset
-	err = s.keycloak.SendPasswordResetEmail(ctx, *user.ID)
-	if err != nil {
-		s.logger.Error(logger.LogKeycloakSendPasswordResetError, "email", email, "keycloak_user_id", *user.ID, "error", err)
-		return err
-	}
-
-	s.logger.Success(logger.LogKeycloakSendPasswordResetOK, "email", email, "keycloak_user_id", *user.ID)
+	s.logger.Success(logger.LogEmployeeServiceRoleAssigned, "keycloak_user_id", userID, "role", role)
 	return nil
 }
 
 func (s service) UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error {
+	s.logger.Debug(logger.LogEmployeeServiceKeycloakIDUpdate, "employee_id", employeeID, "keycloak_user_id", keycloakUserID)
 	err := s.repository.PatchEmployee(ctx, tx, employeeID, keycloakUserID)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeUpdateKeycloakIDError, "employee_id", employeeID, "error", err)
+		s.logger.Error(logger.LogEmployeeServiceKeycloakIDUpdateError, "employee_id", employeeID, "error", err)
 		return err
 	}
+	s.logger.Success(logger.LogEmployeeServiceKeycloakIDUpdated, "employee_id", employeeID, "keycloak_user_id", keycloakUserID)
 	return nil
 }
 
 func (s service) RollbackEmployee(ctx context.Context, employeeID string) error {
+	s.logger.Warn(logger.LogEmployeeServiceRollbackEmployee, "employee_id", employeeID)
 	err := s.repository.DeleteEmployee(ctx, nil, employeeID)
 	if err != nil {
-		s.logger.Error(logger.LogEmployeeDeleteError, "employee_id", employeeID, "error", err)
+		s.logger.Error(logger.LogEmployeeServiceRollbackEmployeeError, "employee_id", employeeID, "error", err)
 		return err
 	}
+	s.logger.Info(logger.LogEmployeeServiceRollbackEmployeeComplete, "employee_id", employeeID)
 	return nil
 }
 
 func (s service) RollbackKeycloakUser(ctx context.Context, KeycloakUserID string) error {
+	s.logger.Warn(logger.LogEmployeeServiceRollbackKeycloak, "keycloak_user_id", KeycloakUserID)
 	err := s.keycloak.DeleteUser(ctx, KeycloakUserID)
 	if err != nil {
-		s.logger.Error(logger.LogKeycloakUserDeleteError, "keycloak_user_id", KeycloakUserID, "error", err)
+		s.logger.Error(logger.LogEmployeeServiceRollbackKeycloakError, "keycloak_user_id", KeycloakUserID, "error", err)
 		return err
 	}
+	s.logger.Info(logger.LogEmployeeServiceRollbackKeycloakComplete, "keycloak_user_id", KeycloakUserID)
 	return nil
-}
-
-func (s service) LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
-	employee, err := s.repository.GetEmployeeByID(ctx, id)
-	if err != nil {
-		s.logger.Error(logger.LogEmployeeGetByIDError, "error", err)
-		return nil, err
-	}
-
-	if employee == nil {
-		s.logger.Warn(logger.LogEmployeeNotFound, "id", id)
-		return nil, domain.ErrPersonNotFound
-	}
-
-	return &dto.RegisterEmployee{
-		Employee: *employee,
-		Message:  "Employee located successfully",
-	}, nil
 }
 
 func (s service) CheckAndCleanInconsistentState(ctx context.Context, email string) error {
@@ -286,7 +246,6 @@ func (s service) CheckAndCleanInconsistentState(ctx context.Context, email strin
 			}
 			return "N/A"
 		}())
-
 	// User exists only in Keycloak - clean it
 	if !dbExists && kcExists {
 		s.logger.Info(logger.LogEmployeeServiceCleaningOrphan,
@@ -316,14 +275,14 @@ func (s service) CheckAndCleanInconsistentState(ctx context.Context, email strin
 		s.logger.Info(logger.LogEmployeeServiceCleaningOrphan,
 			"email", email,
 			"source", "database",
-			"person_id", employeeInDB.ID,
+			"employee_id", employeeInDB.ID,
 			"reason", "missing in Keycloak")
 
 		if err := s.repository.DeleteEmployee(ctx, nil, employeeInDB.ID); err != nil {
 			s.logger.Error(logger.LogEmployeeServiceOrphanCleanError,
 				"email", email,
 				"source", "database",
-				"person_id", employeeInDB.ID,
+				"employee_id", employeeInDB.ID,
 				"error", err)
 			return domain.ErrKeycloakCleanupFailed
 		}
@@ -337,7 +296,6 @@ func (s service) CheckAndCleanInconsistentState(ctx context.Context, email strin
 
 	return nil
 }
-
 func isConnectionError(err error) bool {
 	if err == nil {
 		return false
@@ -387,4 +345,109 @@ func contains(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+func (s service) GetUserByEmail(ctx context.Context, email string) (*gocloak.User, error) {
+	s.logger.Debug(logger.LogKeycloakSearchUserByEmail, "email", email)
+	user, err := s.keycloak.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
+		return nil, err
+	}
+	s.logger.Debug(logger.LogKeycloakSearchUserByEmailOK, "email", email, "user_id", *user.ID)
+	return user, nil
+}
+
+func (s service) SendVerificationEmail(ctx context.Context, userID string) error {
+	s.logger.Debug(logger.LogKeycloakSendVerificationEmail, "user_id", userID)
+
+	err := s.keycloak.SendVerificationEmail(ctx, userID)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakSendVerificationEmailError, "user_id", userID, "error", err)
+		return err
+	}
+	s.logger.Success(logger.LogKeycloakSendVerificationEmailOK, "user_id", userID)
+	return nil
+}
+
+func (s service) SendPasswordResetEmail(ctx context.Context, email string) error {
+	s.logger.Debug(logger.LogKeycloakSendPasswordReset, "email", email)
+
+	err := s.keycloak.SendPasswordResetEmail(ctx, email)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakSendPasswordResetError, "email", email, "error", err)
+		return err
+	}
+
+	s.logger.Success(logger.LogKeycloakSendPasswordResetOK, "email", email)
+	return nil
+}
+
+// Login authenticates a user with email and password
+func (s service) Login(ctx context.Context, email, password string) (*gocloak.JWT, error) {
+	s.logger.Debug(logger.LogKeycloakUserLogin, "email", email)
+	token, err := s.keycloak.LoginUser(ctx, email, password)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakUserLoginError, "email", email, "error", err)
+		return nil, err
+	}
+	s.logger.Success(logger.LogKeycloakUserLoginOK, "email", email)
+	return token, nil
+}
+
+// VerifyEmailByToken receives a JWT token, extracts the email, and marks it as verified in Keycloak
+// This is called when a user clicks on the verification link from the email
+// Returns the extracted email on success
+func (s service) VerifyEmailByToken(ctx context.Context, token string) (string, error) {
+	s.logger.Info(logger.LogKeycloakEmailVerify)
+
+	// Extract email from the JWT token
+	tokenParser := jwt.NewTokenParser()
+	email, err := tokenParser.ExtractEmailFromToken(token)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakEmailVerifyError, "error", err, "reason", "failed to extract email from token")
+		return "", domain.ErrInvalidToken
+	}
+
+	s.logger.Debug("Email extracted from token", "email", email)
+
+	// Get user from Keycloak by email
+	user, err := s.keycloak.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
+		return "", domain.ErrUserNotFound
+	}
+
+	// Check if already verified
+	if user.EmailVerified != nil && *user.EmailVerified {
+		s.logger.Warn(logger.LogKeycloakEmailAlreadyVerified, "email", email, "user_id", *user.ID)
+		return email, domain.ErrEmailAlreadyVerified
+	}
+
+	// Verify the email in Keycloak
+	if err := s.keycloak.VerifyEmail(ctx, *user.ID); err != nil {
+		s.logger.Error(logger.LogKeycloakEmailVerifyError, "email", email, "user_id", *user.ID, "error", err)
+		return "", err
+	}
+
+	s.logger.Success(logger.LogKeycloakEmailVerifyOK, "email", email, "user_id", *user.ID)
+	return email, nil
+}
+
+func (s service) LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error) {
+	employee, err := s.repository.GetEmployeeByID(ctx, id)
+	if err != nil {
+		s.logger.Error(logger.LogEmployeeGetByIDError, "error", err)
+		return nil, err
+	}
+
+	if employee == nil {
+		s.logger.Warn(logger.LogEmployeeNotFound, "id", id)
+		return nil, domain.ErrPersonNotFound
+	}
+
+	return &dto.RegisterEmployee{
+		Employee: *employee,
+		Message:  "Employee located successfully",
+	}, nil
 }

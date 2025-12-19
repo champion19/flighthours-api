@@ -167,6 +167,10 @@ const (
 	LogKeycloakSendPasswordResetError     = "Error enviando email de recuperación"
 	LogKeycloakSearchUserByEmail          = "Buscando usuario por email en Keycloak"
 	LogKeycloakSearchUserByEmailOK        = "Usuario encontrado por email en Keycloak"
+	LogKeycloakEmailVerify                = "Verificando email de usuario"
+	LogKeycloakEmailVerifyOK              = "Email verificado exitosamente"
+	LogKeycloakEmailVerifyError           = "Error verificando email"
+	LogKeycloakEmailAlreadyVerified       = "Email ya ha sido verificado"
 )
 
 // ============================================
@@ -448,6 +452,9 @@ const (
 	LogEmployeeServiceCleaningOrphan            = "Limpiando usuario huérfano"
 	LogEmployeeServiceOrphanCleaned             = "Usuario huérfano eliminado exitosamente"
 	LogEmployeeServiceOrphanCleanError          = "Error limpiando usuario huérfano"
+	LogEmployeeServiceRollbackEmployee          = "Ejecutando rollback: eliminando empleado de BD"
+	LogEmployeeServiceRollbackEmployeeComplete  = "Rollback de empleado completado"
+	LogEmployeeServiceRollbackEmployeeError     = "Error en rollback de empleado"
 )
 
 // ============================================

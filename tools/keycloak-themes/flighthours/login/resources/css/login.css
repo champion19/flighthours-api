@@ -1,0 +1,182 @@
+/* Flighthours Login Theme - Estilos personalizados */
+
+/* Variables de color */
+:root {
+    --primary-color: #007BFF;
+    --primary-dark: #0056b3;
+    --gradient-start: #667eea;
+    --gradient-end: #764ba2;
+    --error-color: #ef4444;
+    --success-color: #10b981;
+    --text-dark: #333;
+    --text-light: #666;
+    --bg-light: #f8f9fa;
+}
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Contenedor principal */
+.login-pf-page {
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Card principal */
+#kc-form-wrapper,
+.kc-form-wrapper {
+    background: white;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Logo */
+#kc-header-wrapper {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+#kc-header-wrapper .kc-logo-text {
+    color: var(--primary-color);
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Botones */
+button[type="submit"],
+.btn-primary {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
+}
+
+/* Alertas */
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 14px;
+}
+
+.alert-error {
+    background: #fef2f2;
+    border-left: 4px solid var(--error-color);
+    color: #991b1b;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border-left: 4px solid var(--success-color);
+    color: #166534;
+}
+
+.alert-warning {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    color: #92400e;
+}
+
+.alert-info {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    color: #1e40af;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* Footer */
+#kc-info {
+    margin-top: 1.5rem;
+    text-align: center;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+/* Checkbox */
+.checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.checkbox input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    #kc-form-wrapper,
+    .kc-form-wrapper {
+        padding: 2rem 1.5rem;
+    }
+}

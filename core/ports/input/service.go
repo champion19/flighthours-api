@@ -3,6 +3,7 @@ package input
 import (
 	"context"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/output"
@@ -26,8 +27,11 @@ type Service interface {
 	CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error)
 	SetUserPassword(ctx context.Context, userID string, password string) error
 	AssignUserRole(ctx context.Context, userID string, role string) error
+	GetUserByEmail(ctx context.Context, email string) (*gocloak.User, error)
 	SendVerificationEmail(ctx context.Context, userID string) error
 	SendPasswordResetEmail(ctx context.Context, email string) error
+	Login(ctx context.Context, email, password string) (*gocloak.JWT, error)
+	VerifyEmailByToken(ctx context.Context, token string) (string, error)
 
 	//employee- compensaciones (rollback)
 	RollbackEmployee(ctx context.Context, employeeID string) error

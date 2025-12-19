@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/input"
@@ -54,6 +55,15 @@ func (f *fakeServiceForReadOnly) SendVerificationEmail(context.Context, string) 
 }
 func (f *fakeServiceForReadOnly) SendPasswordResetEmail(context.Context, string) error {
 	return nil
+}
+func (f *fakeServiceForReadOnly) Login(context.Context, string, string) (*gocloak.JWT, error) {
+	return &gocloak.JWT{}, nil
+}
+func (f *fakeServiceForReadOnly) VerifyEmailByToken(context.Context, string) (string, error) {
+	return "", nil
+}
+func (f *fakeServiceForReadOnly) GetUserByEmail(context.Context, string) (*gocloak.User, error) {
+	return nil, errors.New("not implemented")
 }
 func (f *fakeServiceForReadOnly) RollbackEmployee(context.Context, string) error {
 	return nil

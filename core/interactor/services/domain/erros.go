@@ -6,6 +6,8 @@ var (
 	ErrDuplicateUser             = errors.New("Err_DUPLICATE_USER")
 	ErrUserCannotSave            = errors.New("Err_USER_CANNOT_SAVE")
 	ErrPersonNotFound            = errors.New("Err_PERSON_NOT_FOUND")
+	ErrUserNotFound              = errors.New("Err_USER_NOT_FOUND")
+	ErrEmailAlreadyVerified      = errors.New("Err_EMAIL_ALREADY_VERIFIED")
 	ErrInvalidTransaction        = errors.New("Err_INVALID_TRANSACTION")
 	ErrGettingUserByEmail        = errors.New("Err_GETTING_USER_BY_EMAIL")
 	ErrNotFoundUserByEmail       = errors.New("Err_NOT_FOUND_USER_BY_EMAIL")
@@ -16,6 +18,7 @@ var (
 	ErrVerificationTokenNotFound = errors.New("Err_VERIFICATION_TOKEN_NOT_FOUND")
 	ErrTokenExpired              = errors.New("Err_TOKEN_EXPIRED")
 	ErrTokenAlreadyUsed          = errors.New("Err_TOKEN_ALREADY_USED")
+	ErrInvalidToken              = errors.New("Err_INVALID_TOKEN")
 	ErrRegistrationFailed        = errors.New("Err_REGISTRATION_FAILED")
 	ErrRoleRequired              = errors.New("Err_ROLE_REQUIRED")
 	ErrDBQueryFailed             = errors.New("Err_DB_QUERY_FAILED")
@@ -193,4 +196,20 @@ const (
 	MsgKeycloakUserExists     = "MOD_INFRA_KC_USER_EXISTS_ERR_00007"
 	MsgDatabaseUserExists     = "MOD_INFRA_DB_USER_EXISTS_ERR_00008"
 	MsgIncompleteRegistration = "MOD_INFRA_INCOMPLETE_REG_ERR_00009"
+)
+
+// Keycloak Module (MOD_KC_*) - Email Verification and Password Reset
+const (
+	// Email Verification
+	MsgKCEmailVerified        = "MOD_KC_EMAIL_VERIFIED_EXI_00001"
+	MsgKCInvalidToken         = "MOD_KC_INVALID_TOKEN_ERR_00001"
+	MsgKCEmailVerifyError     = "MOD_KC_EMAIL_VERIFY_ERROR_ERR_00001"
+	MsgKCUserNotFound         = "MOD_KC_USER_NOT_FOUND_ERR_00001"
+	MsgKCEmailAlreadyVerified = "MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001"
+	// Verification Email Sending
+	MsgKCVerifEmailSent  = "MOD_KC_VERIF_EMAIL_SENT_EXI_00001"
+	MsgKCVerifEmailError = "MOD_KC_VERIF_EMAIL_ERROR_ERR_00001"
+	// Password Reset
+	MsgKCPwdResetSent  = "MOD_KC_PWD_RESET_SENT_EXI_00001"
+	MsgKCPwdResetError = "MOD_KC_PWD_RESET_ERROR_ERR_00001"
 )

@@ -32,12 +32,14 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 		if err == domain.ErrIncompleteRegistration {
 			log.Warn(logger.LogEmployeeInteractorIncompleteDetected, "email", employee.Email)
 
+			//intentar limpiar el estado inconsistente antes de reintentar
 			if cleanErr := i.service.CheckAndCleanInconsistentState(ctx, employee.Email); cleanErr != nil {
 				log.Error(logger.LogEmployeeInteractorCleanup_Error, "email", employee.Email, "error", cleanErr)
 				return nil, cleanErr
 			}
 
 			log.Success(logger.LogEmployeeInteractorCleanup_OK, "email", employee.Email)
+			//retornar el error de registro incompleto para que el cliente sepa que debe reintentar
 			return nil, err
 		}
 		log.Error(logger.LogEmployeeInteractorStep1_Error, "error", err)
@@ -50,7 +52,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 
 	//paso 1.5
 	if err = i.service.CheckAndCleanInconsistentState(ctx, employee.Email); err != nil {
-		log.Error(logger.LogEmployeeInteractorStep15_Error, "email", employee.Email, "error", err)
+		log.Error(logger.LogEmployeeInteractorStep15_Error,"error", err)
 		return
 	}
 	log.Success(logger.LogEmployeeInteractorStep15_OK, "email", employee.Email)
@@ -133,22 +135,20 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 	}
 	log.Success(logger.LogEmployeeInteractorCommit_OK)
 
-	// Paso 9: Enviar email de verificación
-	log.Info(logger.LogKeycloakSendVerificationEmail, "keycloak_user_id", keycloakUserID)
-	if err = i.service.SendVerificationEmail(ctx, keycloakUserID); err != nil {
-		// No retornar error, solo loguear advertencia
-		// El usuario ya está creado, el email se puede reenviar después
-		log.Warn(logger.LogKeycloakSendVerificationEmailError,
-			"keycloak_user_id", keycloakUserID,
-			"error", err,
-			"note", "User created successfully, but email verification failed. User can request resend.")
-	} else {
-		log.Success(logger.LogKeycloakSendVerificationEmailOK, "keycloak_user_id", keycloakUserID)
-	}
-
 	employee.KeycloakUserID = keycloakUserID
 	result.Employee = employee
 	result.Message = "user registered successfully"
+
+	// Paso 9: Enviar email de verificación
+	if sendErr := i.service.SendVerificationEmail(ctx, keycloakUserID); sendErr != nil {
+    //log warning pero no falla la creación del usuario
+		log.Warn(logger.LogKeycloakSendVerificationEmailError,
+			"keycloak_user_id", keycloakUserID,
+      "email", employee.Email,
+			"error", sendErr)
+	} else {
+		log.Info(logger.LogKeycloakSendVerificationEmailOK, "keycloak_user_id", keycloakUserID, "email", employee.Email)
+	}
 
 	log.Success(logger.LogEmployeeInteractorRegComplete, employee.ToLogger(),
 		"Keycloak_id", keycloakUserID)
@@ -168,39 +168,33 @@ func (i *Interactor) Locate(ctx context.Context, id string) (*dto.RegisterEmploy
 	}
 	return result, nil
 }
-
+// ResendVerificationEmail reenvía el email de verificación a un usuario por email
 func (i *Interactor) ResendVerificationEmail(ctx context.Context, email string) error {
 	traceID := middleware.GetTraceIDFromContext(ctx)
 	log := i.logger.WithTraceID(traceID)
 
-	log.Info(logger.LogKeycloakSearchUserByEmail, "email", email)
+	log.Info(logger.LogKeycloakSendVerificationEmail, "email", email)
 
 	// Buscar empleado por email en la base de datos
-	employee, err := i.service.GetEmployeeByEmail(ctx, email)
+	user, err := i.service.GetUserByEmail(ctx, email)
 	if err != nil {
-		log.Error(logger.LogEmployeeGetByEmailError, "email", email, "error", err)
-		return err
+		log.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
+		return domain.ErrUserNotFound
 	}
 
-	if employee == nil {
-		log.Error(logger.LogEmployeeNotFound, "email", email)
-		return domain.ErrPersonNotFound
+	//verificar si el email ya fue verificado
+	if user.EmailVerified != nil && *user.EmailVerified {
+		log.Warn(logger.LogKeycloakSendVerificationEmailError, "email", email, "reason", "email already verified")
+		return domain.ErrEmailAlreadyVerified
 	}
-
-	if employee.KeycloakUserID == "" {
-		log.Error(logger.LogKeycloakUserIDEmpty, "email", email, "employee_id", employee.ID)
-		return domain.ErrKeycloakInconsistentState
-	}
-
-	log.Success(logger.LogKeycloakSearchUserByEmailOK, "email", email, "keycloak_user_id", employee.KeycloakUserID)
 
 	// Enviar email de verificación
-	if err = i.service.SendVerificationEmail(ctx, employee.KeycloakUserID); err != nil {
+	if err = i.service.SendVerificationEmail(ctx, *user.ID); err != nil {
 		log.Error(logger.LogKeycloakSendVerificationEmailError, "email", email, "error", err)
 		return err
 	}
 
-	log.Success(logger.LogKeycloakSendVerificationEmailOK, "email", email)
+	log.Success(logger.LogKeycloakSendVerificationEmailOK, "email", email, "user_id", *user.ID)
 	return nil
 }
 
@@ -212,10 +206,38 @@ func (i *Interactor) RequestPasswordReset(ctx context.Context, email string) err
 
 	// Llamar al servicio que busca el usuario y envía el email
 	if err := i.service.SendPasswordResetEmail(ctx, email); err != nil {
-		log.Error(logger.LogKeycloakSendPasswordResetError, "email", email, "error", err)
-		return err
+		log.Warn(logger.LogKeycloakSendPasswordResetError, "email", email, "error", err)
+	} else{
+		log.Success(logger.LogKeycloakSendPasswordResetOK, "email", email)
 	}
 
-	log.Success(logger.LogKeycloakSendPasswordResetOK, "email", email)
 	return nil
+}
+
+// VerifyEmailByToken verifica el email de un usuario extrayéndolo del token JWT
+// Este método delega al Service que maneja la lógica de negocio (parsing del token y verificación en Keycloak)
+func (i *Interactor) VerifyEmailByToken(ctx context.Context, token string) (string, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogKeycloakEmailVerify)
+
+	// Delegar toda la lógica al Service (parsing del token + verificación en Keycloak)
+	email, err := i.service.VerifyEmailByToken(ctx, token)
+	if err != nil {
+		switch err {
+		case domain.ErrInvalidToken:
+			log.Error(logger.LogKeycloakEmailVerifyError, "error", err, "reason", "invalid token")
+		case domain.ErrUserNotFound:
+			log.Warn(logger.LogKeycloakUserNotFound, "email", email)
+		case domain.ErrEmailAlreadyVerified:
+			log.Warn(logger.LogKeycloakEmailAlreadyVerified, "email", email)
+		default:
+			log.Error(logger.LogKeycloakEmailVerifyError, "email", email, "error", err)
+		}
+		return email, err
+	}
+
+	log.Success(logger.LogKeycloakEmailVerifyOK, "email", email)
+	return email, nil
 }

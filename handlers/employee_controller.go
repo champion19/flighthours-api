@@ -5,6 +5,7 @@ import (
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
+	"errors"
 )
 
 // RegisterEmployee godoc
@@ -69,7 +70,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			true,                 // httpOnly
 		)
 
-		// Usar funciones HATEOAS centralizadas
+		// Construir respuesta con HATEOAS
 		baseURL := GetBaseURL(c)
 		links := BuildAccountLinks(baseURL, encodedID)
 		SetLocationHeader(c, baseURL, "accounts", encodedID)
@@ -83,8 +84,8 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			"encoded_id", encodedID,
 			"client_ip", c.ClientIP())
 
-		// Record Prometheus metric for person registration
-
+		// Record Prometheus metric for employee registration
+		middleware.RecordEmployeeRegistration()
 		h.Response.SuccessWithData(c, domain.MsgUserRegistered, response)
 	}
 }
@@ -101,55 +102,28 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 // @Failure      404      {object}  middleware.APIResponse  "Usuario no encontrado"
 // @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
 // @Router       /auth/resend-verification [post]
-func (h handler) ResendVerificationEmail() func(c *gin.Context) {
+func (h handler) ResendVerificationEmail()gin.HandlerFunc {
 	return func(c *gin.Context) {
-		traceID := middleware.GetRequestID(c)
-		log := Logger.WithTraceID(traceID)
-
-		log.Info(logger.LogKeycloakSendVerificationEmail,
-			"method", c.Request.Method,
-			"path", c.Request.URL.Path,
-			"client_ip", c.ClientIP())
-
-		var request ResendVerificationEmailRequest
-		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Error(logger.LogRegJSONParseError, "error", err, "client_ip", c.ClientIP())
-			c.Error(domain.ErrInvalidJSONFormat)
+		var req ResendVerificationEmailRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			h.Response.Error(c, domain.MsgValBadFormat)
 			return
 		}
 
-		log.Info(logger.LogKeycloakSearchUserByEmail, "email", request.Email)
-
-		// Llamar al Interactor
-		err := h.Interactor.ResendVerificationEmail(c, request.Email)
+		err := h.Interactor.ResendVerificationEmail(c, req.Email)
 		if err != nil {
-			log.Error(logger.LogKeycloakSendVerificationEmailError,
-				"email", request.Email,
-				"error", err,
-				"client_ip", c.ClientIP())
-			c.Error(err)
+		// Manejar diferentes tipos de errores
+			switch err {
+			case domain.ErrUserNotFound:
+				h.Response.Error(c, "MOD_KC_USER_NOT_FOUND_ERR_00001")
+			case domain.ErrEmailAlreadyVerified:
+				h.Response.Warning(c, "MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001")
+			default:
+				h.Response.Error(c, "MOD_KC_VERIF_EMAIL_ERROR_ERR_00001")
+			}
 			return
 		}
-
-		// Generar enlaces HATEOAS
-		baseURL := GetBaseURL(c)
-		links := map[string]Link{
-			"login": {
-				Href:   baseURL + "/v1/motogo/auth/login",
-				Method: "POST",
-			},
-		}
-
-		response := ResendVerificationEmailResponse{
-			Message: "Verification email resent successfully",
-			Links:   links,
-		}
-
-		log.Success(logger.LogKeycloakSendVerificationEmailOK,
-			"email", request.Email,
-			"client_ip", c.ClientIP())
-
-		h.Response.SuccessWithData(c, "MOD_KC_VERIF_EMAIL_RESENT_EXI_00001", response)
+		h.Response.Success(c, "MOD_KC_VERIF_EMAIL_RESENT_EXI_00001",req.Email)
 	}
 }
 
@@ -165,54 +139,116 @@ func (h handler) ResendVerificationEmail() func(c *gin.Context) {
 // @Failure      404      {object}  middleware.APIResponse  "Usuario no encontrado"
 // @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
 // @Router       /auth/password-reset [post]
-func (h handler) RequestPasswordReset() func(c *gin.Context) {
+func (h handler) RequestPasswordReset()  gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req PasswordResetRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		// Este método SIEMPRE retorna nil por seguridad (no revela si el email existe)
+		// El logging interno sí registra el resultado real
+		_ = h.Interactor.RequestPasswordReset(c, req.Email)
+
+		// Siempre responder con éxito genérico
+		h.Response.Success(c, "MOD_KC_PWD_RESET_SENT_EXI_00001")
+	}
+}
+// @Summary Login de usuario
+// @Description Autentica un usuario y retorna tokens de acceso
+// @Tags Autenticación
+// @Accept json
+// @Produce json
+// @Param request body LoginRequest true "Credenciales de login"
+// @Success 200 {object} middleware.APIResponse{data=LoginResponse} "Login exitoso"
+// @Failure 400 {object} middleware.APIResponse "Credenciales inválidas"
+// @Failure 401 {object} middleware.APIResponse "Email no verificado o credenciales incorrectas"
+// @Failure 500 {object} middleware.APIResponse "Error interno del servidor"
+// @Router /auth/login [post]
+func (h handler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		traceID := middleware.GetRequestID(c)
 		log := Logger.WithTraceID(traceID)
 
-		log.Info(logger.LogKeycloakSendPasswordReset,
-			"method", c.Request.Method,
-			"path", c.Request.URL.Path,
-			"client_ip", c.ClientIP())
-
-		var request PasswordResetRequest
-		if err := c.ShouldBindJSON(&request); err != nil {
-			log.Error(logger.LogRegJSONParseError, "error", err, "client_ip", c.ClientIP())
-			c.Error(domain.ErrInvalidJSONFormat)
+		var req LoginRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Error(logger.LogRegJSONParseError, "error", err)
+			h.Response.Error(c, domain.MsgValBadFormat)
 			return
 		}
 
-		log.Info(logger.LogKeycloakSearchUserByEmail, "email", request.Email)
+		log.Info(logger.LogKeycloakUserLogin, "email", req.Email, "client_ip", c.ClientIP())
 
-		// Llamar al Interactor
-		err := h.Interactor.RequestPasswordReset(c, request.Email)
+		// Llamar al servicio de autenticación de Keycloak
+		token, err := h.EmployeeService.Login(c, req.Email, req.Password)
 		if err != nil {
-			log.Error(logger.LogKeycloakSendPasswordResetError,
-				"email", request.Email,
-				"error", err,
-				"client_ip", c.ClientIP())
-			c.Error(err)
+			log.Error(logger.LogKeycloakUserLoginError, "email", req.Email, "error", err, "client_ip", c.ClientIP())
+			c.Error(errors.New(domain.MsgUnauthorized))
 			return
 		}
 
-		// Generar enlaces HATEOAS
-		baseURL := GetBaseURL(c)
-		links := map[string]Link{
-			"login": {
-				Href:   baseURL + "/v1/motogo/auth/login",
-				Method: "POST",
-			},
+		response := LoginResponse{
+			AccessToken:  token.AccessToken,
+			RefreshToken: token.RefreshToken,
+			ExpiresIn:    token.ExpiresIn,
+			TokenType:    token.TokenType,
 		}
 
-		response := PasswordResetResponse{
-			Message: "Password reset email sent successfully",
-			Links:   links,
+		log.Success(logger.LogKeycloakUserLoginOK, "email", req.Email, "client_ip", c.ClientIP())
+		middleware.RecordEmployeeRegistration() // Por ahora usamos el mismo metric
+		h.Response.SuccessWithData(c, "MOD_AUTH_LOGIN_SUCCESS_EXI_00001", response)
+	}
+}
+
+// @Summary Verificar email de usuario (Proxy)
+// @Description Verifica el email de un usuario usando un token JWT. Este endpoint actúa como proxy para no exponer Keycloak directamente.
+// @Tags Autenticación
+// @Accept json
+// @Produce json
+// @Param request body VerifyEmailRequest true "Token de verificación del email"
+// @Success 200 {object} middleware.APIResponse{data=VerifyEmailResponse} "Email verificado exitosamente"
+// @Failure 400 {object} middleware.APIResponse "Token inválido o expirado"
+// @Failure 404 {object} middleware.APIResponse "Usuario no encontrado"
+// @Failure 409 {object} middleware.APIResponse "Email ya estaba verificado"
+// @Failure 500 {object} middleware.APIResponse "Error interno del servidor"
+// @Router /auth/verify-email [post]
+func (h handler) VerifyEmailByToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		var req verifyEmailRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Error(logger.LogRegJSONParseError, "error", err)
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
 		}
 
-		log.Success(logger.LogKeycloakSendPasswordResetOK,
-			"email", request.Email,
-			"client_ip", c.ClientIP())
+		log.Info(logger.LogKeycloakEmailVerify, "client_ip", c.ClientIP())
 
-		h.Response.SuccessWithData(c, "MOD_KC_PWD_RESET_SENT_EXI_00001", response)
+		// Pasar el token al Interactor - la extracción del email se hace en la capa de negocio
+		email, err := h.Interactor.VerifyEmailByToken(c, req.Token)
+		if err != nil {
+			switch err {
+			case domain.ErrInvalidToken:
+				h.Response.Error(c, domain.MsgKCInvalidToken)
+			case domain.ErrUserNotFound:
+				h.Response.Error(c, domain.MsgKCUserNotFound)
+			case domain.ErrEmailAlreadyVerified:
+				h.Response.Warning(c, domain.MsgKCEmailAlreadyVerified)
+			default:
+				h.Response.Error(c, domain.MsgKCEmailVerifyError)
+			}
+			return
+		}
+
+		response := verifyEmailResponse{
+			Verified: true,
+			Email:    email,
+		}
+
+		log.Success(logger.LogKeycloakEmailVerifyOK, "email", email, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgKCEmailVerified, response)
 	}
 }
