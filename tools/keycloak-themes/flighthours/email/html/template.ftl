@@ -7,8 +7,8 @@
     <title>FlightHours</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #F5F7FA;
             margin: 0;
             padding: 2rem;
         }
@@ -18,87 +18,98 @@
         }
         .card {
             background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 71, 171, 0.12);
         }
         .header {
             text-align: center;
             margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #007BFF;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #0047AB;
         }
         .header h1 {
-            color: #333;
+            color: #2C3E50;
             font-size: 24px;
+            font-weight: 600;
             margin: 0.5rem 0;
         }
         .logo {
-            color: #007BFF;
-            font-size: 18px;
-            font-weight: bold;
+            color: #0047AB;
+            font-size: 28px;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        .logo::before {
+            content: '✈️ ';
+            font-size: 24px;
         }
         .content {
-            color: #333;
+            color: #2C3E50;
             line-height: 1.6;
         }
         .content p {
             margin: 1rem 0;
-            color: #666;
+            color: #64748B;
+            font-size: 15px;
         }
         .button {
             display: inline-block;
             margin: 1.5rem 0;
-            padding: 12px 24px;
-            background-color: #007BFF;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #0047AB 0%, #1E88E5 100%);
             color: white !important;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 10px;
             font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 71, 171, 0.2);
+            transition: all 0.3s ease;
         }
         .button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(135deg, #003d96 0%, #1976D2 100%);
+            box-shadow: 0 6px 16px rgba(0, 71, 171, 0.3);
         }
         .link-text {
-            color: #666;
+            color: #64748B;
             font-size: 14px;
             word-break: break-all;
         }
         .footer {
             margin-top: 2rem;
             padding-top: 1.5rem;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #E1E8ED;
             text-align: center;
-            font-size: 12px;
-            color: #999;
+            font-size: 13px;
+            color: #64748B;
         }
         .footer a {
-            color: #007BFF;
+            color: #0047AB;
             text-decoration: none;
+            font-weight: 500;
         }
         .info-box {
-            background-color: #e7f3ff;
-            border-left: 4px solid #007BFF;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
+            background-color: #EFF6FF;
+            border-left: 4px solid #0047AB;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
         }
         .info-box p {
             margin: 0;
-            color: #004085;
+            color: #1E40AF;
             font-size: 14px;
         }
         .warning-box {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
+            background-color: #FFFBEB;
+            border-left: 4px solid #F59E0B;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
         }
         .warning-box p {
             margin: 0;
-            color: #856404;
+            color: #92400E;
             font-size: 14px;
         }
         @media only screen and (max-width: 600px) {
@@ -106,7 +117,7 @@
                 padding: 1rem;
             }
             .card {
-                padding: 1.5rem;
+                padding: 2rem 1.5rem;
             }
             .button {
                 display: block;
@@ -114,6 +125,7 @@
             }
         }
     </style>
+
 </head>
 <body>
     <div class="container">

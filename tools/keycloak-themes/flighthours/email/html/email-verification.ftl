@@ -5,44 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlightHours - Verificar Email</title>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f2f2f2; margin: 0; padding: 2rem;">
+<body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F5F7FA; margin: 0; padding: 2rem;">
     <div style="max-width: 600px; margin: 0 auto;">
-        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        <div style="background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 16px rgba(0, 71, 171, 0.12);">
 
             <!-- Header -->
-            <div style="text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #007BFF;">
-                <div style="color: #007BFF; font-size: 18px; font-weight: bold;">FlightHours</div>
+            <div style="text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #0047AB;">
+                <div style="color: #0047AB; font-size: 28px; font-weight: 700;">✈️ FlightHours</div>
             </div>
 
             <!-- Content -->
-            <div style="color: #333; line-height: 1.6;">
-                <h1 style="color: #333; text-align: center; margin-bottom: 1.5rem; font-size: 22px;">Bienvenido a FlightHours</h1>
+            <div style="color: #2C3E50; line-height: 1.6;">
+                <h1 style="color: #2C3E50; text-align: center; margin-bottom: 1.5rem; font-size: 24px; font-weight: 600;">Bienvenido a FlightHours</h1>
 
-                <p style="margin: 1rem 0; color: #666;">Gracias por registrarte en nuestra plataforma.</p>
+                <p style="margin: 1rem 0; color: #64748B; font-size: 15px;">Gracias por registrarte en nuestra plataforma.</p>
 
-                <p style="margin: 1rem 0; color: #666;">Para completar tu registro, por favor haz clic en el siguiente enlace:</p>
+                <p style="margin: 1rem 0; color: #64748B; font-size: 15px;">Para completar tu registro, por favor haz clic en el siguiente enlace:</p>
 
                 <div style="text-align: center; margin: 1.5rem 0;">
-                    <a href="${link}" style="display: inline-block; padding: 12px 24px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px; font-weight: 600;">
+                    <a href="${link}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #0047AB 0%, #1E88E5 100%); color: white; text-decoration: none; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 71, 171, 0.2);">
                         Verificar mi email
                     </a>
                 </div>
 
-                <p style="color: #666; font-size: 14px; word-break: break-all;">Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
-                <p style="color: #666; font-size: 14px; word-break: break-all;">${link}</p>
+                <p style="color: #64748B; font-size: 14px; word-break: break-all;">Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:</p>
+                <p style="color: #64748B; font-size: 14px; word-break: break-all;">${link}</p>
 
-                <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1rem 0; border-radius: 4px;">
-                    <p style="margin: 0; color: #856404; font-size: 14px;"><strong>IMPORTANTE:</strong> Este enlace expirará en 15 minutos por seguridad.</p>
+                <div style="background-color: #FFFBEB; border-left: 4px solid #F59E0B; padding: 1.25rem; margin: 1.5rem 0; border-radius: 8px;">
+                    <p style="margin: 0; color: #92400E; font-size: 14px;"><strong>IMPORTANTE:</strong> Este enlace expirará en 15 minutos por seguridad.</p>
                 </div>
 
-                <p style="color: #999; font-size: 12px; margin-top: 30px;">
+                <p style="color: #64748B; font-size: 13px; margin-top: 30px;">
                     Si no solicitaste este registro, puedes ignorar este correo de forma segura.
                 </p>
             </div>
 
             <!-- Footer -->
-            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #999;">
-                <p><a href="mailto:soporte@flighthours.com" style="color: #007BFF; text-decoration: none;">soporte@flighthours.com</a></p>
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #151ec3ff; text-align: center; font-size: 13px; color: #64748B;">
+                <p><a href="mailto:soporte@flighthours.com" style="color: #0047AB; text-decoration: none; font-weight: 500;">soporte@flighthours.com</a></p>
                 <p>&copy; ${.now?string('yyyy')} FlightHours. Todos los derechos reservados.</p>
             </div>
 

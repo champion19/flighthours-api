@@ -7,53 +7,67 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0047AB 0%, #4A90E2 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-        .container { max-width: 450px; width: 100%; }
+        .container { max-width: 480px; width: 100%; }
         .card {
             background: white;
-            padding: 2.5rem 2rem;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 71, 171, 0.16);
             text-align: center;
         }
-        .logo { color: #007BFF; font-size: 28px; font-weight: bold; margin-bottom: 1.5rem; }
+        .logo {
+            color: #0047AB;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .logo::before { content: '✈️'; font-size: 28px; }
         .icon {
             width: 80px; height: 80px;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 1.5rem;
             font-size: 40px; color: white;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
         }
-        h1 { color: #333; font-size: 22px; margin-bottom: 1rem; }
-        .message { color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 1.5rem; }
+        h1 { color: #2C3E50; font-size: 24px; font-weight: 600; margin-bottom: 1rem; }
+        .message { color: #64748B; font-size: 15px; line-height: 1.6; margin-bottom: 1.5rem; }
         .error-box {
-            background: #fef2f2;
-            border-left: 4px solid #ef4444;
-            border-radius: 8px;
+            background: #FEF2F2;
+            border-left: 4px solid #EF4444;
+            border-radius: 10px;
+
             padding: 1rem;
             margin-bottom: 1.5rem;
             text-align: left;
         }
-        .error-box p { color: #991b1b; font-size: 14px; margin: 0; }
+        .error-box p { color: #991B1B; font-size: 14px; margin: 0; }
         .app-box {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 2px solid #007BFF;
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            border: 2px solid #0047AB;
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-        .app-box h2 { color: #007BFF; font-size: 18px; margin-bottom: 0.5rem; }
-        .app-box p { color: #0369a1; font-size: 14px; margin: 0; }
+        .app-box h2 { color: #0047AB; font-size: 18px; margin-bottom: 0.5rem; font-weight: 600; }
+        .app-box p { color: #2C3E50; font-size: 14px; margin: 0; }
         .app-icon { font-size: 48px; margin-bottom: 0.5rem; }
-        .footer { margin-top: 1.5rem; color: #999; font-size: 12px; }
+        .footer { margin-top: 1.5rem; color: #64748B; font-size: 13px; }
+
     </style>
 </head>
 <body>

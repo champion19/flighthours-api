@@ -7,8 +7,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0047AB 0%, #4A90E2 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -16,26 +17,30 @@
             padding: 20px;
         }
         .container {
-
             background: white;
-            max-width: 450px;
+            max-width: 480px;
             width: 100%;
-            padding: 3rem 2rem;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 71, 171, 0.16);
             text-align: center;
         }
         .logo {
-            color: #007BFF;
+            color: #0047AB;
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
+        .logo::before { content: '✈️'; font-size: 28px; }
         .spinner {
             width: 60px;
             height: 60px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #007BFF;
+            border: 5px solid #E1E8ED;
+            border-top: 5px solid #0047AB;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin: 0 auto 2rem;
@@ -46,13 +51,13 @@
             100% { transform: rotate(360deg); }
         }
         h1 {
-            color: #1a1a1a;
+            color: #2C3E50;
             font-size: 24px;
             margin-bottom: 1rem;
             font-weight: 600;
         }
         .message {
-            color: #666;
+            color: #64748B;
             font-size: 15px;
             line-height: 1.6;
             margin-bottom: 2rem;
@@ -60,58 +65,60 @@
         .success-icon {
             width: 80px;
             height: 80px;
-            background: #28a745;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
             border-radius: 50%;
             display: none;
             align-items: center;
             justify-content: center;
             margin: 0 auto 2rem;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
         }
         .success-icon.show { display: flex; }
         .success-icon svg { width: 40px; height: 40px; fill: white; }
         .error-icon {
             width: 80px;
             height: 80px;
-            background: #dc3545;
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
             border-radius: 50%;
             display: none;
             align-items: center;
             justify-content: center;
             margin: 0 auto 2rem;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
         }
         .error-icon.show { display: flex; }
         .error-icon svg { width: 40px; height: 40px; fill: white; }
         .app-box {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 2px solid #007BFF;
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            border: 2px solid #0047AB;
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-        .app-box h2 { color: #007BFF; font-size: 18px; margin-bottom: 0.5rem; }
-        .app-box p { color: #0369a1; font-size: 14px; margin: 0; }
+        .app-box h2 { color: #0047AB; font-size: 18px; margin-bottom: 0.5rem; font-weight: 600; }
+        .app-box p { color: #2C3E50; font-size: 14px; margin: 0; }
         .app-icon { font-size: 48px; margin-bottom: 0.5rem; }
         .btn {
             display: inline-block;
             padding: 14px 32px;
-            background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+            background: linear-gradient(135deg, #0047AB 0%, #1E88E5 100%);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             font-size: 16px;
             border: none;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
         }
         .footer {
             margin-top: 2rem;
-            color: #999;
+            color: #64748B;
             font-size: 13px;
         }
         .hidden { display: none !important; }
