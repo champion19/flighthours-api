@@ -5,6 +5,7 @@ import (
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
+	"errors"
 )
 
 // RegisterEmployee godoc
@@ -69,7 +70,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			true,                 // httpOnly
 		)
 
-		// Usar funciones HATEOAS centralizadas
+		// Construir respuesta con HATEOAS
 		baseURL := GetBaseURL(c)
 		links := BuildAccountLinks(baseURL, encodedID)
 		SetLocationHeader(c, baseURL, "accounts", encodedID)
@@ -83,9 +84,171 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			"encoded_id", encodedID,
 			"client_ip", c.ClientIP())
 
-			// Record Prometheus metric for person registration
-
-
+		// Record Prometheus metric for employee registration
+		middleware.RecordEmployeeRegistration()
 		h.Response.SuccessWithData(c, domain.MsgUserRegistered, response)
+	}
+}
+
+// ResendVerificationEmail godoc
+// @Summary      Reenviar email de verificación
+// @Description  Reenvía el email de verificación a un usuario registrado que no ha verificado su cuenta
+// @Tags         authentication
+// @Accept       json
+// @Produce      json
+// @Param        request  body      ResendVerificationEmailRequest  true  "Email del usuario"
+// @Success      200      {object}  middleware.APIResponse{data=ResendVerificationEmailResponse}  "Email reenviado exitosamente"
+// @Failure      400      {object}  middleware.APIResponse  "Error de validación - Email inválido"
+// @Failure      404      {object}  middleware.APIResponse  "Usuario no encontrado"
+// @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /auth/resend-verification [post]
+func (h handler) ResendVerificationEmail()gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req ResendVerificationEmailRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		err := h.Interactor.ResendVerificationEmail(c, req.Email)
+		if err != nil {
+		// Manejar diferentes tipos de errores
+			switch err {
+			case domain.ErrUserNotFound:
+				h.Response.Error(c, "MOD_KC_USER_NOT_FOUND_ERR_00001")
+			case domain.ErrEmailAlreadyVerified:
+				h.Response.Warning(c, "MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001")
+			default:
+				h.Response.Error(c, "MOD_KC_VERIF_EMAIL_ERROR_ERR_00001")
+			}
+			return
+		}
+		h.Response.Success(c, "MOD_KC_VERIF_EMAIL_RESENT_EXI_00001",req.Email)
+	}
+}
+
+// RequestPasswordReset godoc
+// @Summary      Solicitar recuperación de contraseña
+// @Description  Envía un email con instrucciones para recuperar la contraseña de un usuario
+// @Tags         authentication
+// @Accept       json
+// @Produce      json
+// @Param        request  body      PasswordResetRequest  true  "Email del usuario"
+// @Success      200      {object}  middleware.APIResponse{data=PasswordResetResponse}  "Email de recuperación enviado"
+// @Failure      400      {object}  middleware.APIResponse  "Error de validación - Email inválido"
+// @Failure      404      {object}  middleware.APIResponse  "Usuario no encontrado"
+// @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /auth/password-reset [post]
+func (h handler) RequestPasswordReset()  gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req PasswordResetRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		// Este método SIEMPRE retorna nil por seguridad (no revela si el email existe)
+		// El logging interno sí registra el resultado real
+		_ = h.Interactor.RequestPasswordReset(c, req.Email)
+
+		// Siempre responder con éxito genérico
+		h.Response.Success(c, "MOD_KC_PWD_RESET_SENT_EXI_00001")
+	}
+}
+// @Summary Login de usuario
+// @Description Autentica un usuario y retorna tokens de acceso
+// @Tags Autenticación
+// @Accept json
+// @Produce json
+// @Param request body LoginRequest true "Credenciales de login"
+// @Success 200 {object} middleware.APIResponse{data=LoginResponse} "Login exitoso"
+// @Failure 400 {object} middleware.APIResponse "Credenciales inválidas"
+// @Failure 401 {object} middleware.APIResponse "Email no verificado o credenciales incorrectas"
+// @Failure 500 {object} middleware.APIResponse "Error interno del servidor"
+// @Router /auth/login [post]
+func (h handler) Login() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		var req LoginRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Error(logger.LogRegJSONParseError, "error", err)
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		log.Info(logger.LogKeycloakUserLogin, "email", req.Email, "client_ip", c.ClientIP())
+
+		// Llamar al servicio de autenticación de Keycloak
+		token, err := h.EmployeeService.Login(c, req.Email, req.Password)
+		if err != nil {
+			log.Error(logger.LogKeycloakUserLoginError, "email", req.Email, "error", err, "client_ip", c.ClientIP())
+			c.Error(errors.New(domain.MsgUnauthorized))
+			return
+		}
+
+		response := LoginResponse{
+			AccessToken:  token.AccessToken,
+			RefreshToken: token.RefreshToken,
+			ExpiresIn:    token.ExpiresIn,
+			TokenType:    token.TokenType,
+		}
+
+		log.Success(logger.LogKeycloakUserLoginOK, "email", req.Email, "client_ip", c.ClientIP())
+		middleware.RecordEmployeeRegistration() // Por ahora usamos el mismo metric
+		h.Response.SuccessWithData(c, "MOD_AUTH_LOGIN_SUCCESS_EXI_00001", response)
+	}
+}
+
+// @Summary Verificar email de usuario (Proxy)
+// @Description Verifica el email de un usuario usando un token JWT. Este endpoint actúa como proxy para no exponer Keycloak directamente.
+// @Tags Autenticación
+// @Accept json
+// @Produce json
+// @Param request body VerifyEmailRequest true "Token de verificación del email"
+// @Success 200 {object} middleware.APIResponse{data=VerifyEmailResponse} "Email verificado exitosamente"
+// @Failure 400 {object} middleware.APIResponse "Token inválido o expirado"
+// @Failure 404 {object} middleware.APIResponse "Usuario no encontrado"
+// @Failure 409 {object} middleware.APIResponse "Email ya estaba verificado"
+// @Failure 500 {object} middleware.APIResponse "Error interno del servidor"
+// @Router /auth/verify-email [post]
+func (h handler) VerifyEmailByToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		var req verifyEmailRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Error(logger.LogRegJSONParseError, "error", err)
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		log.Info(logger.LogKeycloakEmailVerify, "client_ip", c.ClientIP())
+
+		// Pasar el token al Interactor - la extracción del email se hace en la capa de negocio
+		email, err := h.Interactor.VerifyEmailByToken(c, req.Token)
+		if err != nil {
+			switch err {
+			case domain.ErrInvalidToken:
+				h.Response.Error(c, domain.MsgKCInvalidToken)
+			case domain.ErrUserNotFound:
+				h.Response.Error(c, domain.MsgKCUserNotFound)
+			case domain.ErrEmailAlreadyVerified:
+				h.Response.Warning(c, domain.MsgKCEmailAlreadyVerified)
+			default:
+				h.Response.Error(c, domain.MsgKCEmailVerifyError)
+			}
+			return
+		}
+
+		response := verifyEmailResponse{
+			Verified: true,
+			Email:    email,
+		}
+
+		log.Success(logger.LogKeycloakEmailVerifyOK, "email", email, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgKCEmailVerified, response)
 	}
 }

@@ -3,8 +3,8 @@ package mocks
 import (
 	"context"
 
-	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -84,6 +84,11 @@ func (m *MockAuthClient) GetUserRoles(ctx context.Context, userID string) ([]*go
 // Verificación
 
 func (m *MockAuthClient) SendVerificationEmail(ctx context.Context, userID string) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
+}
+
+func (m *MockAuthClient) SendPasswordResetEmail(ctx context.Context, userID string) error {
 	args := m.Called(ctx, userID)
 	return args.Error(0)
 }

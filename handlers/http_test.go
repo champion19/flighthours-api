@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/interactor"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
@@ -67,8 +68,19 @@ func (f *fakeService) CreateUserInKeycloak(context.Context, *domain.Employee) (s
 }
 func (f *fakeService) SetUserPassword(context.Context, string, string) error { return nil }
 func (f *fakeService) AssignUserRole(context.Context, string, string) error  { return nil }
-func (f *fakeService) RollbackEmployee(context.Context, string) error        { return nil }
-func (f *fakeService) RollbackKeycloakUser(context.Context, string) error    { return nil }
+func (f *fakeService) SendVerificationEmail(context.Context, string) error   { return nil }
+func (f *fakeService) SendPasswordResetEmail(context.Context, string) error  { return nil }
+func (f *fakeService) Login(context.Context, string, string) (*gocloak.JWT, error) {
+	return &gocloak.JWT{}, nil
+}
+func (f *fakeService) VerifyEmailByToken(context.Context, string) (string, error) {
+	return "", nil
+}
+func (f *fakeService) GetUserByEmail(context.Context, string) (*gocloak.User, error) {
+	return nil, errors.New("not implemented")
+}
+func (f *fakeService) RollbackEmployee(context.Context, string) error     { return nil }
+func (f *fakeService) RollbackKeycloakUser(context.Context, string) error { return nil }
 
 type fakeServiceErr struct {
 	err error
@@ -101,8 +113,19 @@ func (f *fakeServiceErr) CreateUserInKeycloak(context.Context, *domain.Employee)
 }
 func (f *fakeServiceErr) SetUserPassword(context.Context, string, string) error { return nil }
 func (f *fakeServiceErr) AssignUserRole(context.Context, string, string) error  { return nil }
-func (f *fakeServiceErr) RollbackEmployee(context.Context, string) error        { return nil }
-func (f *fakeServiceErr) RollbackKeycloakUser(context.Context, string) error    { return nil }
+func (f *fakeServiceErr) SendVerificationEmail(context.Context, string) error   { return nil }
+func (f *fakeServiceErr) SendPasswordResetEmail(context.Context, string) error  { return nil }
+func (f *fakeServiceErr) Login(context.Context, string, string) (*gocloak.JWT, error) {
+	return &gocloak.JWT{}, nil
+}
+func (f *fakeServiceErr) VerifyEmailByToken(context.Context, string) (string, error) {
+	return "", nil
+}
+func (f *fakeServiceErr) GetUserByEmail(context.Context, string) (*gocloak.User, error) {
+	return nil, errors.New("not implemented")
+}
+func (f *fakeServiceErr) RollbackEmployee(context.Context, string) error     { return nil }
+func (f *fakeServiceErr) RollbackKeycloakUser(context.Context, string) error { return nil }
 
 type fakeMessageCacheRepo struct {
 	messages []cachetypes.CachedMessage

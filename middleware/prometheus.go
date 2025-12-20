@@ -117,8 +117,9 @@ func getErrorType(status int) string {
 	}
 }
 
-// RecordPersonRegistration increments the person registration counter
-func RecordPersonRegistration() {
+
+// RecordEmployeeRegistration increments the employee registration counter
+func RecordEmployeeRegistration() {
 	userRegistrationsTotal.Inc()
 }
 
