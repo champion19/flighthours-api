@@ -58,17 +58,15 @@
             display: inline-block;
             margin: 1.5rem 0;
             padding: 14px 28px;
-            background: linear-gradient(135deg, #0047AB 0%, #1E88E5 100%);
-            color: white !important;
+            background-color: #0047AB;
+            color: #FFFFFF !important;
             text-decoration: none;
             border-radius: 10px;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0, 71, 171, 0.2);
-            transition: all 0.3s ease;
+            font-size: 16px;
         }
         .button:hover {
-            background: linear-gradient(135deg, #003d96 0%, #1976D2 100%);
-            box-shadow: 0 6px 16px rgba(0, 71, 171, 0.3);
+            background-color: #003d96;
         }
         .link-text {
             color: #64748B;

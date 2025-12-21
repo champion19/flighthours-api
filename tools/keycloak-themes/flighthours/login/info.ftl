@@ -142,14 +142,14 @@
             <div class="success-icon show">
                 <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
             </div>
-            <h1 style="color: #28a745;">¡Correo verificado!</h1>
+            <h1 style="color: #10B981;">¡Correo verificado!</h1>
             <p class="message">
                 Tu cuenta ha sido verificada correctamente.
             </p>
 
             <div class="app-box">
                 <div class="app-icon">📱</div>
-                <h2>Abre la aplicación MotoGo</h2>
+                <h2>Abre la aplicación FlightHours</h2>
                 <p>Ya puedes iniciar sesión con tu correo y contraseña.</p>
             </div>
 
@@ -163,7 +163,7 @@
             <div class="error-icon show">
                 <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
             </div>
-            <h1 style="color: #dc3545;">Error de verificación</h1>
+            <h1 style="color: #EF4444;">Error de verificación</h1>
             <p class="message" id="error-message">
                 No pudimos verificar tu correo. El enlace puede haber expirado.
             </p>
@@ -175,7 +175,7 @@
             <div class="success-icon show">
                 <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
             </div>
-            <h1 style="color: #17a2b8;">Correo ya verificado</h1>
+            <h1 style="color: #0047AB;">Correo ya verificado</h1>
             <p class="message">
                 Tu correo electrónico ya estaba verificado.<br>
                 Puedes usar la aplicación normalmente.

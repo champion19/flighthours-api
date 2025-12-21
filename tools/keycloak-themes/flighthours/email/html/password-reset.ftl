@@ -25,7 +25,7 @@
                 <p style="margin: 1rem 0; color: #64748B; font-size: 15px;">Si fuiste tú quien solicitó esto, haz clic en el siguiente botón para crear una nueva contraseña:</p>
 
                 <div style="text-align: center; margin: 1.5rem 0;">
-                    <a href="${link}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #0047AB 0%, #1E88E5 100%); color: white; text-decoration: none; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 71, 171, 0.2);">
+                    <a href="${link}" style="display: inline-block; padding: 14px 28px; background-color: #0047AB; color: #FFFFFF; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px;">
                         Restablecer contraseña
                     </a>
                 </div>

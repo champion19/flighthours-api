@@ -85,7 +85,7 @@
             <div class="app-box">
                 <div class="app-icon">📱</div>
                 <h2>Solicita un nuevo enlace</h2>
-                <p>Abre la aplicación MotoGo y solicita un nuevo correo de verificación.</p>
+                <p>Abre la aplicación FlightHours y solicita un nuevo correo de verificación.</p>
             </div>
 
             <div class="error-box">

@@ -5,7 +5,6 @@ import (
 	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
-	"errors"
 )
 
 // RegisterEmployee godoc
@@ -180,11 +179,10 @@ func (h handler) Login() gin.HandlerFunc {
 
 		log.Info(logger.LogKeycloakUserLogin, "email", req.Email, "client_ip", c.ClientIP())
 
-		// Llamar al servicio de autenticación de Keycloak
-		token, err := h.EmployeeService.Login(c, req.Email, req.Password)
+		token, err := h.Interactor.Login(c, req.Email, req.Password)
 		if err != nil {
 			log.Error(logger.LogKeycloakUserLoginError, "email", req.Email, "error", err, "client_ip", c.ClientIP())
-			c.Error(errors.New(domain.MsgUnauthorized))
+			h.Response.Error(c, domain.MsgUnauthorized)
 			return
 		}
 
@@ -196,7 +194,7 @@ func (h handler) Login() gin.HandlerFunc {
 		}
 
 		log.Success(logger.LogKeycloakUserLoginOK, "email", req.Email, "client_ip", c.ClientIP())
-		middleware.RecordEmployeeRegistration() // Por ahora usamos el mismo metric
+		middleware.RecordEmployeeRegistration()
 		h.Response.SuccessWithData(c, "MOD_AUTH_LOGIN_SUCCESS_EXI_00001", response)
 	}
 }

@@ -32,7 +32,7 @@ func (s service) GetEmployeeByEmail(ctx context.Context, email string) (*domain.
 		s.logger.Error(logger.LogEmployeeServiceErrorByEmail, "email", email, "error", err)
 		return nil, err
 	}
-	s.logger.Debug(logger.LogEmployeeServiceFoundByEmail, "email", email,"employee_id", employee.ID)
+	s.logger.Debug(logger.LogEmployeeServiceFoundByEmail, "email", email, "employee_id", employee.ID)
 	return employee, nil
 }
 
@@ -43,7 +43,7 @@ func (s service) GetEmployeeByID(ctx context.Context, id string) (*domain.Employ
 		s.logger.Error(logger.LogEmployeeServiceErrorByID, "employee_id", id, "error", err)
 		return nil, err
 	}
-	s.logger.Debug(logger.LogEmployeeServiceFoundByID, "employee_id", id,"email", employee.Email)
+	s.logger.Debug(logger.LogEmployeeServiceFoundByID, "employee_id", id, "email", employee.Email)
 	return employee, nil
 }
 
@@ -154,7 +154,7 @@ func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Empl
 
 func (s service) SetUserPassword(ctx context.Context, userID string, password string) error {
 	s.logger.Debug(logger.LogEmployeeServicePasswordSet, "keycloak_user_id", userID)
-	err := s.keycloak.SetPassword(ctx, userID, password, true)
+	err := s.keycloak.SetPassword(ctx, userID, password, false)
 	if err != nil {
 		s.logger.Error(logger.LogEmployeeServicePasswordError, "keycloak_user_id", userID, "error", err)
 		return err

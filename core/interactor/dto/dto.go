@@ -16,7 +16,12 @@ type UserSyncStatus struct {
 	LastSyncAt     string `json:"last_sync_at,omitempty"`
 }
 
-
+type TokenResponse struct {
+	ExpiresIn    int    `json:"expires_in"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	TokenType    string `json:"token_type"`
+}
 
 func FromDomainToDTO(employee *domain.Employee) *RegisterEmployee {
 	return &RegisterEmployee{
@@ -24,4 +29,3 @@ func FromDomainToDTO(employee *domain.Employee) *RegisterEmployee {
 		Message:  "Employee located successfully",
 	}
 }
-

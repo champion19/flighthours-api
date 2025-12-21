@@ -243,6 +243,11 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_KC_PWD_RESET_ERROR_ERR_00001":         http.StatusServiceUnavailable,  // 503 - Error enviando reset
 
 	// ========================================
+	// Authentication Module (MOD_AUTH_*)
+	// ========================================
+	"MOD_AUTH_LOGIN_SUCCESS_EXI_00001": http.StatusOK, // 200 - Login exitoso
+
+	// ========================================
 	// Infrastructure Module (MOD_INFRA_*)
 	// ========================================
 	"MOD_INFRA_KC_UNAVAIL_ERR_00004":      http.StatusLocked,              // 423 - Keycloak no disponible
