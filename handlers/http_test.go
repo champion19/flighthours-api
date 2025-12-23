@@ -206,8 +206,8 @@ func TestHTTP_RegisterEmployee(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
-		if w.Code != http.StatusOK {
-			t.Fatalf("expected status %d, got %d. body=%s", http.StatusOK, w.Code, w.Body.String())
+		if w.Code != http.StatusCreated {
+			t.Fatalf("expected status %d, got %d. body=%s", http.StatusCreated, w.Code, w.Body.String())
 		}
 
 		var out middleware.APIResponse

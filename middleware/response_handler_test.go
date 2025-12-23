@@ -48,8 +48,8 @@ func TestResponseHandler_Success(t *testing.T) {
 
 	handler.Success(c, domain.MsgUserRegistered)
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("expected status %d, got %d", http.StatusCreated, w.Code)
 	}
 }
 
@@ -63,8 +63,8 @@ func TestResponseHandler_SuccessWithData(t *testing.T) {
 	data := map[string]string{"id": "123"}
 	handler.SuccessWithData(c, domain.MsgUserRegistered, data)
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+	if w.Code != http.StatusCreated {
+		t.Fatalf("expected status %d, got %d", http.StatusCreated, w.Code)
 	}
 }
 

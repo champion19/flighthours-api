@@ -203,6 +203,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	// ========================================
 	// Users Module (MOD_U_*)
 	// ========================================
+	"MOD_U_REG_EXI_00001":        http.StatusCreated,      // 201 - Usuario registrado exitosamente
 	"MOD_U_DUP_ERR_00001":        http.StatusConflict,     // 409 - Usuario duplicado
 	"MOD_U_EMAIL_NF_ERR_00005":   http.StatusNotFound,     // 404 - Email no encontrado
 	"MOD_U_GET_ERR_00003":        http.StatusNotFound,     // 404 - Usuario no encontrado
@@ -241,6 +242,14 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_KC_VERIF_EMAIL_ERROR_ERR_00001":       http.StatusServiceUnavailable,  // 503 - Error enviando email
 	"MOD_KC_PWD_RESET_SENT_EXI_00001":          http.StatusOK,                  // 200 - Email de reset enviado
 	"MOD_KC_PWD_RESET_ERROR_ERR_00001":         http.StatusServiceUnavailable,  // 503 - Error enviando reset
+	// Login with email verification
+	"MOD_KC_LOGIN_EMAIL_NOT_VERIFIED_ERR_00001": http.StatusUnauthorized, // 401 - Email no verificado, no puede hacer login
+	"MOD_KC_LOGIN_SUCCESS_EXI_00001":            http.StatusOK,           // 200 - Login exitoso
+	// Password update
+	"MOD_KC_PWD_UPDATED_EXI_00001":              http.StatusOK,                  // 200 - Contraseña actualizada
+	"MOD_KC_PWD_UPDATE_ERROR_ERR_00001":         http.StatusInternalServerError, // 500 - Error actualizando contraseña
+	"MOD_KC_PWD_MISMATCH_ERR_00001":             http.StatusBadRequest,          // 400 - Contraseñas no coinciden
+	"MOD_KC_PWD_UPDATE_TOKEN_INVALID_ERR_00001": http.StatusUnauthorized,        // 401 - Token de actualización inválido
 
 	// ========================================
 	// Authentication Module (MOD_AUTH_*)
@@ -268,6 +277,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	// ========================================
 	// Messages Module (MOD_M_*)
 	// ========================================
+	"MOD_M_CREATE_EXI_00001":    http.StatusCreated,    // 201 - Mensaje creado exitosamente
 	"MOD_M_UPDATE_ERR_00010":    http.StatusBadRequest, // 400 - Error actualizando mensaje
 	"MOD_M_NOT_FOUND_ERR_00001": http.StatusNotFound,   // 404 - Mensaje no encontrado
 }

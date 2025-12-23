@@ -219,4 +219,7 @@ const (
 	MsgKCPwdUpdateError        = "MOD_KC_PWD_UPDATE_ERROR_ERR_00001"
 	MsgKCPwdMismatch           = "MOD_KC_PWD_MISMATCH_ERR_00001"
 	MsgKCPwdUpdateTokenInvalid = "MOD_KC_PWD_UPDATE_TOKEN_INVALID_ERR_00001"
+	// Login
+	MsgKCLoginEmailNotVerified = "MOD_KC_LOGIN_EMAIL_NOT_VERIFIED_ERR_00001"
+	MsgKCLoginSuccess          = "MOD_KC_LOGIN_SUCCESS_EXI_00001"
 )

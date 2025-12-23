@@ -384,13 +384,47 @@ func (s service) SendPasswordResetEmail(ctx context.Context, email string) error
 }
 
 // Login authenticates a user with email and password
+// This method verifies that the email is verified before allowing login
+// If email is not verified, it automatically resends the verification email
 func (s service) Login(ctx context.Context, email, password string) (*gocloak.JWT, error) {
+	s.logger.Debug(logger.LogKeycloakLoginCheckingVerification, "email", email)
+
+	// Step 1: Get user from Keycloak to check email verification status
+	user, err := s.keycloak.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
+		return nil, domain.ErrUserNotFound
+	}
+
+	// Step 2: Check if email is verified
+	if user.EmailVerified == nil || !*user.EmailVerified {
+		s.logger.Warn(logger.LogKeycloakLoginEmailNotVerified, "email", email, "user_id", *user.ID)
+
+		// Step 2.1: Resend verification email automatically
+		s.logger.Info(logger.LogKeycloakLoginResendingVerification, "email", email, "user_id", *user.ID)
+		if sendErr := s.keycloak.SendVerificationEmail(ctx, *user.ID); sendErr != nil {
+			s.logger.Error(logger.LogKeycloakLoginResendVerificationError,
+				"email", email,
+				"user_id", *user.ID,
+				"error", sendErr)
+			// Continue anyway - the main error is that email is not verified
+		} else {
+			s.logger.Success(logger.LogKeycloakLoginResendVerificationOK, "email", email, "user_id", *user.ID)
+		}
+
+		return nil, domain.ErrorEmailNotVerified
+	}
+
+	s.logger.Debug(logger.LogKeycloakLoginEmailVerified, "email", email, "user_id", *user.ID)
+
+	// Step 3: Proceed with Keycloak authentication
 	s.logger.Debug(logger.LogKeycloakUserLogin, "email", email)
 	token, err := s.keycloak.LoginUser(ctx, email, password)
 	if err != nil {
 		s.logger.Error(logger.LogKeycloakUserLoginError, "email", email, "error", err)
 		return nil, err
 	}
+
 	s.logger.Success(logger.LogKeycloakUserLoginOK, "email", email)
 	return token, nil
 }

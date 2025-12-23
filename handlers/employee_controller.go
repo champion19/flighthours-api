@@ -69,15 +69,6 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			true,                 // httpOnly
 		)
 
-		// Construir respuesta con HATEOAS
-		baseURL := GetBaseURL(c)
-		links := BuildAccountLinks(baseURL, encodedID)
-		SetLocationHeader(c, baseURL, "accounts", encodedID)
-
-		response := RegisterEmployeeResponse{
-			Links: links,
-		}
-
 		log.Success("register employee success",
 			result.Employee.ToLogger(),
 			"encoded_id", encodedID,
@@ -85,7 +76,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 
 		// Record Prometheus metric for employee registration
 		middleware.RecordEmployeeRegistration()
-		h.Response.SuccessWithData(c, domain.MsgUserRegistered, response)
+		h.Response.Success(c, domain.MsgUserRegistered)
 	}
 }
 
@@ -183,7 +174,19 @@ func (h handler) Login() gin.HandlerFunc {
 		token, err := h.Interactor.Login(c, req.Email, req.Password)
 		if err != nil {
 			log.Error(logger.LogKeycloakUserLoginError, "email", req.Email, "error", err, "client_ip", c.ClientIP())
-			h.Response.Error(c, domain.MsgUnauthorized)
+
+			// Handle specific errors with appropriate messages
+			switch err {
+			case domain.ErrorEmailNotVerified:
+				// Email not verified - verification email was resent automatically
+				h.Response.Error(c, domain.MsgKCLoginEmailNotVerified)
+			case domain.ErrUserNotFound:
+				// User not found - return generic unauthorized for security
+				h.Response.Error(c, domain.MsgUnauthorized)
+			default:
+				// Other errors (invalid credentials, etc.)
+				h.Response.Error(c, domain.MsgUnauthorized)
+			}
 			return
 		}
 
@@ -196,7 +199,7 @@ func (h handler) Login() gin.HandlerFunc {
 
 		log.Success(logger.LogKeycloakUserLoginOK, "email", req.Email, "client_ip", c.ClientIP())
 		middleware.RecordEmployeeRegistration()
-		h.Response.SuccessWithData(c, "MOD_AUTH_LOGIN_SUCCESS_EXI_00001", response)
+		h.Response.SuccessWithData(c, domain.MsgKCLoginSuccess, response)
 	}
 }
 

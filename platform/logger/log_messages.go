@@ -178,6 +178,13 @@ const (
 	LogKeycloakPasswordTokenValidation    = "Validando token de actualización de contraseña"
 	LogKeycloakPasswordTokenValidOK       = "Token de actualización validado"
 	LogKeycloakPasswordTokenInvalid       = "Token de actualización inválido"
+	// Login with verification
+	LogKeycloakLoginCheckingVerification    = "Verificando estado de email antes de login"
+	LogKeycloakLoginEmailNotVerified        = "Login rechazado: email no verificado"
+	LogKeycloakLoginEmailVerified           = "Email verificado, procediendo con login"
+	LogKeycloakLoginResendingVerification   = "Reenviando email de verificación automáticamente"
+	LogKeycloakLoginResendVerificationOK    = "Email de verificación reenviado exitosamente"
+	LogKeycloakLoginResendVerificationError = "Error reenviando email de verificación"
 )
 
 // ============================================
