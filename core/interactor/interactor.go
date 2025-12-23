@@ -52,7 +52,7 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 
 	//paso 1.5
 	if err = i.service.CheckAndCleanInconsistentState(ctx, employee.Email); err != nil {
-		log.Error(logger.LogEmployeeInteractorStep15_Error,"error", err)
+		log.Error(logger.LogEmployeeInteractorStep15_Error, "error", err)
 		return
 	}
 	log.Success(logger.LogEmployeeInteractorStep15_OK, "email", employee.Email)
@@ -141,10 +141,10 @@ func (i *Interactor) RegisterEmployee(ctx context.Context, employee domain.Emplo
 
 	// Paso 9: Enviar email de verificación
 	if sendErr := i.service.SendVerificationEmail(ctx, keycloakUserID); sendErr != nil {
-    //log warning pero no falla la creación del usuario
+		//log warning pero no falla la creación del usuario
 		log.Warn(logger.LogKeycloakSendVerificationEmailError,
 			"keycloak_user_id", keycloakUserID,
-      "email", employee.Email,
+			"email", employee.Email,
 			"error", sendErr)
 	} else {
 		log.Info(logger.LogKeycloakSendVerificationEmailOK, "keycloak_user_id", keycloakUserID, "email", employee.Email)
@@ -168,6 +168,7 @@ func (i *Interactor) Locate(ctx context.Context, id string) (*dto.RegisterEmploy
 	}
 	return result, nil
 }
+
 // ResendVerificationEmail reenvía el email de verificación a un usuario por email
 func (i *Interactor) ResendVerificationEmail(ctx context.Context, email string) error {
 	traceID := middleware.GetTraceIDFromContext(ctx)
@@ -207,7 +208,7 @@ func (i *Interactor) RequestPasswordReset(ctx context.Context, email string) err
 	// Llamar al servicio que busca el usuario y envía el email
 	if err := i.service.SendPasswordResetEmail(ctx, email); err != nil {
 		log.Warn(logger.LogKeycloakSendPasswordResetError, "email", email, "error", err)
-	} else{
+	} else {
 		log.Success(logger.LogKeycloakSendPasswordResetOK, "email", email)
 	}
 
@@ -246,20 +247,52 @@ func (i *Interactor) Login(ctx context.Context, email string, password string) (
 	traceID := middleware.GetTraceIDFromContext(ctx)
 	log := i.logger.WithTraceID(traceID)
 
-	log.Info(logger.LogKeycloakUserLogin, "email", email, "client_ip" )
+	log.Info(logger.LogKeycloakUserLogin, "email", email, "client_ip")
 
 	// Llamar al servicio de autenticación de Keycloak
 	token, err := i.service.Login(ctx, email, password)
-		if err != nil {
-			log.Error(logger.LogKeycloakUserLoginError, "email", email, "error", err, "client_ip")
-			return nil, err
-		}
+	if err != nil {
+		log.Error(logger.LogKeycloakUserLoginError, "email", email, "error", err, "client_ip")
+		return nil, err
+	}
 
 	log.Success(logger.LogKeycloakUserLoginOK, "email", email)
 	return &dto.TokenResponse{
-		ExpiresIn: token.ExpiresIn,
-		AccessToken: token.AccessToken,
+		ExpiresIn:    token.ExpiresIn,
+		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
-		TokenType: token.TokenType,
+		TokenType:    token.TokenType,
 	}, nil
+}
+
+// UpdatePassword validates the action token and updates the user's password
+// This method handles password updates from the password reset flow
+func (i *Interactor) UpdatePassword(ctx context.Context, token, newPassword, confirmPassword string) (string, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogKeycloakPasswordUpdate)
+
+	// Validate passwords match
+	if newPassword != confirmPassword {
+		log.Warn(logger.LogKeycloakPasswordMismatch)
+		return "", domain.ErrPasswordMismatch
+	}
+
+	// Delegate to service
+	email, err := i.service.UpdatePassword(ctx, token, newPassword)
+	if err != nil {
+		switch err {
+		case domain.ErrInvalidToken:
+			log.Error(logger.LogKeycloakPasswordTokenInvalid, "error", err)
+		case domain.ErrPasswordUpdateFailed:
+			log.Error(logger.LogKeycloakPasswordUpdateError, "error", err)
+		default:
+			log.Error(logger.LogKeycloakPasswordUpdateError, "error", err)
+		}
+		return "", err
+	}
+
+	log.Success(logger.LogKeycloakPasswordUpdateOK, "email", email)
+	return email, nil
 }

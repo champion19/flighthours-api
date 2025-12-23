@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/champion19/flighthours-api/platform/logger"
-	_ "github.com/champion19/flighthours-api/platform/swaggo" 
+	_ "github.com/champion19/flighthours-api/platform/swaggo"
 	"github.com/champion19/flighthours-api/server"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -58,3 +58,4 @@ func main() {
 	}
 
 }
+

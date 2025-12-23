@@ -101,7 +101,7 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 // @Failure      404      {object}  middleware.APIResponse  "Usuario no encontrado"
 // @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
 // @Router       /auth/resend-verification [post]
-func (h handler) ResendVerificationEmail()gin.HandlerFunc {
+func (h handler) ResendVerificationEmail() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req ResendVerificationEmailRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -111,7 +111,7 @@ func (h handler) ResendVerificationEmail()gin.HandlerFunc {
 
 		err := h.Interactor.ResendVerificationEmail(c, req.Email)
 		if err != nil {
-		// Manejar diferentes tipos de errores
+			// Manejar diferentes tipos de errores
 			switch err {
 			case domain.ErrUserNotFound:
 				h.Response.Error(c, "MOD_KC_USER_NOT_FOUND_ERR_00001")
@@ -122,7 +122,7 @@ func (h handler) ResendVerificationEmail()gin.HandlerFunc {
 			}
 			return
 		}
-		h.Response.Success(c, "MOD_KC_VERIF_EMAIL_RESENT_EXI_00001",req.Email)
+		h.Response.Success(c, "MOD_KC_VERIF_EMAIL_RESENT_EXI_00001", req.Email)
 	}
 }
 
@@ -138,7 +138,7 @@ func (h handler) ResendVerificationEmail()gin.HandlerFunc {
 // @Failure      404      {object}  middleware.APIResponse  "Usuario no encontrado"
 // @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
 // @Router       /auth/password-reset [post]
-func (h handler) RequestPasswordReset()  gin.HandlerFunc {
+func (h handler) RequestPasswordReset() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req PasswordResetRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -154,6 +154,7 @@ func (h handler) RequestPasswordReset()  gin.HandlerFunc {
 		h.Response.Success(c, "MOD_KC_PWD_RESET_SENT_EXI_00001")
 	}
 }
+
 // @Summary Login de usuario
 // @Description Autentica un usuario y retorna tokens de acceso
 // @Tags Autenticación
@@ -248,5 +249,63 @@ func (h handler) VerifyEmailByToken() gin.HandlerFunc {
 
 		log.Success(logger.LogKeycloakEmailVerifyOK, "email", email, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgKCEmailVerified, response)
+	}
+}
+
+// UpdatePassword godoc
+// @Summary      Actualizar contraseña con token
+// @Description  Actualiza la contraseña del usuario usando el token recibido por email
+// @Tags         authentication
+// @Accept       json
+// @Produce      json
+// @Param        request  body      UpdatePasswordRequest  true  "Token y nueva contraseña"
+// @Success      200      {object}  middleware.APIResponse{data=UpdatePasswordResponse}  "Contraseña actualizada exitosamente"
+// @Failure      400      {object}  middleware.APIResponse  "Error de validación - Contraseñas no coinciden o token inválido"
+// @Failure      401      {object}  middleware.APIResponse  "Token inválido o expirado"
+// @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /auth/update-password [post]
+func (h handler) UpdatePassword() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		var req UpdatePasswordRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Error(logger.LogRegJSONParseError, "error", err)
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		// Validate passwords match
+		if req.NewPassword != req.ConfirmPassword {
+			log.Warn(logger.LogKeycloakPasswordMismatch, "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgKCPwdMismatch)
+			return
+		}
+
+		log.Info(logger.LogKeycloakPasswordUpdate, "client_ip", c.ClientIP())
+
+		email, err := h.Interactor.UpdatePassword(c, req.Token, req.NewPassword, req.ConfirmPassword)
+		if err != nil {
+			switch err {
+			case domain.ErrInvalidToken:
+				h.Response.Error(c, domain.MsgKCPwdUpdateTokenInvalid)
+			case domain.ErrPasswordMismatch:
+				h.Response.Error(c, domain.MsgKCPwdMismatch)
+			case domain.ErrPasswordUpdateFailed:
+				h.Response.Error(c, domain.MsgKCPwdUpdateError)
+			default:
+				h.Response.Error(c, domain.MsgKCPwdUpdateError)
+			}
+			return
+		}
+
+		response := UpdatePasswordResponse{
+			Updated: true,
+			Email:   email,
+		}
+
+		log.Success(logger.LogKeycloakPasswordUpdateOK, "email", email, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgKCPwdUpdated, response)
 	}
 }

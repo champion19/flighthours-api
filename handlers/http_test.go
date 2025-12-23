@@ -81,6 +81,9 @@ func (f *fakeService) GetUserByEmail(context.Context, string) (*gocloak.User, er
 }
 func (f *fakeService) RollbackEmployee(context.Context, string) error     { return nil }
 func (f *fakeService) RollbackKeycloakUser(context.Context, string) error { return nil }
+func (f *fakeService) UpdatePassword(context.Context, string, string) (string, error) {
+	return "", nil
+}
 
 type fakeServiceErr struct {
 	err error
@@ -126,6 +129,9 @@ func (f *fakeServiceErr) GetUserByEmail(context.Context, string) (*gocloak.User,
 }
 func (f *fakeServiceErr) RollbackEmployee(context.Context, string) error     { return nil }
 func (f *fakeServiceErr) RollbackKeycloakUser(context.Context, string) error { return nil }
+func (f *fakeServiceErr) UpdatePassword(context.Context, string, string) (string, error) {
+	return "", nil
+}
 
 type fakeMessageCacheRepo struct {
 	messages []cachetypes.CachedMessage

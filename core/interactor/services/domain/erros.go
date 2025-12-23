@@ -23,9 +23,11 @@ var (
 	ErrRoleRequired              = errors.New("Err_ROLE_REQUIRED")
 	ErrDBQueryFailed             = errors.New("Err_DB_QUERY_FAILED")
 	ErrUserCannotDelete          = errors.New("Err_USER_CANNOT_DELETE")
+	ErrPasswordMismatch          = errors.New("Err_PASSWORD_MISMATCH")
+	ErrPasswordUpdateFailed      = errors.New("Err_PASSWORD_UPDATE_FAILED")
 )
 
-//Infrastructure Errors
+// Infrastructure Errors
 var (
 	ErrKeycloakInconsistentState  = errors.New("ERR_KC_INCONSISTENT_STATE")
 	ErrKeycloakUserCreationFailed = errors.New("ERR_KC_USER_CREATION_FAILED")
@@ -39,7 +41,7 @@ var (
 	ErrIncompleteRegistration = errors.New("ERR_INCOMPLETE_REGISTRATION")
 )
 
-//Request Validation errors
+// Request Validation errors
 var (
 	ErrInvalidJSONFormat = errors.New("Err_INVALID_JSON_FORMAT")
 	ErrInvalidRequest    = errors.New("Err_INVALID_REQUEST")
@@ -60,7 +62,7 @@ var (
 	ErrSchemaMultipleFields   = errors.New("ERR_SCHEMA_MULTIPLE_FIELDS")
 )
 
-//Authorization Errors
+// Authorization Errors
 var (
 	ErrRoleAssignmentFailed = errors.New("Err_ROLE_ASSIGNMENT_FAILED")
 	ErrRoleRemovalFailed    = errors.New("Err_ROLE_REMOVAL_FAILED")
@@ -212,4 +214,9 @@ const (
 	// Password Reset
 	MsgKCPwdResetSent  = "MOD_KC_PWD_RESET_SENT_EXI_00001"
 	MsgKCPwdResetError = "MOD_KC_PWD_RESET_ERROR_ERR_00001"
+	// Password Update
+	MsgKCPwdUpdated            = "MOD_KC_PWD_UPDATED_EXI_00001"
+	MsgKCPwdUpdateError        = "MOD_KC_PWD_UPDATE_ERROR_ERR_00001"
+	MsgKCPwdMismatch           = "MOD_KC_PWD_MISMATCH_ERR_00001"
+	MsgKCPwdUpdateTokenInvalid = "MOD_KC_PWD_UPDATE_TOKEN_INVALID_ERR_00001"
 )

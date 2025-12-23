@@ -99,8 +99,11 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		//POST /auth/verify-email - Verificar correo con token
 		public.POST("/auth/verify-email", handler.VerifyEmailByToken())
 
-    //Messages Endpoints
-    // POST /messages - Crear nuevo mensaje
+		//POST /auth/update-password - Actualizar contraseña con token
+		public.POST("/auth/update-password", validator.WithValidateUpdatePassword(), handler.UpdatePassword())
+
+		//Messages Endpoints
+		// POST /messages - Crear nuevo mensaje
 		public.POST("/messages", validator.WithValidateMessage(), handler.CreateMessage())
 
 		// PUT /messages/:id - Actualizar mensaje existente

@@ -171,6 +171,13 @@ const (
 	LogKeycloakEmailVerifyOK              = "Email verificado exitosamente"
 	LogKeycloakEmailVerifyError           = "Error verificando email"
 	LogKeycloakEmailAlreadyVerified       = "Email ya ha sido verificado"
+	LogKeycloakPasswordUpdate             = "Actualizando contraseña de usuario"
+	LogKeycloakPasswordUpdateOK           = "Contraseña actualizada exitosamente"
+	LogKeycloakPasswordUpdateError        = "Error actualizando contraseña"
+	LogKeycloakPasswordMismatch           = "Las contraseñas no coinciden"
+	LogKeycloakPasswordTokenValidation    = "Validando token de actualización de contraseña"
+	LogKeycloakPasswordTokenValidOK       = "Token de actualización validado"
+	LogKeycloakPasswordTokenInvalid       = "Token de actualización inválido"
 )
 
 // ============================================

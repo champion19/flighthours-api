@@ -451,3 +451,27 @@ func (s service) LocateEmployee(ctx context.Context, id string) (*dto.RegisterEm
 		Message:  "Employee located successfully",
 	}, nil
 }
+
+// UpdatePassword validates the action token and updates the user's password
+// Returns the email of the user whose password was updated
+func (s service) UpdatePassword(ctx context.Context, token, newPassword string) (string, error) {
+	s.logger.Info(logger.LogKeycloakPasswordUpdate)
+
+	// Validate the action token and get user info
+	s.logger.Debug(logger.LogKeycloakPasswordTokenValidation)
+	userID, email, err := s.keycloak.ValidateActionToken(ctx, token)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakPasswordTokenInvalid, "error", err)
+		return "", domain.ErrInvalidToken
+	}
+	s.logger.Debug(logger.LogKeycloakPasswordTokenValidOK, "user_id", userID, "email", email)
+
+	// Set the new password (temporary: false because user chose this password)
+	if err := s.keycloak.SetPassword(ctx, userID, newPassword, false); err != nil {
+		s.logger.Error(logger.LogKeycloakPasswordUpdateError, "user_id", userID, "error", err)
+		return "", domain.ErrPasswordUpdateFailed
+	}
+
+	s.logger.Success(logger.LogKeycloakPasswordUpdateOK, "user_id", userID, "email", email)
+	return email, nil
+}

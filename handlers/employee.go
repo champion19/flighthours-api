@@ -33,7 +33,7 @@ type EmployeeResponse struct {
 }
 
 type RegisterEmployeeResponse struct {
-	Links   []Link `json:"_links"`
+	Links []Link `json:"_links"`
 }
 
 type LoginRequest struct {
@@ -47,6 +47,7 @@ type LoginResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	TokenType    string `json:"token_type"`
 }
+
 // ResendVerificationEmailRequest - DTO para reenviar email de verificación
 type ResendVerificationEmailRequest struct {
 	Email string `json:"email" binding:"required,email"`
@@ -57,7 +58,6 @@ type PasswordResetRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
-
 // VerifyEmailRequest - DTO para verificar email mediante token proxy
 // Este token es un JWT que contiene el email del usuario
 type verifyEmailRequest struct {
@@ -66,8 +66,21 @@ type verifyEmailRequest struct {
 
 // VerifyEmailResponse - Respuesta de verificación de email
 type verifyEmailResponse struct {
-	Verified bool `json:"verified"`
+	Verified bool   `json:"verified"`
 	Email    string `json:"email,omitempty"`
+}
+
+// UpdatePasswordRequest - DTO para actualizar contraseña con token de Keycloak
+type UpdatePasswordRequest struct {
+	Token           string `json:"token" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=8"`
+	ConfirmPassword string `json:"confirm_password" binding:"required,min=8"`
+}
+
+// UpdatePasswordResponse - Respuesta de actualización de contraseña
+type UpdatePasswordResponse struct {
+	Updated bool   `json:"updated"`
+	Email   string `json:"email,omitempty"`
 }
 
 func (e EmployeeRequest) ToDomain() domain.Employee {

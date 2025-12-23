@@ -94,6 +94,9 @@ func (fakeKeycloak) Logout(context.Context, string) error      { return errors.N
 func (fakeKeycloak) RefreshToken(context.Context, string) (*gocloak.JWT, error) {
 	return nil, errors.New("not implemented")
 }
+func (fakeKeycloak) ValidateActionToken(context.Context, string) (string, string, error) {
+	return "", "", errors.New("not implemented")
+}
 
 func TestService_RegisterEmployee(t *testing.T) {
 	ctx := context.Background()
