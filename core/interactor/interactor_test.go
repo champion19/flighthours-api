@@ -120,6 +120,9 @@ func (f *fakeService) RollbackKeycloakUser(ctx context.Context, kcID string) err
 func (f *fakeService) UpdatePassword(context.Context, string, string) (string, error) {
 	return "", nil
 }
+func (f *fakeService) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
+}
 
 func TestInteractor_RegisterEmployee(t *testing.T) {
 	ctx := context.Background()

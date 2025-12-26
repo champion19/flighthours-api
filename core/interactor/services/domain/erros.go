@@ -25,6 +25,9 @@ var (
 	ErrUserCannotDelete          = errors.New("Err_USER_CANNOT_DELETE")
 	ErrPasswordMismatch          = errors.New("Err_PASSWORD_MISMATCH")
 	ErrPasswordUpdateFailed      = errors.New("Err_PASSWORD_UPDATE_FAILED")
+	ErrUserCannotUpdate          = errors.New("Err_USER_CANNOT_UPDATE")
+	ErrKeycloakUpdateFailed      = errors.New("Err_KEYCLOAK_UPDATE_FAILED")
+	ErrRoleUpdateFailed          = errors.New("Err_ROLE_UPDATE_FAILED")
 )
 
 // Infrastructure Errors
@@ -112,6 +115,12 @@ const (
 	MsgUserUpdated       = "MOD_U_UPD_EXI_00002"
 	MsgUserDeleted       = "MOD_U_DEL_EXI_00003"
 	MsgUserEmailVerified = "MOD_U_VER_EXI_00004"
+	MsgUserFound         = "MOD_U_GET_EXI_00005"
+
+	// Update errors
+	MsgUserUpdateError         = "MOD_U_UPD_ERR_00013"
+	MsgUserKeycloakUpdateError = "MOD_U_KC_UPD_ERR_00014"
+	MsgUserRoleUpdateError     = "MOD_U_ROLE_UPD_ERR_00015"
 )
 
 // Person Module (MOD_P_*)

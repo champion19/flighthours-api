@@ -84,6 +84,9 @@ func (f *fakeService) RollbackKeycloakUser(context.Context, string) error { retu
 func (f *fakeService) UpdatePassword(context.Context, string, string) (string, error) {
 	return "", nil
 }
+func (f *fakeService) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
+}
 
 type fakeServiceErr struct {
 	err error
@@ -131,6 +134,9 @@ func (f *fakeServiceErr) RollbackEmployee(context.Context, string) error     { r
 func (f *fakeServiceErr) RollbackKeycloakUser(context.Context, string) error { return nil }
 func (f *fakeServiceErr) UpdatePassword(context.Context, string, string) (string, error) {
 	return "", nil
+}
+func (f *fakeServiceErr) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
 }
 
 type fakeMessageCacheRepo struct {

@@ -82,8 +82,14 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	{
 		// Registro de usuario
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
-		//GET/accounts/:id
-		//public.GET("/accounts/:id", handler.GetEmployeeByID())
+
+		// GET /employees/:id - Obtener información de un empleado por ID (sin contraseña)
+		public.GET("/employees/:id", handler.GetEmployeeByID())
+
+		// PUT /employees/:id - Actualizar información general de un empleado
+		// No modifica email ni password (se manejan en endpoints separados)
+		// Sincroniza cambios de active y role con Keycloak
+		public.PUT("/employees/:id", handler.UpdateEmployee())
 
 		// Login - devuelve tokens JWT
 		public.POST("/login", handler.Login())

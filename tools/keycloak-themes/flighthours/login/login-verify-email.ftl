@@ -36,19 +36,18 @@
             gap: 0.5rem;
         }
         .logo::before { content: '✈️'; font-size: 28px; }
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid #E1E8ED;
-            border-top: 5px solid #0047AB;
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #0047AB 0%, #4A90E2 100%);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 2rem;
-        }
-        .spinner.hidden { display: none; }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 4px 16px rgba(0, 71, 171, 0.3);
         }
         h1 {
             color: #2C3E50;
@@ -60,34 +59,18 @@
             color: #64748B;
             font-size: 15px;
             line-height: 1.6;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
-            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        .app-box {
+            background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+            border: 2px solid #0047AB;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-        .success-icon.show { display: flex; }
-        .success-icon svg { width: 40px; height: 40px; fill: white; }
-        .error-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-        }
-        .error-icon.show { display: flex; }
-        .error-icon svg { width: 40px; height: 40px; fill: white; }
+        .app-box h2 { color: #0047AB; font-size: 18px; margin-bottom: 0.5rem; font-weight: 600; }
+        .app-box p { color: #2C3E50; font-size: 14px; margin: 0; }
+        .app-icon { font-size: 48px; margin-bottom: 0.5rem; }
         .btn {
             display: inline-block;
             padding: 14px 32px;
@@ -111,139 +94,53 @@
             color: #64748B;
             font-size: 13px;
         }
-        .hidden { display: none !important; }
+        .info-box {
+            background: #FFFBEB;
+            border-left: 4px solid #F59E0B;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .info-box p {
+            color: #92400E;
+            font-size: 14px;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="logo">Flighthours</div>
 
-        <!-- Estado: Cargando -->
-        <div id="loading-state">
-            <div class="spinner"></div>
-            <h1>Verificando tu correo...</h1>
-            <p class="message">
-                Por favor espera un momento. Estamos procesando tu verificación automáticamente.
-            </p>
+        <div class="icon">📧</div>
+
+        <h1>Verificar correo electrónico</h1>
+
+        <p class="message">
+            Te hemos enviado un correo electrónico con instrucciones para verificar tu cuenta.
+        </p>
+
+        <div class="info-box">
+            <p><strong>Revisa tu bandeja de entrada</strong></p>
+            <p>Si no ves el correo, revisa también la carpeta de spam.</p>
         </div>
 
-        <!-- Estado: Éxito -->
-        <div id="success-state" class="hidden">
-            <div class="success-icon show">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            </div>
-            <h1 style="color: #10B981;">¡Correo verificado!</h1>
-            <p class="message">
-                Tu dirección de correo ha sido verificada exitosamente.<br>
-                Ya puedes abrir la aplicación Flighthours.
-            </p>
-            <a href="flighthours://email-verified" class="btn">Abrir Flighthours</a>
+        <div class="app-box">
+            <div class="app-icon">📱</div>
+            <h2>¿Ya verificaste tu correo?</h2>
+            <p>Vuelve a la aplicación FlightHours e inicia sesión.</p>
         </div>
 
-        <!-- Estado: Error -->
-        <div id="error-state" class="hidden">
-            <div class="error-icon show">
-                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </div>
-            <h1 style="color: #EF4444;">Error de verificación</h1>
-            <p class="message" id="error-message">
-                No pudimos verificar tu correo. El enlace puede haber expirado.
-            </p>
-            <a href="flighthours://resend-verification" class="btn">Reenviar correo</a>
-        </div>
-
-        <!-- Estado: Ya verificado -->
-        <div id="already-verified-state" class="hidden">
-            <div class="success-icon show">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            </div>
-            <h1 style="color: #0047AB;">Correo ya verificado</h1>
-            <p class="message">
-                Tu correo electrónico ya estaba verificado.<br>
-                Puedes usar la aplicación normalmente.
-            </p>
-            <a href="flighthours://home" class="btn">Abrir Flighthours</a>
-        </div>
+        <#if url?? && url.loginAction??>
+            <form action="${url.loginAction}" method="post">
+                <button type="submit" class="btn">Ya verifiqué mi correo</button>
+            </form>
+        </#if>
 
         <div class="footer">
-            © 2025 Flighthours
+            © ${.now?string('yyyy')} Flighthours
         </div>
     </div>
-
-    <script>
-        (function() {
-            // Configuración - CAMBIAR POR TU URL DE PRODUCCIÓN
-            const BACKEND_URL = 'http://localhost:8081/flighthours/api/v1/auth/verify-email';
-
-            // Elementos del DOM
-            const loadingState = document.getElementById('loading-state');
-            const successState = document.getElementById('success-state');
-            const errorState = document.getElementById('error-state');
-            const alreadyVerifiedState = document.getElementById('already-verified-state');
-            const errorMessage = document.getElementById('error-message');
-
-            function showState(state) {
-                loadingState.classList.add('hidden');
-                successState.classList.add('hidden');
-                errorState.classList.add('hidden');
-                alreadyVerifiedState.classList.add('hidden');
-                state.classList.remove('hidden');
-            }
-
-            function getTokenFromUrl() {
-                // Obtener el parámetro 'key' de la URL actual
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get('key');
-            }
-
-            async function verifyEmail() {
-                const token = getTokenFromUrl();
-
-                if (!token) {
-                    errorMessage.textContent = 'No se encontró el token de verificación en la URL.';
-                    showState(errorState);
-                    return;
-                }
-
-                console.log('[Flighthours] Enviando token al backend...');
-
-                try {
-                    const response = await fetch(BACKEND_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ token: token })
-                    });
-
-                    const data = await response.json();
-                    console.log('[Flighthours] Respuesta del backend:', data);
-
-                    if (response.ok && data.success) {
-                        showState(successState);
-                    } else if (data.code === 'MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001') {
-                        showState(alreadyVerifiedState);
-                    } else {
-                        // Mostrar mensaje de error específico si está disponible
-                        if (data.message && data.message.contenido) {
-                            errorMessage.textContent = data.message.contenido;
-                        }
-                        showState(errorState);
-                    }
-                } catch (error) {
-                    console.error('[Flighthours] Error:', error);
-                    errorMessage.textContent = 'Error de conexión. Por favor, intenta de nuevo más tarde.';
-                    showState(errorState);
-                }
-            }
-
-            // Ejecutar verificación cuando la página cargue
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', verifyEmail);
-            } else {
-                verifyEmail();
-            }
-        })();
-    </script>
 </body>
 </html>

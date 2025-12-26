@@ -7,7 +7,7 @@ ENV KC_DB=mysql
 WORKDIR /opt/keycloak
 
 # Copiar theme FlightHours
-COPY tools/keycloak/themes/flighthours /opt/keycloak/themes/flighthours
+COPY tools/keycloak-themes/flighthours /opt/keycloak/themes/flighthours
 
 
 RUN keytool -genkeypair -storepass password -storetype PKCS12 \

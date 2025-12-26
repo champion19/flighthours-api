@@ -509,3 +509,106 @@ func (s service) UpdatePassword(ctx context.Context, token, newPassword string) 
 	s.logger.Success(logger.LogKeycloakPasswordUpdateOK, "user_id", userID, "email", email)
 	return email, nil
 }
+
+// UpdateEmployee actualiza un empleado en la BD y sincroniza cambios relevantes con Keycloak
+// Sincroniza: estado active (enabled/disabled) y cambios de rol
+func (s service) UpdateEmployee(ctx context.Context, employee domain.Employee, previousActive bool, previousRole string) error {
+	s.logger.Info(logger.LogEmployeeUpdating, employee.ToLogger())
+
+	// Step 1: Begin transaction
+	tx, err := s.repository.BeginTx(ctx)
+	if err != nil {
+		s.logger.Error(logger.LogDBTransactionBeginErr, "error", err)
+		return domain.ErrUserCannotUpdate
+	}
+
+	// Step 2: Update employee in database
+	err = s.repository.UpdateEmployee(ctx, tx, employee)
+	if err != nil {
+		tx.Rollback()
+		s.logger.Error(logger.LogEmployeeUpdateError, employee.ToLogger(), "error", err)
+		return domain.ErrUserCannotUpdate
+	}
+
+	// Step 3: Sync with Keycloak if needed
+	if employee.KeycloakUserID != "" {
+		// Step 3.1: Check if active status changed
+		if previousActive != employee.Active {
+			s.logger.Info(logger.LogEmployeeKeycloakStatusUpdate,
+				"employee_id", employee.ID,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"previous_active", previousActive,
+				"new_active", employee.Active)
+
+			// Get user from Keycloak
+			kcUser, err := s.keycloak.GetUserByID(ctx, employee.KeycloakUserID)
+			if err != nil {
+				tx.Rollback()
+				s.logger.Error(logger.LogKeycloakUserGetByIDError,
+					"keycloak_user_id", employee.KeycloakUserID,
+					"error", err)
+				return domain.ErrKeycloakUpdateFailed
+			}
+
+			// Update enabled status
+			kcUser.Enabled = &employee.Active
+			if err := s.keycloak.UpdateUser(ctx, kcUser); err != nil {
+				tx.Rollback()
+				s.logger.Error(logger.LogKeycloakUserGetByIDError,
+					"keycloak_user_id", employee.KeycloakUserID,
+					"new_enabled", employee.Active,
+					"error", err)
+				return domain.ErrKeycloakUpdateFailed
+			}
+
+			s.logger.Success(logger.LogEmployeeKeycloakStatusUpdated,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"enabled", employee.Active)
+		}
+
+		// Step 3.2: Check if role changed
+		if previousRole != employee.Role && employee.Role != "" {
+			s.logger.Info(logger.LogEmployeeKeycloakRoleUpdate,
+				"employee_id", employee.ID,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"previous_role", previousRole,
+				"new_role", employee.Role)
+
+			// Remove old role if it existed
+			if previousRole != "" {
+				if err := s.keycloak.RemoveRole(ctx, employee.KeycloakUserID, previousRole); err != nil {
+					// Log but don't fail - old role might not exist
+					s.logger.Warn(logger.LogEmployeeServiceRoleError,
+						"keycloak_user_id", employee.KeycloakUserID,
+						"role", previousRole,
+						"action", "remove",
+						"error", err)
+				}
+			}
+
+			// Assign new role
+			if err := s.keycloak.AssignRole(ctx, employee.KeycloakUserID, employee.Role); err != nil {
+				tx.Rollback()
+				s.logger.Error(logger.LogEmployeeServiceRoleError,
+					"keycloak_user_id", employee.KeycloakUserID,
+					"role", employee.Role,
+					"action", "assign",
+					"error", err)
+				return domain.ErrRoleUpdateFailed
+			}
+
+			s.logger.Success(logger.LogEmployeeKeycloakRoleUpdated,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"role", employee.Role)
+		}
+	}
+
+	// Step 4: Commit transaction
+	if err := tx.Commit(); err != nil {
+		s.logger.Error(logger.LogDBTransactionCommitErr, "error", err)
+		return domain.ErrUserCannotUpdate
+	}
+
+	s.logger.Success(logger.LogEmployeeUpdateComplete, employee.ToLogger())
+	return nil
+}

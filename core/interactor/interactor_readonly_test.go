@@ -74,6 +74,9 @@ func (f *fakeServiceForReadOnly) RollbackKeycloakUser(context.Context, string) e
 func (f *fakeServiceForReadOnly) UpdatePassword(context.Context, string, string) (string, error) {
 	return "", nil
 }
+func (f *fakeServiceForReadOnly) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
+}
 
 var _ input.Service = (*fakeServiceForReadOnly)(nil)
 

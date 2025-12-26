@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlightHours - Actualizar Contraseña</title>
+    <title>FlightHours - Recuperar Contraseña</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -71,27 +71,7 @@
             border-color: #0047AB;
             box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.1);
         }
-        .password-requirements {
-            background: #F3F4F6;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        .password-requirements p {
-            font-size: 13px;
-            color: #6B7280;
-            margin-bottom: 4px;
-        }
-        .password-requirements ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-        .password-requirements li {
-            font-size: 12px;
-            color: #6B7280;
-            margin-bottom: 2px;
-        }
+
         .btn {
             display: block;
             width: 100%;
@@ -104,11 +84,24 @@
             border-radius: 10px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1rem;
         }
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 16px rgba(0, 71, 171, 0.3);
         }
+
+        .btn-link {
+            display: inline-block;
+            color: #0047AB;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+
         .error-message {
             background: #FEE2E2;
             color: #DC2626;
@@ -117,6 +110,7 @@
             margin-bottom: 1rem;
             font-size: 14px;
         }
+
         .footer { margin-top: 1.5rem; color: #64748B; font-size: 13px; }
     </style>
 </head>
@@ -126,45 +120,33 @@
             <div class="logo">FlightHours</div>
             <div class="icon">🔐</div>
 
-            <h1>Actualizar Contraseña</h1>
+            <h1>Recuperar Contraseña</h1>
 
             <p class="message">
-                Ingresa tu nueva contraseña para completar la actualización de tu cuenta.
+                Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
             </p>
 
-            <#if message?? && (message.type!'') = 'error'>
+            <#if message?has_content && (message.type = 'error' || message.type = 'warning')>
                 <div class="error-message">
-                    ${message.summary!'Error al procesar la solicitud'}
+                    ${kcSanitize(message.summary)?no_esc}
                 </div>
             </#if>
 
-            <#-- Formulario nativo de Keycloak -->
             <form action="${url.loginAction}" method="post">
                 <div class="form-group">
-                    <label for="password-new">Nueva contraseña</label>
-                    <input type="password" id="password-new" name="password-new"
-                           required minlength="8"
-                           placeholder="Mínimo 8 caracteres"
-                           autofocus autocomplete="new-password">
+                    <label for="username">Correo electrónico</label>
+                    <input type="email" id="username" name="username"
+                           placeholder="tu@email.com"
+                           autofocus required
+                           <#if auth?has_content && auth.showUsername()>
+                               value="${auth.attemptedUsername}"
+                           </#if>
+                    >
                 </div>
 
-                <div class="form-group">
-                    <label for="password-confirm">Confirmar contraseña</label>
-                    <input type="password" id="password-confirm" name="password-confirm"
-                           required minlength="8"
-                           placeholder="Repite la contraseña"
-                           autocomplete="new-password">
-                </div>
+                <button type="submit" class="btn">Enviar enlace de recuperación</button>
 
-                <div class="password-requirements">
-                    <p><strong>Requisitos de la contraseña:</strong></p>
-                    <ul>
-                        <li>Mínimo 8 caracteres</li>
-                        <li>Se recomienda incluir mayúsculas, minúsculas y números</li>
-                    </ul>
-                </div>
-
-                <button type="submit" class="btn">Actualizar Contraseña</button>
+                <a href="${url.loginUrl}" class="btn-link">← Volver al inicio de sesión</a>
             </form>
 
             <div class="footer">

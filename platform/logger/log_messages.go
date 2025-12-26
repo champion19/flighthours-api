@@ -265,6 +265,7 @@ const (
 	LogEmployeeGetByEmailError       = "Error obteniendo empleado por email"
 	LogEmployeeGetByID               = "Obteniendo empleado por ID"
 	LogEmployeeGetByIDError          = "Error obteniendo empleado por ID"
+	LogEmployeeGetByIDOK             = "Empleado obtenido exitosamente por ID"
 	LogEmployeeFound                 = "Empleado encontrado"
 	LogEmployeeNotFound              = "Empleado no encontrado"
 	LogEmployeeSearchError           = "Error buscando empleado"
@@ -276,6 +277,13 @@ const (
 	LogEmployeeDeleteError           = "Error eliminando empleado de base de datos"
 	LogEmployeeLocating              = "Localizando empleado"
 	LogEmployeeLocateError           = "Error localizando empleado"
+	// Update specific logs
+	LogEmployeeUpdateRequest         = "Solicitud de actualización de empleado recibida"
+	LogEmployeeUpdateComplete        = "Empleado actualizado exitosamente"
+	LogEmployeeKeycloakStatusUpdate  = "Actualizando estado del usuario en Keycloak"
+	LogEmployeeKeycloakStatusUpdated = "Estado del usuario actualizado en Keycloak"
+	LogEmployeeKeycloakRoleUpdate    = "Actualizando rol del usuario en Keycloak"
+	LogEmployeeKeycloakRoleUpdated   = "Rol del usuario actualizado en Keycloak"
 )
 
 // ============================================

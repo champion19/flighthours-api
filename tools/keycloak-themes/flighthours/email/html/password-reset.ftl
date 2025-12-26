@@ -24,6 +24,14 @@
 
                 <p style="margin: 1rem 0; color: #64748B; font-size: 15px;">Si fuiste tú quien solicitó esto, haz clic en el siguiente botón para crear una nueva contraseña:</p>
 
+                <#--
+                    Usamos el link de Keycloak pero con un redirect a nuestra página personalizada.
+                    El link original ${link} va a Keycloak action-token.
+                    Lo modificamos para redirigir a nuestra página de update-password que tiene JavaScript.
+                -->
+                <#assign customLink = "http://localhost:8080/realms/flighthours/protocol/openid-connect/auth?client_id=account&redirect_uri=" + link?url + "&response_type=code&scope=openid&kc_action=UPDATE_PASSWORD">
+
+                <#-- Para simplicidad, seguimos usando el link original pero nuestra página lo interceptará -->
                 <div style="text-align: center; margin: 1.5rem 0;">
                     <a href="${link}" style="display: inline-block; padding: 14px 28px; background-color: #0047AB; color: #FFFFFF; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px;">
                         Restablecer contraseña
