@@ -527,7 +527,9 @@ func (s service) UpdateEmployee(ctx context.Context, employee domain.Employee, p
 	if err != nil {
 		tx.Rollback()
 		s.logger.Error(logger.LogEmployeeUpdateError, employee.ToLogger(), "error", err)
-		return domain.ErrUserCannotUpdate
+		// Propagate the original error (e.g., ErrInvalidForeignKey, ErrDataTooLong)
+		// instead of replacing it with a generic error
+		return err
 	}
 
 	// Step 3: Sync with Keycloak if needed

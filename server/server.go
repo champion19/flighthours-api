@@ -89,7 +89,8 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// PUT /employees/:id - Actualizar información general de un empleado
 		// No modifica email ni password (se manejan en endpoints separados)
 		// Sincroniza cambios de active y role con Keycloak
-		public.PUT("/employees/:id", handler.UpdateEmployee())
+		// Valida: longitud de campos, formato de fechas, rol válido
+		public.PUT("/employees/:id", validator.WithValidateUpdateEmployee(), handler.UpdateEmployee())
 
 		// Login - devuelve tokens JWT
 		public.POST("/login", handler.Login())

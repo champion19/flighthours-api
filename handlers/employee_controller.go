@@ -515,6 +515,15 @@ func (h handler) UpdateEmployee() gin.HandlerFunc {
 				h.Response.Error(c, domain.MsgUserKeycloakUpdateError)
 			case domain.ErrRoleUpdateFailed:
 				h.Response.Error(c, domain.MsgUserRoleUpdateError)
+			// Data validation errors - 400/422, not 500
+			case domain.ErrInvalidForeignKey:
+				h.Response.Error(c, domain.MsgInvalidForeignKey)
+			case domain.ErrDataTooLong:
+				h.Response.Error(c, domain.MsgDataTooLong)
+			case domain.ErrDuplicateUser:
+				h.Response.Error(c, domain.MsgUserDuplicate)
+			case domain.ErrInvalidData:
+				h.Response.Error(c, domain.MsgInvalidData)
 			default:
 				h.Response.Error(c, domain.MsgServerError)
 			}

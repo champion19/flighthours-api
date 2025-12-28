@@ -204,6 +204,8 @@ var messageCodeToHTTPStatus = map[string]int{
 	// Users Module (MOD_U_*)
 	// ========================================
 	"MOD_U_REG_EXI_00001":        http.StatusCreated,      // 201 - Usuario registrado exitosamente
+	"MOD_U_UPD_EXI_00002":        http.StatusOK,           // 200 - Usuario actualizado exitosamente
+	"MOD_U_GET_EXI_00005":        http.StatusOK,           // 200 - Usuario encontrado
 	"MOD_U_DUP_ERR_00001":        http.StatusConflict,     // 409 - Usuario duplicado
 	"MOD_U_EMAIL_NF_ERR_00005":   http.StatusNotFound,     // 404 - Email no encontrado
 	"MOD_U_GET_ERR_00003":        http.StatusNotFound,     // 404 - Usuario no encontrado
@@ -211,6 +213,10 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_U_EMAIL_NV_ERR_00006":   http.StatusForbidden,    // 403 - Email no verificado
 	"MOD_U_TOKEN_EXP_ERR_00008":  http.StatusUnauthorized, // 401 - Token expirado
 	"MOD_U_TOKEN_USED_ERR_00009": http.StatusUnauthorized, // 401 - Token ya usado
+	// Update errors
+	"MOD_U_UPD_ERR_00013":      http.StatusInternalServerError, // 500 - Error actualizando usuario
+	"MOD_U_KC_UPD_ERR_00014":   http.StatusServiceUnavailable,  // 503 - Error sincronizando con Keycloak
+	"MOD_U_ROLE_UPD_ERR_00015": http.StatusServiceUnavailable,  // 503 - Error actualizando rol en Keycloak
 
 	// ========================================
 	// Person Module (MOD_P_*)
@@ -229,6 +235,10 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_V_VAL_ERR_00011":  http.StatusBadRequest, // 400 - Múltiples errores
 	"MOD_V_JSON_ERR_00012": http.StatusBadRequest, // 400 - JSON inválido
 	"MOD_V_ID_ERR_00013":   http.StatusBadRequest, // 400 - ID inválido
+	// Data validation errors from DB constraints
+	"MOD_V_FK_ERR_00014":   http.StatusUnprocessableEntity, // 422 - Invalid foreign key (e.g., airline doesn't exist)
+	"MOD_V_LEN_ERR_00015":  http.StatusUnprocessableEntity, // 422 - Data too long for column
+	"MOD_V_DATA_ERR_00016": http.StatusUnprocessableEntity, // 422 - Invalid data
 
 	// ========================================
 	// Keycloak Module (MOD_KC_*) - Email Verification & Auth

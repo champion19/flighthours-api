@@ -28,6 +28,10 @@ var (
 	ErrUserCannotUpdate          = errors.New("Err_USER_CANNOT_UPDATE")
 	ErrKeycloakUpdateFailed      = errors.New("Err_KEYCLOAK_UPDATE_FAILED")
 	ErrRoleUpdateFailed          = errors.New("Err_ROLE_UPDATE_FAILED")
+	// Data validation errors (from DB constraints)
+	ErrInvalidForeignKey = errors.New("Err_INVALID_FOREIGN_KEY") // 1452 - FK constraint fails
+	ErrDataTooLong       = errors.New("Err_DATA_TOO_LONG")       // 1406 - Data too long for column
+	ErrInvalidData       = errors.New("Err_INVALID_DATA")        // Generic invalid data
 )
 
 // Infrastructure Errors
@@ -121,6 +125,10 @@ const (
 	MsgUserUpdateError         = "MOD_U_UPD_ERR_00013"
 	MsgUserKeycloakUpdateError = "MOD_U_KC_UPD_ERR_00014"
 	MsgUserRoleUpdateError     = "MOD_U_ROLE_UPD_ERR_00015"
+	// Data validation errors (from DB constraints) - These are 400/422, not 500
+	MsgInvalidForeignKey = "MOD_V_FK_ERR_00014"   // Invalid reference (e.g., airline doesn't exist)
+	MsgDataTooLong       = "MOD_V_LEN_ERR_00015"  // Data exceeds column length
+	MsgInvalidData       = "MOD_V_DATA_ERR_00016" // Generic invalid data
 )
 
 // Person Module (MOD_P_*)
