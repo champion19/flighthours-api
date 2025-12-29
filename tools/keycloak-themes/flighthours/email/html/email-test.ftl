@@ -27,7 +27,7 @@
                     <p style="margin: 0.5rem 0 0 0; color: #1E40AF; font-size: 14px;">Tu servidor de correo está funcionando perfectamente con Keycloak.</p>
                 </div>
 
-                <div style="background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); padding: 24px; border-radius: 12px; text-align: center; margin: 24px 0; border: 2px solid #10B981;">
+                <div style="background-color: #F0FDF4; padding: 24px; border-radius: 12px; text-align: center; margin: 24px 0; border: 2px solid #10B981;">
                     <p style="color: #065F46; font-size: 18px; font-weight: 600; margin: 0;">
                         ✓ Todo está listo para enviar notificaciones
                     </p>

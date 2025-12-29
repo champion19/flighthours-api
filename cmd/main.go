@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/champion19/flighthours-api/platform/logger"
-	_ "github.com/champion19/flighthours-api/platform/swaggo" 
+	_ "github.com/champion19/flighthours-api/platform/swaggo"
 	"github.com/champion19/flighthours-api/server"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -41,10 +41,10 @@ func main() {
 
 	// Configurar CORS para permitir requests desde Swagger UI
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3001","http://localhost:8081", "http://localhost:8080"},
+		AllowOrigins:     []string{"http://localhost:3001", "http://localhost:8081", "http://localhost:8080"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+		ExposeHeaders:    []string{"Content-Length"},  
 		AllowCredentials: true,
 	}))
 

@@ -23,9 +23,18 @@ var (
 	ErrRoleRequired              = errors.New("Err_ROLE_REQUIRED")
 	ErrDBQueryFailed             = errors.New("Err_DB_QUERY_FAILED")
 	ErrUserCannotDelete          = errors.New("Err_USER_CANNOT_DELETE")
+	ErrPasswordMismatch          = errors.New("Err_PASSWORD_MISMATCH")
+	ErrPasswordUpdateFailed      = errors.New("Err_PASSWORD_UPDATE_FAILED")
+	ErrUserCannotUpdate          = errors.New("Err_USER_CANNOT_UPDATE")
+	ErrKeycloakUpdateFailed      = errors.New("Err_KEYCLOAK_UPDATE_FAILED")
+	ErrRoleUpdateFailed          = errors.New("Err_ROLE_UPDATE_FAILED")
+	// Data validation errors (from DB constraints)
+	ErrInvalidForeignKey = errors.New("Err_INVALID_FOREIGN_KEY") // 1452 - FK constraint fails
+	ErrDataTooLong       = errors.New("Err_DATA_TOO_LONG")       // 1406 - Data too long for column
+	ErrInvalidData       = errors.New("Err_INVALID_DATA")        // Generic invalid data
 )
 
-//Infrastructure Errors
+// Infrastructure Errors
 var (
 	ErrKeycloakInconsistentState  = errors.New("ERR_KC_INCONSISTENT_STATE")
 	ErrKeycloakUserCreationFailed = errors.New("ERR_KC_USER_CREATION_FAILED")
@@ -39,7 +48,7 @@ var (
 	ErrIncompleteRegistration = errors.New("ERR_INCOMPLETE_REGISTRATION")
 )
 
-//Request Validation errors
+// Request Validation errors
 var (
 	ErrInvalidJSONFormat = errors.New("Err_INVALID_JSON_FORMAT")
 	ErrInvalidRequest    = errors.New("Err_INVALID_REQUEST")
@@ -60,7 +69,7 @@ var (
 	ErrSchemaMultipleFields   = errors.New("ERR_SCHEMA_MULTIPLE_FIELDS")
 )
 
-//Authorization Errors
+// Authorization Errors
 var (
 	ErrRoleAssignmentFailed = errors.New("Err_ROLE_ASSIGNMENT_FAILED")
 	ErrRoleRemovalFailed    = errors.New("Err_ROLE_REMOVAL_FAILED")
@@ -110,6 +119,16 @@ const (
 	MsgUserUpdated       = "MOD_U_UPD_EXI_00002"
 	MsgUserDeleted       = "MOD_U_DEL_EXI_00003"
 	MsgUserEmailVerified = "MOD_U_VER_EXI_00004"
+	MsgUserFound         = "MOD_U_GET_EXI_00005"
+
+	// Update errors
+	MsgUserUpdateError         = "MOD_U_UPD_ERR_00013"
+	MsgUserKeycloakUpdateError = "MOD_U_KC_UPD_ERR_00014"
+	MsgUserRoleUpdateError     = "MOD_U_ROLE_UPD_ERR_00015"
+	// Data validation errors (from DB constraints) - These are 400/422, not 500
+	MsgInvalidForeignKey = "MOD_V_FK_ERR_00014"   // Invalid reference (e.g., airline doesn't exist)
+	MsgDataTooLong       = "MOD_V_LEN_ERR_00015"  // Data exceeds column length
+	MsgInvalidData       = "MOD_V_DATA_ERR_00016" // Generic invalid data
 )
 
 // Person Module (MOD_P_*)
@@ -212,4 +231,12 @@ const (
 	// Password Reset
 	MsgKCPwdResetSent  = "MOD_KC_PWD_RESET_SENT_EXI_00001"
 	MsgKCPwdResetError = "MOD_KC_PWD_RESET_ERROR_ERR_00001"
+	// Password Update
+	MsgKCPwdUpdated            = "MOD_KC_PWD_UPDATED_EXI_00001"
+	MsgKCPwdUpdateError        = "MOD_KC_PWD_UPDATE_ERROR_ERR_00001"
+	MsgKCPwdMismatch           = "MOD_KC_PWD_MISMATCH_ERR_00001"
+	MsgKCPwdUpdateTokenInvalid = "MOD_KC_PWD_UPDATE_TOKEN_INVALID_ERR_00001"
+	// Login
+	MsgKCLoginEmailNotVerified = "MOD_KC_LOGIN_EMAIL_NOT_VERIFIED_ERR_00001"
+	MsgKCLoginSuccess          = "MOD_KC_LOGIN_SUCCESS_EXI_00001"
 )

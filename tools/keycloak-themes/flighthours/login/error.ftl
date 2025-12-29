@@ -50,7 +50,6 @@
             background: #FEF2F2;
             border-left: 4px solid #EF4444;
             border-radius: 10px;
-
             padding: 1rem;
             margin-bottom: 1.5rem;
             text-align: left;
@@ -67,7 +66,6 @@
         .app-box p { color: #2C3E50; font-size: 14px; margin: 0; }
         .app-icon { font-size: 48px; margin-bottom: 0.5rem; }
         .footer { margin-top: 1.5rem; color: #64748B; font-size: 13px; }
-
     </style>
 </head>
 <body>
@@ -78,19 +76,29 @@
 
             <h1>Enlace inválido o expirado</h1>
 
-            <p class="message">
-                El enlace que utilizaste ya no es válido o ha expirado.
-            </p>
+            <#if message??>
+                <p class="message">
+                    <#if message.summary??>
+                        ${message.summary}
+                    <#else>
+                        ${message}
+                    </#if>
+                </p>
+            <#else>
+                <p class="message">
+                    El enlace que utilizaste ya no es válido o ha expirado.
+                </p>
+            </#if>
 
             <div class="app-box">
                 <div class="app-icon">📱</div>
                 <h2>Solicita un nuevo enlace</h2>
-                <p>Abre la aplicación MotoGo y solicita un nuevo correo de verificación.</p>
+                <p>Abre la aplicación FlightHours y solicita un nuevo correo.</p>
             </div>
 
             <div class="error-box">
                 <p><strong>¿Por qué pasó esto?</strong></p>
-                <p>• El enlace puede haber expirado (15 minutos)<br>
+                <p>• El enlace puede haber expirado<br>
                    • Ya fue utilizado anteriormente<br>
                    • El enlace está incompleto</p>
             </div>

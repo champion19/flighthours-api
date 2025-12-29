@@ -24,6 +24,7 @@ type AuthClient interface {
 	SendVerificationEmail(ctx context.Context, userID string) error
 	SendPasswordResetEmail(ctx context.Context, userID string) error
 	VerifyEmail(ctx context.Context, userID string) error
+	ValidateActionToken(ctx context.Context, token string) (userID string, email string, err error)
 
 	Logout(ctx context.Context, refreshToken string) error
 	RefreshToken(ctx context.Context, refreshToken string) (*gocloak.JWT, error)

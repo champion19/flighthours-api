@@ -81,6 +81,12 @@ func (f *fakeService) GetUserByEmail(context.Context, string) (*gocloak.User, er
 }
 func (f *fakeService) RollbackEmployee(context.Context, string) error     { return nil }
 func (f *fakeService) RollbackKeycloakUser(context.Context, string) error { return nil }
+func (f *fakeService) UpdatePassword(context.Context, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeService) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
+}
 
 type fakeServiceErr struct {
 	err error
@@ -126,6 +132,12 @@ func (f *fakeServiceErr) GetUserByEmail(context.Context, string) (*gocloak.User,
 }
 func (f *fakeServiceErr) RollbackEmployee(context.Context, string) error     { return nil }
 func (f *fakeServiceErr) RollbackKeycloakUser(context.Context, string) error { return nil }
+func (f *fakeServiceErr) UpdatePassword(context.Context, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeServiceErr) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
+}
 
 type fakeMessageCacheRepo struct {
 	messages []cachetypes.CachedMessage
@@ -200,8 +212,8 @@ func TestHTTP_RegisterEmployee(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
-		if w.Code != http.StatusOK {
-			t.Fatalf("expected status %d, got %d. body=%s", http.StatusOK, w.Code, w.Body.String())
+		if w.Code != http.StatusCreated {
+			t.Fatalf("expected status %d, got %d. body=%s", http.StatusCreated, w.Code, w.Body.String())
 		}
 
 		var out middleware.APIResponse

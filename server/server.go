@@ -82,8 +82,15 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	{
 		// Registro de usuario
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
-		//GET/accounts/:id
-		//public.GET("/accounts/:id", handler.GetEmployeeByID())
+
+		// GET /employees/:id - Obtener información de un empleado por ID (sin contraseña)
+		public.GET("/employees/:id", handler.GetEmployeeByID())
+
+		// PUT /employees/:id - Actualizar información general de un empleado
+		// No modifica email ni password (se manejan en endpoints separados)
+		// Sincroniza cambios de active y role con Keycloak
+		// Valida: longitud de campos, formato de fechas, rol válido
+		public.PUT("/employees/:id", validator.WithValidateUpdateEmployee(), handler.UpdateEmployee())
 
 		// Login - devuelve tokens JWT
 		public.POST("/login", handler.Login())
@@ -99,8 +106,11 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		//POST /auth/verify-email - Verificar correo con token
 		public.POST("/auth/verify-email", handler.VerifyEmailByToken())
 
-    //Messages Endpoints
-    // POST /messages - Crear nuevo mensaje
+		//POST /auth/update-password - Actualizar contraseña con token
+		public.POST("/auth/update-password", validator.WithValidateUpdatePassword(), handler.UpdatePassword())
+
+		//Messages Endpoints
+		// POST /messages - Crear nuevo mensaje
 		public.POST("/messages", validator.WithValidateMessage(), handler.CreateMessage())
 
 		// PUT /messages/:id - Actualizar mensaje existente

@@ -112,3 +112,10 @@ func (m *MockAuthClient) RefreshToken(ctx context.Context, refreshToken string) 
 	}
 	return args.Get(0).(*gocloak.JWT), args.Error(1)
 }
+
+// Token Validation
+
+func (m *MockAuthClient) ValidateActionToken(ctx context.Context, token string) (string, string, error) {
+	args := m.Called(ctx, token)
+	return args.String(0), args.String(1), args.Error(2)
+}

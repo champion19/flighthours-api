@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flighthours - Verificando correo</title>
+    <title>FlightHours - Procesando</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -16,10 +16,9 @@
             justify-content: center;
             padding: 20px;
         }
-        .container {
+        .container { max-width: 480px; width: 100%; }
+        .card {
             background: white;
-            max-width: 480px;
-            width: 100%;
             padding: 3rem 2.5rem;
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 71, 171, 0.16);
@@ -36,58 +35,33 @@
             gap: 0.5rem;
         }
         .logo::before { content: '✈️'; font-size: 28px; }
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid #E1E8ED;
-            border-top: 5px solid #0047AB;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 2rem;
-        }
-        .spinner.hidden { display: none; }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        h1 {
-            color: #2C3E50;
-            font-size: 24px;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-        .message {
-            color: #64748B;
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
-        .success-icon {
-            width: 80px;
-            height: 80px;
+        .icon {
+            width: 80px; height: 80px;
             background: linear-gradient(135deg, #10B981 0%, #059669 100%);
             border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 40px; color: white;
             box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
         }
-        .success-icon.show { display: flex; }
-        .success-icon svg { width: 40px; height: 40px; fill: white; }
-        .error-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+        .icon.password {
+            background: linear-gradient(135deg, #0047AB 0%, #4A90E2 100%);
+            box-shadow: 0 4px 16px rgba(0, 71, 171, 0.3);
         }
-        .error-icon.show { display: flex; }
-        .error-icon svg { width: 40px; height: 40px; fill: white; }
+        .icon.success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid #E1E8ED;
+            border-top: 4px solid #0047AB;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        h1 { color: #2C3E50; font-size: 24px; font-weight: 600; margin-bottom: 1rem; }
+        .message { color: #64748B; font-size: 15px; line-height: 1.6; margin-bottom: 1.5rem; }
         .app-box {
             background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
             border: 2px solid #0047AB;
@@ -98,173 +72,380 @@
         .app-box h2 { color: #0047AB; font-size: 18px; margin-bottom: 0.5rem; font-weight: 600; }
         .app-box p { color: #2C3E50; font-size: 14px; margin: 0; }
         .app-icon { font-size: 48px; margin-bottom: 0.5rem; }
-        .btn {
-            display: inline-block;
-            padding: 14px 32px;
-            background: linear-gradient(135deg, #0047AB 0%, #1E88E5 100%);
-            color: white;
-            text-decoration: none;
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
             border-radius: 10px;
-            font-weight: 600;
             font-size: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #0047AB;
+            box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.1);
+        }
+        .password-requirements {
+            background: #F3F4F6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .password-requirements p { font-size: 13px; color: #6B7280; margin-bottom: 4px; }
+        .password-requirements ul { margin: 0; padding-left: 20px; }
+        .password-requirements li { font-size: 12px; color: #6B7280; margin-bottom: 2px; }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #0047AB 0%, #4A90E2 100%);
             border: none;
+            border-radius: 10px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 12px rgba(0, 71, 171, 0.3);
+            text-decoration: none;
+            text-align: center;
         }
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 71, 171, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 71, 171, 0.3);
         }
-        .footer {
-            margin-top: 2rem;
-            color: #64748B;
-            font-size: 13px;
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn.loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
         }
-        .hidden { display: none !important; }
+        .error-message {
+            background: #FEE2E2;
+            color: #DC2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 14px;
+            display: none;
+        }
+        .footer { margin-top: 1.5rem; color: #64748B; font-size: 13px; }
+        .action-list {
+            text-align: left;
+            background: #F3F4F6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .action-list ul { margin: 0.5rem 0 0 1.5rem; color: #374151; }
+        .hide { display: none !important; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">Flighthours</div>
-
-        <!-- Estado: Cargando -->
-        <div id="loading-state">
+        <!-- Loading State -->
+        <div class="card" id="loadingCard">
+            <div class="logo">FlightHours</div>
             <div class="spinner"></div>
-            <h1>Verificando tu correo...</h1>
-            <p class="message">
-                Por favor espera un momento. Estamos procesando tu verificación.
-            </p>
+            <h1>Procesando...</h1>
+            <p class="message">Por favor espera un momento.</p>
         </div>
 
-        <!-- Estado: Éxito -->
-        <div id="success-state" class="hidden">
-            <div class="success-icon show">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            </div>
-            <h1 style="color: #28a745;">¡Correo verificado!</h1>
+        <!-- Password Form Card -->
+        <div class="card hide" id="passwordFormCard">
+            <div class="logo">FlightHours</div>
+            <div class="icon password">🔐</div>
+
+            <h1>Actualizar Contraseña</h1>
+
             <p class="message">
-                Tu cuenta ha sido verificada correctamente.
+                Ingresa tu nueva contraseña para completar la recuperación de tu cuenta.
+            </p>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="password-new">Nueva contraseña</label>
+                    <input type="password" id="password-new" name="password-new"
+                           required minlength="8"
+                           placeholder="Mínimo 8 caracteres"
+                           autofocus autocomplete="new-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="password-confirm">Confirmar contraseña</label>
+                    <input type="password" id="password-confirm" name="password-confirm"
+                           required minlength="8"
+                           placeholder="Repite la contraseña"
+                           autocomplete="new-password">
+                </div>
+
+                <div class="password-requirements">
+                    <p><strong>Requisitos de la contraseña:</strong></p>
+                    <ul>
+                        <li>Mínimo 8 caracteres</li>
+                        <li>Se recomienda incluir mayúsculas, minúsculas y números</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">Actualizar Contraseña</button>
+            </form>
+
+            <div class="footer">
+                <p>© ${.now?string('yyyy')} FlightHours</p>
+            </div>
+        </div>
+
+        <!-- Success Card (for password update) -->
+        <div class="card hide" id="passwordSuccessCard">
+            <div class="logo">FlightHours</div>
+            <div class="icon success">✓</div>
+
+            <h1 style="color: #10B981;">¡Contraseña Actualizada!</h1>
+
+            <p class="message">
+                Tu contraseña ha sido actualizada exitosamente.
             </p>
 
             <div class="app-box">
                 <div class="app-icon">📱</div>
-                <h2>Abre la aplicación MotoGo</h2>
-                <p>Ya puedes iniciar sesión con tu correo y contraseña.</p>
+                <h2>Abre la aplicación FlightHours</h2>
+                <p>Ya puedes iniciar sesión con tu nueva contraseña.</p>
             </div>
 
-            <p class="message" style="color: #10b981; font-weight: 600; margin-bottom: 0;">
+            <p class="message" style="color: #10B981; font-weight: 600; margin-bottom: 0;">
                 Puedes cerrar esta ventana.
             </p>
-        </div>
 
-        <!-- Estado: Error -->
-        <div id="error-state" class="hidden">
-            <div class="error-icon show">
-                <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            <div class="footer">
+                <p>© ${.now?string('yyyy')} FlightHours</p>
             </div>
-            <h1 style="color: #dc3545;">Error de verificación</h1>
-            <p class="message" id="error-message">
-                No pudimos verificar tu correo. El enlace puede haber expirado.
-            </p>
-            <a href="flighthours://resend-verification" class="btn">Reenviar correo</a>
         </div>
 
-        <!-- Estado: Ya verificado -->
-        <div id="already-verified-state" class="hidden">
-            <div class="success-icon show">
-                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <!-- Generic Success Card (for other actions) -->
+        <div class="card hide" id="genericSuccessCard">
+            <div class="logo">FlightHours</div>
+            <div class="icon success">✓</div>
+
+            <h1>¡Acción completada!</h1>
+
+            <#if message??>
+                <p class="message">
+                    <#if message.summary??>
+                        ${message.summary}
+                    <#else>
+                        ${message}
+                    </#if>
+                </p>
+            <#else>
+                <p class="message">
+                    La operación se ha completado correctamente.
+                </p>
+            </#if>
+
+            <#if requiredActions?? && (requiredActions?size > 0)>
+                <div class="action-list">
+                    <strong>Acciones completadas:</strong>
+                    <ul>
+                        <#list requiredActions as action>
+                            <li>${action}</li>
+                        </#list>
+                    </ul>
+                </div>
+            </#if>
+
+            <div class="app-box">
+                <div class="app-icon">📱</div>
+                <h2>Abre la aplicación FlightHours</h2>
+                <p>Ya puedes continuar usando la aplicación.</p>
             </div>
-            <h1 style="color: #17a2b8;">Correo ya verificado</h1>
-            <p class="message">
-                Tu correo electrónico ya estaba verificado.<br>
-                Puedes usar la aplicación normalmente.
-            </p>
-            <a href="flighthours://home" class="btn">Abrir Flighthours</a>
-        </div>
 
-        <div class="footer">
-            © ${.now?string('yyyy')} Flighthours
+            <#if actionUri??>
+                <a href="${actionUri}" class="btn">Continuar</a>
+            <#elseif pageRedirectUri??>
+                <a href="${pageRedirectUri}" class="btn">Volver a la aplicación</a>
+            <#elseif client?? && client.baseUrl??>
+                <a href="${client.baseUrl}" class="btn">Volver a la aplicación</a>
+            <#else>
+                <p class="message" style="color: #10B981; font-weight: 600; margin-bottom: 0;">
+                    Puedes cerrar esta ventana.
+                </p>
+            </#if>
+
+            <div class="footer">
+                © ${.now?string('yyyy')} FlightHours
+            </div>
         </div>
     </div>
 
     <script>
         (function() {
-            // Configuración - URL del backend
-            const BACKEND_URL = 'http://localhost:8081/flighthours/api/v1/auth/verify-email';
+            console.log('[FlightHours] info.ftl cargado');
 
-            // Elementos del DOM
-            const loadingState = document.getElementById('loading-state');
-            const successState = document.getElementById('success-state');
-            const errorState = document.getElementById('error-state');
-            const alreadyVerifiedState = document.getElementById('already-verified-state');
-            const errorMessage = document.getElementById('error-message');
+            var BACKEND_URL = 'http://localhost:8081/flighthours/api/v1/auth/update-password';
 
-            function showState(state) {
-                loadingState.classList.add('hidden');
-                successState.classList.add('hidden');
-                errorState.classList.add('hidden');
-                alreadyVerifiedState.classList.add('hidden');
-                state.classList.remove('hidden');
+            var currentUrl = window.location.href;
+            console.log('[FlightHours] URL:', currentUrl);
+
+            // Detectar si es UPDATE_PASSWORD
+            var isUpdatePassword = currentUrl.includes('UPDATE_PASSWORD') ||
+                                   currentUrl.includes('update-password') ||
+                                   currentUrl.includes('reset-credentials');
+
+            // Buscar en requiredActions si existe (variable FreeMarker)
+            var requiredActionsHtml = document.querySelector('.action-list');
+            if (requiredActionsHtml && requiredActionsHtml.innerHTML.includes('UPDATE_PASSWORD')) {
+                isUpdatePassword = true;
             }
 
+            console.log('[FlightHours] isUpdatePassword:', isUpdatePassword);
+
+            // Extraer el token 'key' de la URL
             function getTokenFromUrl() {
-                // Obtener el parámetro 'key' de la URL actual
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get('key');
+                var urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('key') || '';
             }
 
-            async function verifyEmail() {
-                const token = getTokenFromUrl();
+            var token = getTokenFromUrl();
+            console.log('[FlightHours] Token encontrado:', token ? 'Sí (' + token.substring(0, 20) + '...)' : 'No');
 
-                if (!token) {
-                    // Si no hay token, mostrar éxito (Keycloak ya procesó)
-                    console.log('[FlightHours] No hay token en URL, Keycloak ya procesó la acción');
-                    showState(successState);
-                    return;
+            // Elementos
+            var loadingCard = document.getElementById('loadingCard');
+            var passwordFormCard = document.getElementById('passwordFormCard');
+            var passwordSuccessCard = document.getElementById('passwordSuccessCard');
+            var genericSuccessCard = document.getElementById('genericSuccessCard');
+            var errorMessage = document.getElementById('errorMessage');
+            var passwordForm = document.getElementById('passwordForm');
+            var submitBtn = document.getElementById('submitBtn');
+
+            function showCard(cardId) {
+                loadingCard.classList.add('hide');
+                passwordFormCard.classList.add('hide');
+                passwordSuccessCard.classList.add('hide');
+                genericSuccessCard.classList.add('hide');
+                document.getElementById(cardId).classList.remove('hide');
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Actualizando...';
+                } else {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Actualizar Contraseña';
                 }
+            }
 
-                console.log('[FlightHours] Token encontrado, enviando al backend...');
-                console.log('[FlightHours] URL del backend:', BACKEND_URL);
+            // Si es UPDATE_PASSWORD y tenemos token, mostrar el formulario
+            if (isUpdatePassword && token) {
+                console.log('[FlightHours] Mostrando formulario de contraseña');
+                showCard('passwordFormCard');
 
-                try {
-                    const response = await fetch(BACKEND_URL, {
+                // Manejar el submit del formulario
+                passwordForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    hideError();
+
+                    var newPassword = document.getElementById('password-new').value;
+                    var confirmPassword = document.getElementById('password-confirm').value;
+
+                    // Validaciones
+                    if (newPassword.length < 8) {
+                        showError('La contraseña debe tener al menos 8 caracteres.');
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        showError('Las contraseñas no coinciden.');
+                        return;
+                    }
+
+                    setLoading(true);
+                    console.log('[FlightHours] Enviando nueva contraseña al backend...');
+
+                    // Enviar al backend
+                    fetch(BACKEND_URL, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
+                            'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ token: token })
-                    });
+                        body: JSON.stringify({
+                            token: token,
+                            new_password: newPassword,
+                            confirm_password: confirmPassword
+                        })
+                    })
+                    .then(function(response) {
+                        return response.json().then(function(data) {
+                            return { status: response.status, data: data };
+                        });
+                    })
+                    .then(function(result) {
+                        console.log('[FlightHours] Respuesta del backend:', result);
 
-                    const data = await response.json();
-                    console.log('[FlightHours] Respuesta del backend:', data);
-
-                    if (response.ok && data.success) {
-                        showState(successState);
-                    } else if (data.code === 'MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001') {
-                        showState(alreadyVerifiedState);
-                    } else {
-                        // Mostrar mensaje de error específico si está disponible
-                        if (data.message && data.message.contenido) {
-                            errorMessage.textContent = data.message.contenido;
-                        } else if (data.message) {
-                            errorMessage.textContent = data.message;
+                        if (result.status >= 200 && result.status < 300 && result.data.success) {
+                            console.log('[FlightHours] Contraseña actualizada exitosamente');
+                            showCard('passwordSuccessCard');
+                        } else {
+                            var errorMsg = 'Error al actualizar la contraseña.';
+                            if (result.data && result.data.message) {
+                                errorMsg = result.data.message;
+                            } else if (result.data && result.data.data && result.data.data.message) {
+                                errorMsg = result.data.data.message;
+                            }
+                            console.error('[FlightHours] Error:', errorMsg);
+                            setLoading(false);
+                            showError(errorMsg);
                         }
-                        showState(errorState);
-                    }
-                } catch (error) {
-                    console.error('[FlightHours] Error de conexión:', error);
-                    // Mostrar error de conexión pero NO el éxito
-                    errorMessage.textContent = 'Error de conexión con el servidor. Por favor, intenta de nuevo más tarde.';
-                    showState(errorState);
-                }
-            }
+                    })
+                    .catch(function(error) {
+                        console.error('[FlightHours] Error de red:', error);
+                        setLoading(false);
+                        showError('Error de conexión. Por favor intenta nuevamente.');
+                    });
+                });
 
-            // Ejecutar verificación cuando la página cargue
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', verifyEmail);
+            } else if (isUpdatePassword && !token) {
+                // UPDATE_PASSWORD pero sin token - mostrar éxito genérico (ya se procesó antes)
+                console.log('[FlightHours] UPDATE_PASSWORD sin token - mostrando éxito genérico');
+                showCard('genericSuccessCard');
+
             } else {
-                verifyEmail();
+                // Otra acción - mostrar éxito genérico
+                console.log('[FlightHours] Acción genérica - mostrando éxito');
+                showCard('genericSuccessCard');
             }
         })();
     </script>

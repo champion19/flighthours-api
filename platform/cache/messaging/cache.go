@@ -203,6 +203,9 @@ var messageCodeToHTTPStatus = map[string]int{
 	// ========================================
 	// Users Module (MOD_U_*)
 	// ========================================
+	"MOD_U_REG_EXI_00001":        http.StatusCreated,      // 201 - Usuario registrado exitosamente
+	"MOD_U_UPD_EXI_00002":        http.StatusOK,           // 200 - Usuario actualizado exitosamente
+	"MOD_U_GET_EXI_00005":        http.StatusOK,           // 200 - Usuario encontrado
 	"MOD_U_DUP_ERR_00001":        http.StatusConflict,     // 409 - Usuario duplicado
 	"MOD_U_EMAIL_NF_ERR_00005":   http.StatusNotFound,     // 404 - Email no encontrado
 	"MOD_U_GET_ERR_00003":        http.StatusNotFound,     // 404 - Usuario no encontrado
@@ -210,6 +213,10 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_U_EMAIL_NV_ERR_00006":   http.StatusForbidden,    // 403 - Email no verificado
 	"MOD_U_TOKEN_EXP_ERR_00008":  http.StatusUnauthorized, // 401 - Token expirado
 	"MOD_U_TOKEN_USED_ERR_00009": http.StatusUnauthorized, // 401 - Token ya usado
+	// Update errors
+	"MOD_U_UPD_ERR_00013":      http.StatusInternalServerError, // 500 - Error actualizando usuario
+	"MOD_U_KC_UPD_ERR_00014":   http.StatusServiceUnavailable,  // 503 - Error sincronizando con Keycloak
+	"MOD_U_ROLE_UPD_ERR_00015": http.StatusServiceUnavailable,  // 503 - Error actualizando rol en Keycloak
 
 	// ========================================
 	// Person Module (MOD_P_*)
@@ -228,6 +235,10 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_V_VAL_ERR_00011":  http.StatusBadRequest, // 400 - Múltiples errores
 	"MOD_V_JSON_ERR_00012": http.StatusBadRequest, // 400 - JSON inválido
 	"MOD_V_ID_ERR_00013":   http.StatusBadRequest, // 400 - ID inválido
+	// Data validation errors from DB constraints
+	"MOD_V_FK_ERR_00014":   http.StatusUnprocessableEntity, // 422 - Invalid foreign key (e.g., airline doesn't exist)
+	"MOD_V_LEN_ERR_00015":  http.StatusUnprocessableEntity, // 422 - Data too long for column
+	"MOD_V_DATA_ERR_00016": http.StatusUnprocessableEntity, // 422 - Invalid data
 
 	// ========================================
 	// Keycloak Module (MOD_KC_*) - Email Verification & Auth
@@ -241,6 +252,19 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_KC_VERIF_EMAIL_ERROR_ERR_00001":       http.StatusServiceUnavailable,  // 503 - Error enviando email
 	"MOD_KC_PWD_RESET_SENT_EXI_00001":          http.StatusOK,                  // 200 - Email de reset enviado
 	"MOD_KC_PWD_RESET_ERROR_ERR_00001":         http.StatusServiceUnavailable,  // 503 - Error enviando reset
+	// Login with email verification
+	"MOD_KC_LOGIN_EMAIL_NOT_VERIFIED_ERR_00001": http.StatusUnauthorized, // 401 - Email no verificado, no puede hacer login
+	"MOD_KC_LOGIN_SUCCESS_EXI_00001":            http.StatusOK,           // 200 - Login exitoso
+	// Password update
+	"MOD_KC_PWD_UPDATED_EXI_00001":              http.StatusOK,                  // 200 - Contraseña actualizada
+	"MOD_KC_PWD_UPDATE_ERROR_ERR_00001":         http.StatusInternalServerError, // 500 - Error actualizando contraseña
+	"MOD_KC_PWD_MISMATCH_ERR_00001":             http.StatusBadRequest,          // 400 - Contraseñas no coinciden
+	"MOD_KC_PWD_UPDATE_TOKEN_INVALID_ERR_00001": http.StatusUnauthorized,        // 401 - Token de actualización inválido
+
+	// ========================================
+	// Authentication Module (MOD_AUTH_*)
+	// ========================================
+	"MOD_AUTH_LOGIN_SUCCESS_EXI_00001": http.StatusOK, // 200 - Login exitoso
 
 	// ========================================
 	// Infrastructure Module (MOD_INFRA_*)
@@ -263,6 +287,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	// ========================================
 	// Messages Module (MOD_M_*)
 	// ========================================
+	"MOD_M_CREATE_EXI_00001":    http.StatusCreated,    // 201 - Mensaje creado exitosamente
 	"MOD_M_UPDATE_ERR_00010":    http.StatusBadRequest, // 400 - Error actualizando mensaje
 	"MOD_M_NOT_FOUND_ERR_00001": http.StatusNotFound,   // 404 - Mensaje no encontrado
 }

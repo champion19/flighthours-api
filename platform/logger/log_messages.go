@@ -171,6 +171,20 @@ const (
 	LogKeycloakEmailVerifyOK              = "Email verificado exitosamente"
 	LogKeycloakEmailVerifyError           = "Error verificando email"
 	LogKeycloakEmailAlreadyVerified       = "Email ya ha sido verificado"
+	LogKeycloakPasswordUpdate             = "Actualizando contraseña de usuario"
+	LogKeycloakPasswordUpdateOK           = "Contraseña actualizada exitosamente"
+	LogKeycloakPasswordUpdateError        = "Error actualizando contraseña"
+	LogKeycloakPasswordMismatch           = "Las contraseñas no coinciden"
+	LogKeycloakPasswordTokenValidation    = "Validando token de actualización de contraseña"
+	LogKeycloakPasswordTokenValidOK       = "Token de actualización validado"
+	LogKeycloakPasswordTokenInvalid       = "Token de actualización inválido"
+	// Login with verification
+	LogKeycloakLoginCheckingVerification    = "Verificando estado de email antes de login"
+	LogKeycloakLoginEmailNotVerified        = "Login rechazado: email no verificado"
+	LogKeycloakLoginEmailVerified           = "Email verificado, procediendo con login"
+	LogKeycloakLoginResendingVerification   = "Reenviando email de verificación automáticamente"
+	LogKeycloakLoginResendVerificationOK    = "Email de verificación reenviado exitosamente"
+	LogKeycloakLoginResendVerificationError = "Error reenviando email de verificación"
 )
 
 // ============================================
@@ -251,6 +265,7 @@ const (
 	LogEmployeeGetByEmailError       = "Error obteniendo empleado por email"
 	LogEmployeeGetByID               = "Obteniendo empleado por ID"
 	LogEmployeeGetByIDError          = "Error obteniendo empleado por ID"
+	LogEmployeeGetByIDOK             = "Empleado obtenido exitosamente por ID"
 	LogEmployeeFound                 = "Empleado encontrado"
 	LogEmployeeNotFound              = "Empleado no encontrado"
 	LogEmployeeSearchError           = "Error buscando empleado"
@@ -262,6 +277,13 @@ const (
 	LogEmployeeDeleteError           = "Error eliminando empleado de base de datos"
 	LogEmployeeLocating              = "Localizando empleado"
 	LogEmployeeLocateError           = "Error localizando empleado"
+	// Update specific logs
+	LogEmployeeUpdateRequest         = "Solicitud de actualización de empleado recibida"
+	LogEmployeeUpdateComplete        = "Empleado actualizado exitosamente"
+	LogEmployeeKeycloakStatusUpdate  = "Actualizando estado del usuario en Keycloak"
+	LogEmployeeKeycloakStatusUpdated = "Estado del usuario actualizado en Keycloak"
+	LogEmployeeKeycloakRoleUpdate    = "Actualizando rol del usuario en Keycloak"
+	LogEmployeeKeycloakRoleUpdated   = "Rol del usuario actualizado en Keycloak"
 )
 
 // ============================================

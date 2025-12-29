@@ -22,6 +22,9 @@ type Service interface {
 	//employee- operaciones transaccionales de BD
 	SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error
 	UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error
+	// UpdateEmployee actualiza un empleado en la BD y sincroniza cambios relevantes con Keycloak
+	// Sincroniza: estado active (enabled/disabled) y cambios de rol
+	UpdateEmployee(ctx context.Context, employee domain.Employee, previousActive bool, previousRole string) error
 
 	//employee-operaciones de keycloak
 	CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error)
@@ -32,6 +35,7 @@ type Service interface {
 	SendPasswordResetEmail(ctx context.Context, email string) error
 	Login(ctx context.Context, email, password string) (*gocloak.JWT, error)
 	VerifyEmailByToken(ctx context.Context, token string) (string, error)
+	UpdatePassword(ctx context.Context, token, newPassword string) (string, error)
 
 	//employee- compensaciones (rollback)
 	RollbackEmployee(ctx context.Context, employeeID string) error

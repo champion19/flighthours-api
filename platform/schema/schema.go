@@ -15,6 +15,8 @@ type Validators struct {
 	MessageValidator                 *jsonschema.Schema
 	ResendVerificationEmailValidator *jsonschema.Schema
 	PasswordResetRequestValidator    *jsonschema.Schema
+	UpdatePasswordValidator          *jsonschema.Schema
+	UpdateEmployeeValidator          *jsonschema.Schema
 }
 
 type FileReaderInterface interface {
@@ -62,11 +64,21 @@ func NewValidator(fileReader FileReaderInterface) (*Validators, error) {
 	if err != nil {
 		return nil, err
 	}
+	updatePassword, err := validator.createSchema("update_password_schema.json")
+	if err != nil {
+		return nil, err
+	}
+	updateEmployee, err := validator.createSchema("update_employee_schema.json")
+	if err != nil {
+		return nil, err
+	}
 
 	validator.RegisterValidator = register
 	validator.MessageValidator = message
 	validator.ResendVerificationEmailValidator = resendVerification
 	validator.PasswordResetRequestValidator = passwordReset
+	validator.UpdatePasswordValidator = updatePassword
+	validator.UpdateEmployeeValidator = updateEmployee
 
 	return validator, nil
 
@@ -99,6 +111,28 @@ func (v *Validators) ValidateRegister(data interface{}) error {
 	}
 
 	result := v.RegisterValidator.Validate(data)
+	if !result.IsValid() {
+		// Collect all validation errors
+		var errorMessages []string
+		for _, err := range result.Errors {
+			errorMessages = append(errorMessages, err.Message)
+		}
+
+		if len(errorMessages) > 0 {
+			return ErrValidationFailed
+		}
+	}
+
+	return nil
+}
+
+// ValidateUpdateEmployee validates data against the update employee schema
+func (v *Validators) ValidateUpdateEmployee(data interface{}) error {
+	if v.UpdateEmployeeValidator == nil {
+		return ErrSchemaEmpty
+	}
+
+	result := v.UpdateEmployeeValidator.Validate(data)
 	if !result.IsValid() {
 		// Collect all validation errors
 		var errorMessages []string

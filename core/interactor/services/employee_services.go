@@ -32,7 +32,7 @@ func (s service) GetEmployeeByEmail(ctx context.Context, email string) (*domain.
 		s.logger.Error(logger.LogEmployeeServiceErrorByEmail, "email", email, "error", err)
 		return nil, err
 	}
-	s.logger.Debug(logger.LogEmployeeServiceFoundByEmail, "email", email,"employee_id", employee.ID)
+	s.logger.Debug(logger.LogEmployeeServiceFoundByEmail, "email", email, "employee_id", employee.ID)
 	return employee, nil
 }
 
@@ -43,7 +43,7 @@ func (s service) GetEmployeeByID(ctx context.Context, id string) (*domain.Employ
 		s.logger.Error(logger.LogEmployeeServiceErrorByID, "employee_id", id, "error", err)
 		return nil, err
 	}
-	s.logger.Debug(logger.LogEmployeeServiceFoundByID, "employee_id", id,"email", employee.Email)
+	s.logger.Debug(logger.LogEmployeeServiceFoundByID, "employee_id", id, "email", employee.Email)
 	return employee, nil
 }
 
@@ -154,7 +154,7 @@ func (s service) CreateUserInKeycloak(ctx context.Context, employee *domain.Empl
 
 func (s service) SetUserPassword(ctx context.Context, userID string, password string) error {
 	s.logger.Debug(logger.LogEmployeeServicePasswordSet, "keycloak_user_id", userID)
-	err := s.keycloak.SetPassword(ctx, userID, password, true)
+	err := s.keycloak.SetPassword(ctx, userID, password, false)
 	if err != nil {
 		s.logger.Error(logger.LogEmployeeServicePasswordError, "keycloak_user_id", userID, "error", err)
 		return err
@@ -384,13 +384,47 @@ func (s service) SendPasswordResetEmail(ctx context.Context, email string) error
 }
 
 // Login authenticates a user with email and password
+// This method verifies that the email is verified before allowing login
+// If email is not verified, it automatically resends the verification email
 func (s service) Login(ctx context.Context, email, password string) (*gocloak.JWT, error) {
+	s.logger.Debug(logger.LogKeycloakLoginCheckingVerification, "email", email)
+
+	// Step 1: Get user from Keycloak to check email verification status
+	user, err := s.keycloak.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
+		return nil, domain.ErrUserNotFound
+	}
+
+	// Step 2: Check if email is verified
+	if user.EmailVerified == nil || !*user.EmailVerified {
+		s.logger.Warn(logger.LogKeycloakLoginEmailNotVerified, "email", email, "user_id", *user.ID)
+
+		// Step 2.1: Resend verification email automatically
+		s.logger.Info(logger.LogKeycloakLoginResendingVerification, "email", email, "user_id", *user.ID)
+		if sendErr := s.keycloak.SendVerificationEmail(ctx, *user.ID); sendErr != nil {
+			s.logger.Error(logger.LogKeycloakLoginResendVerificationError,
+				"email", email,
+				"user_id", *user.ID,
+				"error", sendErr)
+			// Continue anyway - the main error is that email is not verified
+		} else {
+			s.logger.Success(logger.LogKeycloakLoginResendVerificationOK, "email", email, "user_id", *user.ID)
+		}
+
+		return nil, domain.ErrorEmailNotVerified
+	}
+
+	s.logger.Debug(logger.LogKeycloakLoginEmailVerified, "email", email, "user_id", *user.ID)
+
+	// Step 3: Proceed with Keycloak authentication
 	s.logger.Debug(logger.LogKeycloakUserLogin, "email", email)
 	token, err := s.keycloak.LoginUser(ctx, email, password)
 	if err != nil {
 		s.logger.Error(logger.LogKeycloakUserLoginError, "email", email, "error", err)
 		return nil, err
 	}
+
 	s.logger.Success(logger.LogKeycloakUserLoginOK, "email", email)
 	return token, nil
 }
@@ -450,4 +484,133 @@ func (s service) LocateEmployee(ctx context.Context, id string) (*dto.RegisterEm
 		Employee: *employee,
 		Message:  "Employee located successfully",
 	}, nil
+}
+
+// UpdatePassword validates the action token and updates the user's password
+// Returns the email of the user whose password was updated
+func (s service) UpdatePassword(ctx context.Context, token, newPassword string) (string, error) {
+	s.logger.Info(logger.LogKeycloakPasswordUpdate)
+
+	// Validate the action token and get user info
+	s.logger.Debug(logger.LogKeycloakPasswordTokenValidation)
+	userID, email, err := s.keycloak.ValidateActionToken(ctx, token)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakPasswordTokenInvalid, "error", err)
+		return "", domain.ErrInvalidToken
+	}
+	s.logger.Debug(logger.LogKeycloakPasswordTokenValidOK, "user_id", userID, "email", email)
+
+	// Set the new password (temporary: false because user chose this password)
+	if err := s.keycloak.SetPassword(ctx, userID, newPassword, false); err != nil {
+		s.logger.Error(logger.LogKeycloakPasswordUpdateError, "user_id", userID, "error", err)
+		return "", domain.ErrPasswordUpdateFailed
+	}
+
+	s.logger.Success(logger.LogKeycloakPasswordUpdateOK, "user_id", userID, "email", email)
+	return email, nil
+}
+
+// UpdateEmployee actualiza un empleado en la BD y sincroniza cambios relevantes con Keycloak
+// Sincroniza: estado active (enabled/disabled) y cambios de rol
+func (s service) UpdateEmployee(ctx context.Context, employee domain.Employee, previousActive bool, previousRole string) error {
+	s.logger.Info(logger.LogEmployeeUpdating, employee.ToLogger())
+
+	// Step 1: Begin transaction
+	tx, err := s.repository.BeginTx(ctx)
+	if err != nil {
+		s.logger.Error(logger.LogDBTransactionBeginErr, "error", err)
+		return domain.ErrUserCannotUpdate
+	}
+
+	// Step 2: Update employee in database
+	err = s.repository.UpdateEmployee(ctx, tx, employee)
+	if err != nil {
+		tx.Rollback()
+		s.logger.Error(logger.LogEmployeeUpdateError, employee.ToLogger(), "error", err)
+		// Propagate the original error (e.g., ErrInvalidForeignKey, ErrDataTooLong)
+		// instead of replacing it with a generic error
+		return err
+	}
+
+	// Step 3: Sync with Keycloak if needed
+	if employee.KeycloakUserID != "" {
+		// Step 3.1: Check if active status changed
+		if previousActive != employee.Active {
+			s.logger.Info(logger.LogEmployeeKeycloakStatusUpdate,
+				"employee_id", employee.ID,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"previous_active", previousActive,
+				"new_active", employee.Active)
+
+			// Get user from Keycloak
+			kcUser, err := s.keycloak.GetUserByID(ctx, employee.KeycloakUserID)
+			if err != nil {
+				tx.Rollback()
+				s.logger.Error(logger.LogKeycloakUserGetByIDError,
+					"keycloak_user_id", employee.KeycloakUserID,
+					"error", err)
+				return domain.ErrKeycloakUpdateFailed
+			}
+
+			// Update enabled status
+			kcUser.Enabled = &employee.Active
+			if err := s.keycloak.UpdateUser(ctx, kcUser); err != nil {
+				tx.Rollback()
+				s.logger.Error(logger.LogKeycloakUserGetByIDError,
+					"keycloak_user_id", employee.KeycloakUserID,
+					"new_enabled", employee.Active,
+					"error", err)
+				return domain.ErrKeycloakUpdateFailed
+			}
+
+			s.logger.Success(logger.LogEmployeeKeycloakStatusUpdated,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"enabled", employee.Active)
+		}
+
+		// Step 3.2: Check if role changed
+		if previousRole != employee.Role && employee.Role != "" {
+			s.logger.Info(logger.LogEmployeeKeycloakRoleUpdate,
+				"employee_id", employee.ID,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"previous_role", previousRole,
+				"new_role", employee.Role)
+
+			// Remove old role if it existed
+			if previousRole != "" {
+				if err := s.keycloak.RemoveRole(ctx, employee.KeycloakUserID, previousRole); err != nil {
+					// Log but don't fail - old role might not exist
+					s.logger.Warn(logger.LogEmployeeServiceRoleError,
+						"keycloak_user_id", employee.KeycloakUserID,
+						"role", previousRole,
+						"action", "remove",
+						"error", err)
+				}
+			}
+
+			// Assign new role
+			if err := s.keycloak.AssignRole(ctx, employee.KeycloakUserID, employee.Role); err != nil {
+				tx.Rollback()
+				s.logger.Error(logger.LogEmployeeServiceRoleError,
+					"keycloak_user_id", employee.KeycloakUserID,
+					"role", employee.Role,
+					"action", "assign",
+					"error", err)
+				return domain.ErrRoleUpdateFailed
+			}
+
+			s.logger.Success(logger.LogEmployeeKeycloakRoleUpdated,
+				"keycloak_user_id", employee.KeycloakUserID,
+				"role", employee.Role)
+		}
+	}
+
+	// Step 4: Commit transaction
+	if err := tx.Commit(); err != nil {
+		s.logger.Error(logger.LogDBTransactionCommitErr, "error", err)
+		return domain.ErrUserCannotUpdate
+	}
+
+	s.logger.Success(logger.LogEmployeeUpdateComplete, employee.ToLogger())
+	return nil
 }

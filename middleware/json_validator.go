@@ -38,6 +38,12 @@ func (b *Builder) WithValidateResendVerificationEmail() gin.HandlerFunc {
 func (b *Builder) WithValidatePasswordResetRequest() gin.HandlerFunc {
 	return b.jsonValidator(b.Validators.PasswordResetRequestValidator)
 }
+func (b *Builder) WithValidateUpdatePassword() gin.HandlerFunc {
+	return b.jsonValidator(b.Validators.UpdatePasswordValidator)
+}
+func (b *Builder) WithValidateUpdateEmployee() gin.HandlerFunc {
+	return b.jsonValidator(b.Validators.UpdateEmployeeValidator)
+}
 
 func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 	return func(c *gin.Context) {
