@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
 )
 
 type Employee struct {
@@ -26,19 +25,31 @@ func (e *Employee) SetID() {
 	e.ID = uuid.New().String()
 }
 
-func(e *Employee) ToLogger()[]string{
-return[]string{
-	"id:"+e.ID,
-	"email:"+e.Email,
-	"role:"+e.Role,
-}
+func (e *Employee) ToLogger() []string {
+	return []string{
+		"id:" + e.ID,
+		"email:" + e.Email,
+		"role:" + e.Role,
+	}
 
 }
-
 
 type Airline struct {
-	ID     string
-	Name   string
-	Code   string
-	Status string
+	ID          string `json:"id"`
+	AirlineName string `json:"airline_name"`
+	AirlineCode string `json:"airline_code"`
+	Status      string `json:"status"`
+}
+
+func (a *Airline) ToLogger() []string {
+	return []string{
+		"id:" + a.ID,
+		"name:" + a.AirlineName,
+		"code:" + a.AirlineCode,
+		"status:" + a.Status,
+	}
+}
+
+func (a *Airline) IsActive() bool {
+	return a.Status == "active"
 }
