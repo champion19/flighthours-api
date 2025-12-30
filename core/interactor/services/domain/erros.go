@@ -96,6 +96,11 @@ var (
 	ErrMessageInactive         = errors.New("ERR_MESSAGE_INACTIVE")
 )
 
+// Airline Management Errors (MOD_AIR_*)
+var (
+	ErrAirlineNotFound = errors.New("ERR_AIRLINE_NOT_FOUND")
+)
+
 // ============================================
 // MESSAGE CODES - Constants for use in code
 // ============================================
@@ -239,4 +244,16 @@ const (
 	// Login
 	MsgKCLoginEmailNotVerified = "MOD_KC_LOGIN_EMAIL_NOT_VERIFIED_ERR_00001"
 	MsgKCLoginSuccess          = "MOD_KC_LOGIN_SUCCESS_EXI_00001"
+)
+
+// Airline Module (MOD_AIR_*)
+const (
+	// Errors
+	MsgAirlineNotFound      = "MOD_AIR_NOT_FOUND_ERR_00001"
+	MsgAirlineActivateErr   = "MOD_AIR_ACTIVATE_ERR_00002"
+	MsgAirlineDeactivateErr = "MOD_AIR_DEACTIVATE_ERR_00003"
+	// Success
+	MsgAirlineGetOK        = "MOD_AIR_GET_EXI_00001"
+	MsgAirlineActivateOK   = "MOD_AIR_ACTIVATE_EXI_00002"
+	MsgAirlineDeactivateOK = "MOD_AIR_DEACTIVATE_EXI_00003"
 )

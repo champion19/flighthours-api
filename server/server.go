@@ -55,6 +55,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.ResponseHandler,
 		dependencies.MessageInteractor,
 		dependencies.MessagingCache,
+		dependencies.AirlineInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -129,6 +130,16 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// POST /messages/cache/reload - Recargar caché de mensajes desde BD
 		// Endpoint administrativo para forzar recarga después de cambios manuales
 		public.POST("/messages/cache/reload", handler.ReloadMessageCache())
+
+		// Airlines Endpoints
+		// GET /airlines/:id - Obtener información de una aerolínea por ID
+		public.GET("/airlines/:id", handler.GetAirlineByID())
+
+		// PATCH /airlines/:id/activate - Activar una aerolínea
+		public.PATCH("/airlines/:id/activate", handler.ActivateAirline())
+
+		// PATCH /airlines/:id/deactivate - Desactivar una aerolínea
+		public.PATCH("/airlines/:id/deactivate", handler.DeactivateAirline())
 
 		dependencies.Logger.Success(logger.LogRouteConfigured)
 

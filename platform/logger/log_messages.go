@@ -562,3 +562,22 @@ const (
 	LogMessageInteractorRollbackError = "ROLLBACK BD FALLÓ - ALERTA CRÍTICA"
 	LogMessageInteractorRollbackOK    = "Rollback BD ejecutado correctamente"
 )
+
+// ============================================
+// AIRLINE INTERACTOR
+// ============================================
+const (
+	LogAirlineGet             = "Obteniendo información de aerolínea"
+	LogAirlineGetOK           = "Aerolínea obtenida exitosamente"
+	LogAirlineGetError        = "Error obteniendo aerolínea"
+	LogAirlineNotFound        = "Aerolínea no encontrada"
+	LogAirlineActivate        = "Activando aerolínea"
+	LogAirlineActivateOK      = "Aerolínea activada exitosamente"
+	LogAirlineActivateError   = "Error activando aerolínea"
+	LogAirlineDeactivate      = "Desactivando aerolínea"
+	LogAirlineDeactivateOK    = "Aerolínea desactivada exitosamente"
+	LogAirlineDeactivateError = "Error desactivando aerolínea"
+	LogAirlineRepoInit        = "Inicializando repositorio de aerolíneas"
+	LogAirlineRepoInitOK      = "Repositorio de aerolíneas inicializado"
+	LogAirlineRepoInitError   = "Error inicializando repositorio de aerolíneas"
+)

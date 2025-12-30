@@ -12,6 +12,7 @@ import (
 	"github.com/champion19/flighthours-api/middleware"
 	messagingCache "github.com/champion19/flighthours-api/platform/cache/messaging"
 	mysql "github.com/champion19/flighthours-api/platform/databases/mysql"
+	airlineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
 	messageRepo "github.com/champion19/flighthours-api/platform/databases/repositories/message"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
@@ -30,6 +31,7 @@ type Dependencies struct {
 	ResponseHandler   *middleware.ResponseHandler
 	MessagingCache    *messagingCache.MessageCache
 	MessageInteractor *interactor.MessageInteractor
+	AirlineInteractor *interactor.AirlineInteractor
 }
 
 func Init() (*Dependencies, error) {
@@ -38,7 +40,7 @@ func Init() (*Dependencies, error) {
 
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Error(logger.LogAppConfigError,"error", err)
+		log.Error(logger.LogAppConfigError, "error", err)
 		return nil, err
 	}
 	log.Info(logger.LogAppConfigLoaded)
@@ -49,21 +51,21 @@ func Init() (*Dependencies, error) {
 
 	db, err := mysql.GetDB(cfg.Database, log)
 	if err != nil {
-		log.Error(logger.LogAppDatabaseError,"error", err)
+		log.Error(logger.LogAppDatabaseError, "error", err)
 		return nil, err
 	}
 	log.Success(logger.LogAppDatabaseConnected)
 
 	keycloakClient, err := keycloak.NewClient(&cfg.Keycloak, log)
 	if err != nil {
-		log.Error(logger.LogKeycloakClientError,"error", err)
+		log.Error(logger.LogKeycloakClientError, "error", err)
 		return nil, err
 	}
 	log.Success(logger.LogKeycloakClientOK)
 
 	employeeRepo, err := repo.NewClientRepository(db)
 	if err != nil {
-		log.Error(logger.LogEmployeeRepoInitError,"error", err)
+		log.Error(logger.LogEmployeeRepoInitError, "error", err)
 		return nil, err
 	}
 
@@ -110,6 +112,17 @@ func Init() (*Dependencies, error) {
 	messageInteractor := interactor.NewMessageInteractor(messageService, log)
 	log.Success(logger.LogDependencyMessageIntInit)
 
+	// Inicializar repositorio y servicio de aerolíneas
+	airlineRepository, err := airlineRepo.NewAirlineRepository(db)
+	if err != nil {
+		log.Error(logger.LogAirlineRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogAirlineRepoInitOK)
+
+	airlineService := services.NewAirlineService(airlineRepository, log)
+	airlineInteractor := interactor.NewAirlineInteractor(airlineService, log)
+
 	return &Dependencies{
 		EmployeeService:   employeeService,
 		EmployeeRepo:      employeeRepo,
@@ -121,5 +134,6 @@ func Init() (*Dependencies, error) {
 		ResponseHandler:   responseHandler,
 		MessagingCache:    messagingCache,
 		MessageInteractor: messageInteractor,
+		AirlineInteractor: airlineInteractor,
 	}, nil
 }
