@@ -70,19 +70,30 @@ type ResendVerificationEmailRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+// ResendVerificationEmailResponse - Respuesta de reenvío de email de verificación
+type ResendVerificationEmailResponse struct {
+	Sent  bool   `json:"sent"`
+	Email string `json:"email,omitempty"`
+}
+
 // PasswordResetRequest - DTO para solicitar recuperación de contraseña
 type PasswordResetRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+// PasswordResetResponse - Respuesta de solicitud de recuperación de contraseña
+type PasswordResetResponse struct {
+	Sent bool `json:"sent"`
+}
+
 // VerifyEmailRequest - DTO para verificar email mediante token proxy
 // Este token es un JWT que contiene el email del usuario
-type verifyEmailRequest struct {
+type VerifyEmailRequest struct {
 	Token string `json:"token" binding:"required"`
 }
 
 // VerifyEmailResponse - Respuesta de verificación de email
-type verifyEmailResponse struct {
+type VerifyEmailResponse struct {
 	Verified bool   `json:"verified"`
 	Email    string `json:"email,omitempty"`
 }
