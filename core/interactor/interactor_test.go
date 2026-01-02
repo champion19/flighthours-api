@@ -123,6 +123,12 @@ func (f *fakeService) UpdatePassword(context.Context, string, string) (string, e
 func (f *fakeService) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
 	return nil
 }
+func (f *fakeService) ChangePassword(context.Context, string, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeService) DeleteEmployee(context.Context, string, string) error {
+	return nil
+}
 
 func TestInteractor_RegisterEmployee(t *testing.T) {
 	ctx := context.Background()

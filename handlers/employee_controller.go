@@ -105,15 +105,15 @@ func (h handler) ResendVerificationEmail() gin.HandlerFunc {
 			// Manejar diferentes tipos de errores
 			switch err {
 			case domain.ErrUserNotFound:
-				h.Response.Error(c, "MOD_KC_USER_NOT_FOUND_ERR_00001")
+				h.Response.Error(c, domain.MsgKCUserNotFound)
 			case domain.ErrEmailAlreadyVerified:
-				h.Response.Warning(c, "MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001")
+				h.Response.Warning(c, domain.MsgKCEmailAlreadyVerified)
 			default:
-				h.Response.Error(c, "MOD_KC_VERIF_EMAIL_ERROR_ERR_00001")
+				h.Response.Error(c, domain.MsgKCVerifEmailError)
 			}
 			return
 		}
-		h.Response.Success(c, "MOD_KC_VERIF_EMAIL_RESENT_EXI_00001", req.Email)
+		h.Response.Success(c, domain.MsgKCVerifEmailResent, req.Email)
 	}
 }
 
@@ -142,7 +142,7 @@ func (h handler) RequestPasswordReset() gin.HandlerFunc {
 		_ = h.Interactor.RequestPasswordReset(c, req.Email)
 
 		// Siempre responder con éxito genérico
-		h.Response.Success(c, "MOD_KC_PWD_RESET_SENT_EXI_00001")
+		h.Response.Success(c, domain.MsgKCPwdResetSent)
 	}
 }
 
@@ -538,5 +538,129 @@ func (h handler) UpdateEmployee() gin.HandlerFunc {
 
 		log.Success(logger.LogEmployeeUpdateComplete, "uuid", employeeUUID, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgUserUpdated, response)
+	}
+}
+
+// ChangePassword godoc
+// @Summary      Cambiar contraseña de usuario autenticado
+// @Description  Permite a un usuario cambiar su contraseña conociendo la contraseña actual. Este flujo no requiere salir de la API ni tokens por email.
+// @Tags         authentication
+// @Accept       json
+// @Produce      json
+// @Param        request  body      ChangePasswordRequest  true  "Email, contraseña actual y nueva contraseña"
+// @Success      200      {object}  middleware.APIResponse{data=ChangePasswordResponse}  "Contraseña cambiada exitosamente"
+// @Failure      400      {object}  middleware.APIResponse  "Error de validación - Contraseñas no coinciden"
+// @Failure      401      {object}  middleware.APIResponse  "Contraseña actual incorrecta"
+// @Failure      404      {object}  middleware.APIResponse  "Usuario no encontrado"
+// @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /auth/change-password [post]
+func (h handler) ChangePassword() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		var req ChangePasswordRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Error(logger.LogRegJSONParseError, "error", err)
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		// Validate new passwords match
+		if req.NewPassword != req.ConfirmPassword {
+			log.Warn(logger.LogKeycloakChangePasswordMismatch, "email", req.Email, "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgKCPwdChangeNewMismatch)
+			return
+		}
+
+		log.Info(logger.LogKeycloakChangePassword, "email", req.Email, "client_ip", c.ClientIP())
+
+		email, err := h.Interactor.ChangePassword(c, req.Email, req.CurrentPassword, req.NewPassword, req.ConfirmPassword)
+		if err != nil {
+			switch err {
+			case domain.ErrInvalidCurrentPassword:
+				h.Response.Error(c, domain.MsgKCPwdCurrentInvalid)
+			case domain.ErrUserNotFound:
+				h.Response.Error(c, domain.MsgKCUserNotFound)
+			case domain.ErrPasswordMismatch:
+				h.Response.Error(c, domain.MsgKCPwdChangeNewMismatch)
+			case domain.ErrPasswordUpdateFailed:
+				h.Response.Error(c, domain.MsgKCPwdChangeError)
+			default:
+				h.Response.Error(c, domain.MsgKCPwdChangeError)
+			}
+			return
+		}
+
+		response := ChangePasswordResponse{
+			Changed: true,
+			Email:   email,
+		}
+
+		log.Success(logger.LogKeycloakChangePasswordOK, "email", email, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgKCPwdChanged, response)
+	}
+}
+
+// DeleteEmployee godoc
+// @Summary      Eliminar empleado
+// @Description  Elimina un empleado del sistema (BD y Keycloak). Esta operación es irreversible.
+// @Tags         employees
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "ID del empleado (UUID o ID ofuscado)"
+// @Success      200  {object}  middleware.APIResponse  "Empleado eliminado exitosamente"
+// @Failure      400  {object}  middleware.APIResponse  "ID inválido"
+// @Failure      404  {object}  middleware.APIResponse  "Empleado no encontrado"
+// @Failure      500  {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /employees/{id} [delete]
+func (h handler) DeleteEmployee() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		// Get ID from URL parameter
+		inputID := c.Param("id")
+		if inputID == "" {
+			log.Error(logger.LogMessageIDDecodeError, "error", "empty id parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogEmployeeDeleting, "input_id", inputID, "client_ip", c.ClientIP())
+
+		var employeeUUID string
+
+		// Detect if it's a valid UUID or an obfuscated ID
+		if isValidUUID(inputID) {
+			employeeUUID = inputID
+		} else {
+			// Try to decode obfuscated ID
+			decodedID, err := h.IDEncoder.Decode(inputID)
+			if err != nil {
+				log.Error(logger.LogMessageIDDecodeError, "input_id", inputID, "error", err, "client_ip", c.ClientIP())
+				h.Response.Error(c, domain.MsgValIDInvalid)
+				return
+			}
+			employeeUUID = decodedID
+		}
+
+		log.Debug(logger.LogEmployeeDeletingDB, "employee_id", employeeUUID, "original_id", inputID, "client_ip", c.ClientIP())
+
+		// Call interactor to delete
+		if err := h.Interactor.DeleteEmployee(c, employeeUUID); err != nil {
+			switch err {
+			case domain.ErrPersonNotFound:
+				h.Response.Error(c, domain.MsgUserNotFound)
+			case domain.ErrUserCannotDelete:
+				h.Response.Error(c, domain.MsgUserCannotDelete)
+			default:
+				h.Response.Error(c, domain.MsgServerError)
+			}
+			return
+		}
+
+		log.Success(logger.LogEmployeeDeleteComplete, "employee_id", employeeUUID, "client_ip", c.ClientIP())
+		h.Response.Success(c, domain.MsgUserDeleted)
 	}
 }

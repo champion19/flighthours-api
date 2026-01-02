@@ -25,6 +25,7 @@ var (
 	ErrUserCannotDelete          = errors.New("Err_USER_CANNOT_DELETE")
 	ErrPasswordMismatch          = errors.New("Err_PASSWORD_MISMATCH")
 	ErrPasswordUpdateFailed      = errors.New("Err_PASSWORD_UPDATE_FAILED")
+	ErrInvalidCurrentPassword    = errors.New("Err_INVALID_CURRENT_PASSWORD")
 	ErrUserCannotUpdate          = errors.New("Err_USER_CANNOT_UPDATE")
 	ErrKeycloakUpdateFailed      = errors.New("Err_KEYCLOAK_UPDATE_FAILED")
 	ErrRoleUpdateFailed          = errors.New("Err_ROLE_UPDATE_FAILED")
@@ -231,8 +232,9 @@ const (
 	MsgKCUserNotFound         = "MOD_KC_USER_NOT_FOUND_ERR_00001"
 	MsgKCEmailAlreadyVerified = "MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001"
 	// Verification Email Sending
-	MsgKCVerifEmailSent  = "MOD_KC_VERIF_EMAIL_SENT_EXI_00001"
-	MsgKCVerifEmailError = "MOD_KC_VERIF_EMAIL_ERROR_ERR_00001"
+	MsgKCVerifEmailSent   = "MOD_KC_VERIF_EMAIL_SENT_EXI_00001"
+	MsgKCVerifEmailError  = "MOD_KC_VERIF_EMAIL_ERROR_ERR_00001"
+	MsgKCVerifEmailResent = "MOD_KC_VERIF_EMAIL_RESENT_EXI_00001"
 	// Password Reset
 	MsgKCPwdResetSent  = "MOD_KC_PWD_RESET_SENT_EXI_00001"
 	MsgKCPwdResetError = "MOD_KC_PWD_RESET_ERROR_ERR_00001"
@@ -241,6 +243,11 @@ const (
 	MsgKCPwdUpdateError        = "MOD_KC_PWD_UPDATE_ERROR_ERR_00001"
 	MsgKCPwdMismatch           = "MOD_KC_PWD_MISMATCH_ERR_00001"
 	MsgKCPwdUpdateTokenInvalid = "MOD_KC_PWD_UPDATE_TOKEN_INVALID_ERR_00001"
+	// Change Password (authenticated user changes their own password)
+	MsgKCPwdChanged           = "MOD_KC_PWD_CHANGED_EXI_00001"
+	MsgKCPwdChangeError       = "MOD_KC_PWD_CHANGE_ERROR_ERR_00001"
+	MsgKCPwdCurrentInvalid    = "MOD_KC_PWD_CURRENT_INVALID_ERR_00001"
+	MsgKCPwdChangeNewMismatch = "MOD_KC_PWD_CHANGE_MISMATCH_ERR_00001"
 	// Login
 	MsgKCLoginEmailNotVerified = "MOD_KC_LOGIN_EMAIL_NOT_VERIFIED_ERR_00001"
 	MsgKCLoginSuccess          = "MOD_KC_LOGIN_SUCCESS_EXI_00001"

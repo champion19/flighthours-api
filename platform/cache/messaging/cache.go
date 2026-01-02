@@ -217,6 +217,9 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_U_UPD_ERR_00013":      http.StatusInternalServerError, // 500 - Error actualizando usuario
 	"MOD_U_KC_UPD_ERR_00014":   http.StatusServiceUnavailable,  // 503 - Error sincronizando con Keycloak
 	"MOD_U_ROLE_UPD_ERR_00015": http.StatusServiceUnavailable,  // 503 - Error actualizando rol en Keycloak
+	// Delete
+	"MOD_U_DEL_EXI_00003": http.StatusOK,                  // 200 - Usuario eliminado exitosamente
+	"MOD_U_DEL_ERR_00012": http.StatusInternalServerError, // 500 - Error eliminando usuario
 
 	// ========================================
 	// Person Module (MOD_P_*)
@@ -250,16 +253,22 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_KC_EMAIL_ALREADY_VERIFIED_WARN_00001": http.StatusOK,                  // 200 - Email ya verificado (warning)
 	"MOD_KC_VERIF_EMAIL_SENT_EXI_00001":        http.StatusOK,                  // 200 - Email de verificación enviado
 	"MOD_KC_VERIF_EMAIL_ERROR_ERR_00001":       http.StatusServiceUnavailable,  // 503 - Error enviando email
+	"MOD_KC_VERIF_EMAIL_RESENT_EXI_00001":      http.StatusOK,                  // 200 - Email de verificación reenviado
 	"MOD_KC_PWD_RESET_SENT_EXI_00001":          http.StatusOK,                  // 200 - Email de reset enviado
 	"MOD_KC_PWD_RESET_ERROR_ERR_00001":         http.StatusServiceUnavailable,  // 503 - Error enviando reset
 	// Login with email verification
 	"MOD_KC_LOGIN_EMAIL_NOT_VERIFIED_ERR_00001": http.StatusUnauthorized, // 401 - Email no verificado, no puede hacer login
 	"MOD_KC_LOGIN_SUCCESS_EXI_00001":            http.StatusOK,           // 200 - Login exitoso
-	// Password update
+	// Password update (via email token - forgot password flow)
 	"MOD_KC_PWD_UPDATED_EXI_00001":              http.StatusOK,                  // 200 - Contraseña actualizada
 	"MOD_KC_PWD_UPDATE_ERROR_ERR_00001":         http.StatusInternalServerError, // 500 - Error actualizando contraseña
 	"MOD_KC_PWD_MISMATCH_ERR_00001":             http.StatusBadRequest,          // 400 - Contraseñas no coinciden
 	"MOD_KC_PWD_UPDATE_TOKEN_INVALID_ERR_00001": http.StatusUnauthorized,        // 401 - Token de actualización inválido
+	// Change password (authenticated user knows current password)
+	"MOD_KC_PWD_CHANGED_EXI_00001":         http.StatusOK,                  // 200 - Contraseña cambiada exitosamente
+	"MOD_KC_PWD_CHANGE_ERROR_ERR_00001":    http.StatusInternalServerError, // 500 - Error cambiando contraseña
+	"MOD_KC_PWD_CURRENT_INVALID_ERR_00001": http.StatusUnauthorized,        // 401 - Contraseña actual incorrecta
+	"MOD_KC_PWD_CHANGE_MISMATCH_ERR_00001": http.StatusBadRequest,          // 400 - Nuevas contraseñas no coinciden
 
 	// ========================================
 	// Authentication Module (MOD_AUTH_*)
@@ -280,9 +289,10 @@ var messageCodeToHTTPStatus = map[string]int{
 	// ========================================
 	// General Module (GEN_*)
 	// ========================================
-	"GEN_AUTH_ERR_00002":         http.StatusUnauthorized,       // 401 - No autorizado
-	"GEN_FORBIDDEN_ERR_00003":    http.StatusForbidden,          // 403 - Acceso denegado
-	"GEN_MSG_INACTIVE_ERR_00002": http.StatusServiceUnavailable, // 503 - Mensaje no disponible
+	"GEN_SRV_ERR_00001":          http.StatusInternalServerError, // 500 - Error interno del servidor
+	"GEN_AUTH_ERR_00002":         http.StatusUnauthorized,        // 401 - No autorizado
+	"GEN_FORBIDDEN_ERR_00003":    http.StatusForbidden,           // 403 - Acceso denegado
+	"GEN_MSG_INACTIVE_ERR_00002": http.StatusServiceUnavailable,  // 503 - Mensaje no disponible
 
 	// ========================================
 	// Messages Module (MOD_M_*)

@@ -111,6 +111,21 @@ type UpdatePasswordResponse struct {
 	Email   string `json:"email,omitempty"`
 }
 
+// ChangePasswordRequest - DTO para cambiar contraseña cuando el usuario conoce su contraseña actual
+// Este flujo no requiere salir de la API, el usuario está autenticado y cambia su contraseña directamente
+type ChangePasswordRequest struct {
+	Email           string `json:"email" binding:"required,email"`
+	CurrentPassword string `json:"current_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=8"`
+	ConfirmPassword string `json:"confirm_password" binding:"required,min=8"`
+}
+
+// ChangePasswordResponse - Respuesta de cambio de contraseña
+type ChangePasswordResponse struct {
+	Changed bool   `json:"changed"`
+	Email   string `json:"email,omitempty"`
+}
+
 // UpdateEmployeeRequest - DTO para actualizar información general del empleado
 // Excluye email y password ya que se manejan en endpoints separados
 type UpdateEmployeeRequest struct {

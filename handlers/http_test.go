@@ -87,6 +87,12 @@ func (f *fakeService) UpdatePassword(context.Context, string, string) (string, e
 func (f *fakeService) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
 	return nil
 }
+func (f *fakeService) ChangePassword(context.Context, string, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeService) DeleteEmployee(context.Context, string, string) error {
+	return nil
+}
 
 type fakeServiceErr struct {
 	err error
@@ -136,6 +142,12 @@ func (f *fakeServiceErr) UpdatePassword(context.Context, string, string) (string
 	return "", nil
 }
 func (f *fakeServiceErr) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
+}
+func (f *fakeServiceErr) ChangePassword(context.Context, string, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeServiceErr) DeleteEmployee(context.Context, string, string) error {
 	return nil
 }
 
