@@ -3,6 +3,7 @@ package mocks
 import (
 	"context"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/output"
@@ -102,4 +103,35 @@ func (m *MockService) RollbackEmployee(ctx context.Context, employeeID string) e
 func (m *MockService) RollbackKeycloakUser(ctx context.Context, keycloakUserID string) error {
 	args := m.Called(ctx, keycloakUserID)
 	return args.Error(0)
+}
+
+func (m *MockService) GetUserByEmail(ctx context.Context, email string) (*gocloak.User, error) {
+	args := m.Called(ctx, email)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*gocloak.User), args.Error(1)
+}
+
+func (m *MockService) SendVerificationEmail(ctx context.Context, userID string) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
+}
+
+func (m *MockService) SendPasswordResetEmail(ctx context.Context, email string) error {
+	args := m.Called(ctx, email)
+	return args.Error(0)
+}
+
+func (m *MockService) Login(ctx context.Context, email, password string) (*gocloak.JWT, error) {
+	args := m.Called(ctx, email, password)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*gocloak.JWT), args.Error(1)
+}
+
+func (m *MockService) VerifyEmailByToken(ctx context.Context, token string) (string, error) {
+	args := m.Called(ctx, token)
+	return args.String(0), args.Error(1)
 }

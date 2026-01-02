@@ -28,7 +28,7 @@
     "realm": "flighthours",
     "client_id": "emma",
     "client_secret": "M9HfWmIWf6huAnpKPXIGNdDeTfrwcNMt",
-    "admin_user": "go-admin",
+    "admin_user": "admin",
     "admin_pass": "1997"
   },
   "id_encoder": {

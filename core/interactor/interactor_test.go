@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/input"
@@ -95,11 +96,32 @@ func (f *fakeService) SetUserPassword(ctx context.Context, userID string, passwo
 func (f *fakeService) AssignUserRole(ctx context.Context, userID string, role string) error {
 	return f.assignRoleFn(ctx, userID, role)
 }
+func (f *fakeService) SendVerificationEmail(context.Context, string) error {
+	return nil
+}
+func (f *fakeService) SendPasswordResetEmail(context.Context, string) error {
+	return nil
+}
+func (f *fakeService) Login(context.Context, string, string) (*gocloak.JWT, error) {
+	return &gocloak.JWT{}, nil
+}
+func (f *fakeService) VerifyEmailByToken(context.Context, string) (string, error) {
+	return "", nil
+}
+func (f *fakeService) GetUserByEmail(context.Context, string) (*gocloak.User, error) {
+	return nil, errors.New("not implemented")
+}
 func (f *fakeService) RollbackEmployee(context.Context, string) error {
 	return errors.New("not implemented")
 }
 func (f *fakeService) RollbackKeycloakUser(ctx context.Context, kcID string) error {
 	return f.rollbackKcFn(ctx, kcID)
+}
+func (f *fakeService) UpdatePassword(context.Context, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeService) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
+	return nil
 }
 
 func TestInteractor_RegisterEmployee(t *testing.T) {

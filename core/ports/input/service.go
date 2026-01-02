@@ -3,6 +3,7 @@ package input
 import (
 	"context"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/champion19/flighthours-api/core/interactor/dto"
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/core/ports/output"
@@ -14,18 +15,27 @@ type Service interface {
 	//employee-validaciones y consultas
 	RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error)
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
-  GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
+	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
 	LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error)
 	CheckAndCleanInconsistentState(ctx context.Context, email string) error
 
 	//employee- operaciones transaccionales de BD
 	SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error
-  UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error
+	UpdateEmployeeKeycloakID(ctx context.Context, tx output.Tx, employeeID string, keycloakUserID string) error
+	// UpdateEmployee actualiza un empleado en la BD y sincroniza cambios relevantes con Keycloak
+	// Sincroniza: estado active (enabled/disabled) y cambios de rol
+	UpdateEmployee(ctx context.Context, employee domain.Employee, previousActive bool, previousRole string) error
 
 	//employee-operaciones de keycloak
 	CreateUserInKeycloak(ctx context.Context, employee *domain.Employee) (string, error)
 	SetUserPassword(ctx context.Context, userID string, password string) error
 	AssignUserRole(ctx context.Context, userID string, role string) error
+	GetUserByEmail(ctx context.Context, email string) (*gocloak.User, error)
+	SendVerificationEmail(ctx context.Context, userID string) error
+	SendPasswordResetEmail(ctx context.Context, email string) error
+	Login(ctx context.Context, email, password string) (*gocloak.JWT, error)
+	VerifyEmailByToken(ctx context.Context, token string) (string, error)
+	UpdatePassword(ctx context.Context, token, newPassword string) (string, error)
 
 	//employee- compensaciones (rollback)
 	RollbackEmployee(ctx context.Context, employeeID string) error
@@ -46,4 +56,17 @@ type MessageService interface {
 	SaveMessageToDB(ctx context.Context, tx output.Tx, message domain.Message) error
 	UpdateMessageInDB(ctx context.Context, tx output.Tx, message domain.Message) error
 	DeleteMessageFromDB(ctx context.Context, tx output.Tx, id string) error
+}
+
+// AirlineService defines the interface for airline business operations
+type AirlineService interface {
+	BeginTx(ctx context.Context) (output.Tx, error)
+
+	// Airline - queries
+	GetAirlineByID(ctx context.Context, id string) (*domain.Airline, error)
+
+	// Airline - operations
+	UpdateAirlineStatus(ctx context.Context, id string, status string) error
+	ActivateAirline(ctx context.Context, id string) error
+	DeactivateAirline(ctx context.Context, id string) error
 }

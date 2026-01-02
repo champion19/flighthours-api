@@ -2,6 +2,7 @@ package server
 
 import (
 	"log/slog"
+	"time"
 
 	"github.com/champion19/flighthours-api/cmd/dependency"
 	"github.com/champion19/flighthours-api/handlers"
@@ -9,6 +10,7 @@ import (
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/champion19/flighthours-api/platform/schema"
 	_ "github.com/champion19/flighthours-api/platform/swaggo"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
@@ -17,6 +19,19 @@ import (
 
 func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	dependencies.Logger.Info(logger.LogRouteConfiguring)
+
+	// CORS configuration - Allow requests from Keycloak (localhost:8080) and other origins
+	// This is required for the email verification flow from Keycloak's theme pages
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"http://localhost:8080", "http://localhost:8081", "http://localhost:3001"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Request-ID"},
+		ExposeHeaders:    []string{"Content-Length", "Location"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+	app.Use(cors.New(corsConfig))
+	dependencies.Logger.Info("CORS middleware configured")
 
 	// Endpoint de métricas de Prometheus
 	app.GET("/metrics", gin.WrapH(promhttp.Handler()))
@@ -40,6 +55,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.ResponseHandler,
 		dependencies.MessageInteractor,
 		dependencies.MessagingCache,
+		dependencies.AirlineInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -67,13 +83,35 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	{
 		// Registro de usuario
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
-		//GET/accounts/:id
-		//public.GET("/accounts/:id", handler.GetEmployeeByID())
+
+		// GET /employees/:id - Obtener información de un empleado por ID (sin contraseña)
+		public.GET("/employees/:id", handler.GetEmployeeByID())
+
+		// PUT /employees/:id - Actualizar información general de un empleado
+		// No modifica email ni password (se manejan en endpoints separados)
+		// Sincroniza cambios de active y role con Keycloak
+		// Valida: longitud de campos, formato de fechas, rol válido
+		public.PUT("/employees/:id", validator.WithValidateUpdateEmployee(), handler.UpdateEmployee())
 
 		// Login - devuelve tokens JWT
-		//public.POST("/login", handler.LoginEmployee())
+		public.POST("/login", handler.Login())
 		//public.GET("/user/email/:email", handler.GetEmployeeByEmail())
 
+		// Email verification and password reset
+		//POST /auth/resend-verification - Reenviar correo de verificación
+		public.POST("/auth/resend-verification", validator.WithValidateResendVerificationEmail(), handler.ResendVerificationEmail())
+
+		//POST /auth/password-reset - Solicitar restablecimiento de contraseña
+		public.POST("/auth/password-reset", validator.WithValidatePasswordResetRequest(), handler.RequestPasswordReset())
+
+		//POST /auth/verify-email - Verificar correo con token
+		public.POST("/auth/verify-email", handler.VerifyEmailByToken())
+
+		//POST /auth/update-password - Actualizar contraseña con token
+		public.POST("/auth/update-password", validator.WithValidateUpdatePassword(), handler.UpdatePassword())
+
+		//Messages Endpoints
+		// POST /messages - Crear nuevo mensaje
 		public.POST("/messages", validator.WithValidateMessage(), handler.CreateMessage())
 
 		// PUT /messages/:id - Actualizar mensaje existente
@@ -92,6 +130,16 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// POST /messages/cache/reload - Recargar caché de mensajes desde BD
 		// Endpoint administrativo para forzar recarga después de cambios manuales
 		public.POST("/messages/cache/reload", handler.ReloadMessageCache())
+
+		// Airlines Endpoints
+		// GET /airlines/:id - Obtener información de una aerolínea por ID
+		public.GET("/airlines/:id", handler.GetAirlineByID())
+
+		// PATCH /airlines/:id/activate - Activar una aerolínea
+		public.PATCH("/airlines/:id/activate", handler.ActivateAirline())
+
+		// PATCH /airlines/:id/deactivate - Desactivar una aerolínea
+		public.PATCH("/airlines/:id/deactivate", handler.DeactivateAirline())
 
 		dependencies.Logger.Success(logger.LogRouteConfigured)
 

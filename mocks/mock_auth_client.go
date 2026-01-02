@@ -3,8 +3,8 @@ package mocks
 import (
 	"context"
 
-	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -88,6 +88,11 @@ func (m *MockAuthClient) SendVerificationEmail(ctx context.Context, userID strin
 	return args.Error(0)
 }
 
+func (m *MockAuthClient) SendPasswordResetEmail(ctx context.Context, userID string) error {
+	args := m.Called(ctx, userID)
+	return args.Error(0)
+}
+
 func (m *MockAuthClient) VerifyEmail(ctx context.Context, userID string) error {
 	args := m.Called(ctx, userID)
 	return args.Error(0)
@@ -106,4 +111,11 @@ func (m *MockAuthClient) RefreshToken(ctx context.Context, refreshToken string) 
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*gocloak.JWT), args.Error(1)
+}
+
+// Token Validation
+
+func (m *MockAuthClient) ValidateActionToken(ctx context.Context, token string) (string, string, error) {
+	args := m.Called(ctx, token)
+	return args.String(0), args.String(1), args.Error(2)
 }

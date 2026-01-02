@@ -13,7 +13,7 @@ type Tx interface {
 
 type Repository interface {
 	BeginTx(ctx context.Context) (Tx, error)
-	
+
 	//employee operations - transactional
 	Save(ctx context.Context, tx Tx, employee domain.Employee) error
 	UpdateEmployee(ctx context.Context, tx Tx, employee domain.Employee) error
@@ -39,5 +39,15 @@ type MessageRepository interface {
 	GetByCode(ctx context.Context, code string) (*domain.Message, error)
 	GetByType(ctx context.Context, msgType string) ([]domain.Message, error)
 	GetByModule(ctx context.Context, module string) ([]domain.Message, error)
+}
 
+// AirlineRepository defines the interface for airline data persistence
+type AirlineRepository interface {
+	BeginTx(ctx context.Context) (Tx, error)
+
+	// Airline operations - read
+	GetAirlineByID(ctx context.Context, id string) (*domain.Airline, error)
+
+	// Airline operations - transactional
+	UpdateAirlineStatus(ctx context.Context, tx Tx, id string, status string) error
 }

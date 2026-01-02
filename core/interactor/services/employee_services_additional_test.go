@@ -130,7 +130,7 @@ func TestEmployeeService_UpdateEmployeeKeycloakID(t *testing.T) {
 func TestEmployeeService_SetUserPassword(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockAuth := new(mocks.MockAuthClient)
-		mockAuth.On("SetPassword", mock.Anything, "user123", "newpass", true).Return(nil)
+		mockAuth.On("SetPassword", mock.Anything, "user123", "newpass", false).Return(nil)
 
 		svc := NewService(nil, mockAuth, noopLogger{})
 		err := svc.SetUserPassword(context.Background(), "user123", "newpass")
@@ -143,7 +143,7 @@ func TestEmployeeService_SetUserPassword(t *testing.T) {
 
 	t.Run("keycloak error", func(t *testing.T) {
 		mockAuth := new(mocks.MockAuthClient)
-		mockAuth.On("SetPassword", mock.Anything, "user123", "newpass", true).Return(errors.New("keycloak error"))
+		mockAuth.On("SetPassword", mock.Anything, "user123", "newpass", false).Return(errors.New("keycloak error"))
 
 		svc := NewService(nil, mockAuth, noopLogger{})
 		err := svc.SetUserPassword(context.Background(), "user123", "newpass")

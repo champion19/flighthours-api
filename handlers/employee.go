@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"html/template"
 	"time"
 
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
@@ -30,18 +29,28 @@ type EmployeeResponse struct {
 	StartDate            time.Time `json:"start_date"`
 	EndDate              time.Time `json:"end_date"`
 	Active               bool      `json:"active"`
-	Role                 string    `json:"role,omitempty"`
+	Role                 string    `json:"role"`
+}
+
+// FromDomain convierte un domain.Employee a EmployeeResponse
+// Esta función excluye explícitamente el campo Password para no exponerlo en la API
+func FromDomain(employee *domain.Employee, encodedID string) EmployeeResponse {
+	return EmployeeResponse{
+		ID:                   encodedID,
+		Name:                 employee.Name,
+		Airline:              employee.Airline,
+		Email:                employee.Email,
+		IdentificationNumber: employee.IdentificationNumber,
+		Bp:                   employee.Bp,
+		StartDate:            employee.StartDate,
+		EndDate:              employee.EndDate,
+		Active:               employee.Active,
+		Role:                 employee.Role,
+	}
 }
 
 type RegisterEmployeeResponse struct {
-	
-	Message string           `json:"message"`
-	Links   []Link           `json:"_links"`
-}
-
-type ResponseEmail struct {
-	Title   string
-	Content template.HTML
+	Links []Link `json:"_links"`
 }
 
 type LoginRequest struct {
@@ -54,6 +63,106 @@ type LoginResponse struct {
 	RefreshToken string `json:"refresh_token"`
 	ExpiresIn    int    `json:"expires_in"`
 	TokenType    string `json:"token_type"`
+}
+
+// ResendVerificationEmailRequest - DTO para reenviar email de verificación
+type ResendVerificationEmailRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+// ResendVerificationEmailResponse - Respuesta de reenvío de email de verificación
+type ResendVerificationEmailResponse struct {
+	Sent  bool   `json:"sent"`
+	Email string `json:"email,omitempty"`
+}
+
+// PasswordResetRequest - DTO para solicitar recuperación de contraseña
+type PasswordResetRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+// PasswordResetResponse - Respuesta de solicitud de recuperación de contraseña
+type PasswordResetResponse struct {
+	Sent bool `json:"sent"`
+}
+
+// VerifyEmailRequest - DTO para verificar email mediante token proxy
+// Este token es un JWT que contiene el email del usuario
+type VerifyEmailRequest struct {
+	Token string `json:"token" binding:"required"`
+}
+
+// VerifyEmailResponse - Respuesta de verificación de email
+type VerifyEmailResponse struct {
+	Verified bool   `json:"verified"`
+	Email    string `json:"email,omitempty"`
+}
+
+// UpdatePasswordRequest - DTO para actualizar contraseña con token de Keycloak
+type UpdatePasswordRequest struct {
+	Token           string `json:"token" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=8"`
+	ConfirmPassword string `json:"confirm_password" binding:"required,min=8"`
+}
+
+// UpdatePasswordResponse - Respuesta de actualización de contraseña
+type UpdatePasswordResponse struct {
+	Updated bool   `json:"updated"`
+	Email   string `json:"email,omitempty"`
+}
+
+// UpdateEmployeeRequest - DTO para actualizar información general del empleado
+// Excluye email y password ya que se manejan en endpoints separados
+type UpdateEmployeeRequest struct {
+	Name                 string `json:"name"`
+	Airline              string `json:"airline"`
+	IdentificationNumber string `json:"identificationNumber"`
+	Bp                   string `json:"bp"`
+	StartDate            string `json:"start_date"`
+	EndDate              string `json:"end_date"`
+	Active               bool   `json:"active"`
+	Role                 string `json:"role"`
+}
+
+// ToUpdateData convierte el request a un mapa de campos actualizables
+// Se usa con un empleado existente para preservar email, password y keycloak_user_id
+func (u UpdateEmployeeRequest) ToUpdateData(existing *domain.Employee) domain.Employee {
+	layout := "2006-01-02"
+
+	startDate := existing.StartDate
+	if u.StartDate != "" {
+		if parsed, err := time.Parse(layout, u.StartDate); err == nil {
+			startDate = parsed
+		}
+	}
+
+	endDate := existing.EndDate
+	if u.EndDate != "" {
+		if parsed, err := time.Parse(layout, u.EndDate); err == nil {
+			endDate = parsed
+		}
+	}
+
+	return domain.Employee{
+		ID:                   existing.ID,
+		Name:                 u.Name,
+		Airline:              u.Airline,
+		Email:                existing.Email,    // Preservar email
+		Password:             existing.Password, // Preservar password (aunque no está en BD)
+		IdentificationNumber: u.IdentificationNumber,
+		Bp:                   u.Bp,
+		StartDate:            startDate,
+		EndDate:              endDate,
+		Active:               u.Active,
+		Role:                 u.Role,
+		KeycloakUserID:       existing.KeycloakUserID, // Preservar keycloak_user_id
+	}
+}
+
+// UpdateEmployeeResponse - Respuesta de actualización de empleado
+type UpdateEmployeeResponse struct {
+	ID      string `json:"id"`
+	Updated bool   `json:"updated"`
 }
 
 func (e EmployeeRequest) ToDomain() domain.Employee {

@@ -48,6 +48,29 @@ definitions:
       start_date:
         type: string
     type: object
+  handlers.EmployeeResponse:
+    properties:
+      active:
+        type: boolean
+      airline:
+        type: string
+      bp:
+        type: string
+      email:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      identification_number:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      start_date:
+        type: string
+    type: object
   handlers.Link:
     properties:
       href:
@@ -55,6 +78,27 @@ definitions:
       method:
         type: string
       rel:
+        type: string
+    type: object
+  handlers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      token_type:
         type: string
     type: object
   handlers.MessageCreatedResponse:
@@ -128,14 +172,100 @@ definitions:
           $ref: '#/definitions/handlers.Link'
         type: array
     type: object
+  handlers.PasswordResetRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  handlers.PasswordResetResponse:
+    properties:
+      sent:
+        type: boolean
+    type: object
   handlers.RegisterEmployeeResponse:
     properties:
       _links:
         items:
           $ref: '#/definitions/handlers.Link'
         type: array
-      message:
+    type: object
+  handlers.ResendVerificationEmailRequest:
+    properties:
+      email:
         type: string
+    required:
+    - email
+    type: object
+  handlers.ResendVerificationEmailResponse:
+    properties:
+      email:
+        type: string
+      sent:
+        type: boolean
+    type: object
+  handlers.UpdateEmployeeRequest:
+    properties:
+      active:
+        type: boolean
+      airline:
+        type: string
+      bp:
+        type: string
+      end_date:
+        type: string
+      identificationNumber:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      start_date:
+        type: string
+    type: object
+  handlers.UpdateEmployeeResponse:
+    properties:
+      id:
+        type: string
+      updated:
+        type: boolean
+    type: object
+  handlers.UpdatePasswordRequest:
+    properties:
+      confirm_password:
+        minLength: 8
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+      token:
+        type: string
+    required:
+    - confirm_password
+    - new_password
+    - token
+    type: object
+  handlers.UpdatePasswordResponse:
+    properties:
+      email:
+        type: string
+      updated:
+        type: boolean
+    type: object
+  handlers.VerifyEmailRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  handlers.VerifyEmailResponse:
+    properties:
+      email:
+        type: string
+      verified:
+        type: boolean
     type: object
   middleware.APIResponse:
     properties:
@@ -177,6 +307,409 @@ info:
   title: Flighthours Backend API
   version: "1.0"
 paths:
+  /airlines/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns airline information by ID (accepts both UUID and obfuscated
+        ID)
+      parameters:
+      - description: Airline ID (UUID or obfuscated)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get airline by ID
+      tags:
+      - Airlines
+  /airlines/{id}/activate:
+    patch:
+      consumes:
+      - application/json
+      description: Sets airline status to active (accepts both UUID and obfuscated
+        ID)
+      parameters:
+      - description: Airline ID (UUID or obfuscated)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Activate airline
+      tags:
+      - Airlines
+  /airlines/{id}/deactivate:
+    patch:
+      consumes:
+      - application/json
+      description: Sets airline status to inactive (accepts both UUID and obfuscated
+        ID)
+      parameters:
+      - description: Airline ID (UUID or obfuscated)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Deactivate airline
+      tags:
+      - Airlines
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica un usuario y retorna tokens de acceso
+      parameters:
+      - description: Credenciales de login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login exitoso
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.LoginResponse'
+              type: object
+        "400":
+          description: Credenciales inválidas
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "401":
+          description: Email no verificado o credenciales incorrectas
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Login de usuario
+      tags:
+      - Autenticación
+  /auth/password-reset:
+    post:
+      consumes:
+      - application/json
+      description: Envía un email con instrucciones para recuperar la contraseña de
+        un usuario
+      parameters:
+      - description: Email del usuario
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.PasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email de recuperación enviado
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.PasswordResetResponse'
+              type: object
+        "400":
+          description: Error de validación - Email inválido
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Solicitar recuperación de contraseña
+      tags:
+      - authentication
+  /auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Reenvía el email de verificación a un usuario registrado que no
+        ha verificado su cuenta
+      parameters:
+      - description: Email del usuario
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ResendVerificationEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email reenviado exitosamente
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.ResendVerificationEmailResponse'
+              type: object
+        "400":
+          description: Error de validación - Email inválido
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Reenviar email de verificación
+      tags:
+      - authentication
+  /auth/update-password:
+    post:
+      consumes:
+      - application/json
+      description: Actualiza la contraseña del usuario usando el token recibido por
+        email
+      parameters:
+      - description: Token y nueva contraseña
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdatePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contraseña actualizada exitosamente
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.UpdatePasswordResponse'
+              type: object
+        "400":
+          description: Error de validación - Contraseñas no coinciden o token inválido
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "401":
+          description: Token inválido o expirado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Actualizar contraseña con token
+      tags:
+      - authentication
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Verifica el email de un usuario usando un token JWT. Este endpoint
+        actúa como proxy para no exponer Keycloak directamente.
+      parameters:
+      - description: Token de verificación del email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.VerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Email verificado exitosamente
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.VerifyEmailResponse'
+              type: object
+        "400":
+          description: Token inválido o expirado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "409":
+          description: Email ya estaba verificado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Verificar email de usuario (Proxy)
+      tags:
+      - Autenticación
+  /employees/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene la información de un empleado por su ID. Acepta tanto UUID
+        como ID ofuscado. No expone la contraseña del usuario.
+      parameters:
+      - description: ID del empleado (UUID o ID ofuscado)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Empleado encontrado
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.EmployeeResponse'
+              type: object
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "404":
+          description: Empleado no encontrado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Obtener empleado por ID
+      tags:
+      - employees
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Actualiza la información general de un empleado (nombre, airline, bp, fechas, rol, active).
+        Los campos email y password NO se modifican ya que se manejan en endpoints separados.
+        Si el campo active cambia, se sincroniza el estado enabled/disabled con Keycloak.
+        Si el campo role cambia, se actualiza el rol asignado en Keycloak.
+      parameters:
+      - description: ID del empleado (UUID o ID ofuscado)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Datos a actualizar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Empleado actualizado exitosamente
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.UpdateEmployeeResponse'
+              type: object
+        "400":
+          description: Error de validación - JSON inválido o ID inválido
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "404":
+          description: Empleado no encontrado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Actualizar información de empleado
+      tags:
+      - employees
   /messages:
     get:
       description: Obtiene una lista de mensajes del sistema con filtros opcionales.
