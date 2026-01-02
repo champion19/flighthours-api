@@ -185,6 +185,13 @@ const (
 	LogKeycloakLoginResendingVerification   = "Reenviando email de verificación automáticamente"
 	LogKeycloakLoginResendVerificationOK    = "Email de verificación reenviado exitosamente"
 	LogKeycloakLoginResendVerificationError = "Error reenviando email de verificación"
+	// Change Password (authenticated user)
+	LogKeycloakChangePassword           = "Cambiando contraseña de usuario autenticado"
+	LogKeycloakChangePasswordValidating = "Validando contraseña actual del usuario"
+	LogKeycloakChangePasswordInvalid    = "Contraseña actual incorrecta"
+	LogKeycloakChangePasswordOK         = "Contraseña cambiada exitosamente"
+	LogKeycloakChangePasswordError      = "Error cambiando contraseña"
+	LogKeycloakChangePasswordMismatch   = "Las contraseñas nuevas no coinciden"
 )
 
 // ============================================
@@ -284,6 +291,13 @@ const (
 	LogEmployeeKeycloakStatusUpdated = "Estado del usuario actualizado en Keycloak"
 	LogEmployeeKeycloakRoleUpdate    = "Actualizando rol del usuario en Keycloak"
 	LogEmployeeKeycloakRoleUpdated   = "Rol del usuario actualizado en Keycloak"
+	// Delete specific logs
+	LogEmployeeDeletingKeycloak    = "Eliminando usuario de Keycloak"
+	LogEmployeeDeleteKeycloakError = "Error eliminando usuario de Keycloak"
+	LogEmployeeDeletedKeycloak     = "Usuario eliminado de Keycloak exitosamente"
+	LogEmployeeDeletingDB          = "Eliminando empleado de base de datos"
+	LogEmployeeDeleteDBError       = "Error eliminando empleado de base de datos"
+	LogEmployeeDeleteComplete      = "Empleado eliminado exitosamente"
 )
 
 // ============================================

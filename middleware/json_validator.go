@@ -44,6 +44,9 @@ func (b *Builder) WithValidateUpdatePassword() gin.HandlerFunc {
 func (b *Builder) WithValidateUpdateEmployee() gin.HandlerFunc {
 	return b.jsonValidator(b.Validators.UpdateEmployeeValidator)
 }
+func (b *Builder) WithValidateChangePassword() gin.HandlerFunc {
+	return b.jsonValidator(b.Validators.ChangePasswordValidator)
+}
 
 func (b *Builder) jsonValidator(schema *jsonschema.Schema) gin.HandlerFunc {
 	return func(c *gin.Context) {

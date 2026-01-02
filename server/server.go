@@ -93,6 +93,10 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// Valida: longitud de campos, formato de fechas, rol válido
 		public.PUT("/employees/:id", validator.WithValidateUpdateEmployee(), handler.UpdateEmployee())
 
+		// DELETE /employees/:id - Eliminar empleado (BD y Keycloak)
+		// Esta operación es irreversible
+		public.DELETE("/employees/:id", handler.DeleteEmployee())
+
 		// Login - devuelve tokens JWT
 		public.POST("/login", handler.Login())
 		//public.GET("/user/email/:email", handler.GetEmployeeByEmail())
@@ -109,6 +113,9 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		//POST /auth/update-password - Actualizar contraseña con token
 		public.POST("/auth/update-password", validator.WithValidateUpdatePassword(), handler.UpdatePassword())
+
+		//POST /auth/change-password - Cambiar contraseña (usuario autenticado conoce su contraseña actual)
+		public.POST("/auth/change-password", validator.WithValidateChangePassword(), handler.ChangePassword())
 
 		//Messages Endpoints
 		// POST /messages - Crear nuevo mensaje

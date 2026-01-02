@@ -77,6 +77,12 @@ func (f *fakeServiceForReadOnly) UpdatePassword(context.Context, string, string)
 func (f *fakeServiceForReadOnly) UpdateEmployee(context.Context, domain.Employee, bool, string) error {
 	return nil
 }
+func (f *fakeServiceForReadOnly) ChangePassword(context.Context, string, string, string) (string, error) {
+	return "", nil
+}
+func (f *fakeServiceForReadOnly) DeleteEmployee(context.Context, string, string) error {
+	return nil
+}
 
 var _ input.Service = (*fakeServiceForReadOnly)(nil)
 
