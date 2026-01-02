@@ -337,3 +337,62 @@ func (i *Interactor) UpdateEmployee(ctx context.Context, employeeID string, upda
 	log.Success(logger.LogEmployeeUpdateComplete, "employee_id", employeeID)
 	return nil
 }
+
+// ChangePassword allows an authenticated user to change their own password
+// This method validates the current password and sets a new one without requiring email/token flow
+func (i *Interactor) ChangePassword(ctx context.Context, email, currentPassword, newPassword, confirmPassword string) (string, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogKeycloakChangePassword, "email", email)
+
+	// Validate new passwords match
+	if newPassword != confirmPassword {
+		log.Warn(logger.LogKeycloakChangePasswordMismatch, "email", email)
+		return "", domain.ErrPasswordMismatch
+	}
+
+	// Delegate to service (validates current password and sets new one)
+	resultEmail, err := i.service.ChangePassword(ctx, email, currentPassword, newPassword)
+	if err != nil {
+		switch err {
+		case domain.ErrInvalidCurrentPassword:
+			log.Warn(logger.LogKeycloakChangePasswordInvalid, "email", email)
+		case domain.ErrUserNotFound:
+			log.Warn(logger.LogKeycloakUserNotFound, "email", email)
+		case domain.ErrPasswordUpdateFailed:
+			log.Error(logger.LogKeycloakChangePasswordError, "email", email, "error", err)
+		default:
+			log.Error(logger.LogKeycloakChangePasswordError, "email", email, "error", err)
+		}
+		return "", err
+	}
+
+	log.Success(logger.LogKeycloakChangePasswordOK, "email", resultEmail)
+	return resultEmail, nil
+}
+
+// DeleteEmployee removes an employee from the system (DB and Keycloak)
+// First retrieves the employee to get the keycloakUserID, then delegates to service
+func (i *Interactor) DeleteEmployee(ctx context.Context, employeeID string) error {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogEmployeeDeleting, "employee_id", employeeID)
+
+	// Step 1: Get the employee to retrieve keycloakUserID
+	employee, err := i.service.GetEmployeeByID(ctx, employeeID)
+	if err != nil {
+		log.Warn(logger.LogEmployeeNotFound, "employee_id", employeeID, "error", err)
+		return domain.ErrPersonNotFound
+	}
+
+	// Step 2: Delegate to service to delete from Keycloak and DB
+	if err := i.service.DeleteEmployee(ctx, employee.ID, employee.KeycloakUserID); err != nil {
+		log.Error(logger.LogEmployeeDeleteError, "employee_id", employeeID, "error", err)
+		return err
+	}
+
+	log.Success(logger.LogEmployeeDeleteComplete, "employee_id", employeeID, "email", employee.Email)
+	return nil
+}

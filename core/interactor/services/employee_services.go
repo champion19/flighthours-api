@@ -614,3 +614,63 @@ func (s service) UpdateEmployee(ctx context.Context, employee domain.Employee, p
 	s.logger.Success(logger.LogEmployeeUpdateComplete, employee.ToLogger())
 	return nil
 }
+
+// ChangePassword allows an authenticated user to change their password
+// This method validates the current password by attempting login, then sets the new password
+// Returns the email of the user whose password was changed
+func (s service) ChangePassword(ctx context.Context, email, currentPassword, newPassword string) (string, error) {
+	s.logger.Info(logger.LogKeycloakChangePassword, "email", email)
+
+	// Step 1: Get user from Keycloak to ensure they exist
+	s.logger.Debug(logger.LogKeycloakChangePasswordValidating, "email", email)
+	user, err := s.keycloak.GetUserByEmail(ctx, email)
+	if err != nil {
+		s.logger.Error(logger.LogKeycloakUserNotFound, "email", email, "error", err)
+		return "", domain.ErrUserNotFound
+	}
+
+	// Step 2: Validate current password by attempting login
+	// If login fails, the current password is incorrect
+	_, err = s.keycloak.LoginUser(ctx, email, currentPassword)
+	if err != nil {
+		s.logger.Warn(logger.LogKeycloakChangePasswordInvalid, "email", email, "error", err)
+		return "", domain.ErrInvalidCurrentPassword
+	}
+
+	// Step 3: Set the new password (temporary: false because user chose this password)
+	if err := s.keycloak.SetPassword(ctx, *user.ID, newPassword, false); err != nil {
+		s.logger.Error(logger.LogKeycloakChangePasswordError, "email", email, "user_id", *user.ID, "error", err)
+		return "", domain.ErrPasswordUpdateFailed
+	}
+
+	s.logger.Success(logger.LogKeycloakChangePasswordOK, "email", email, "user_id", *user.ID)
+	return email, nil
+}
+
+// DeleteEmployee removes an employee from both Keycloak and the database
+// First deletes from Keycloak (if keycloakUserID is provided), then from the database
+func (s service) DeleteEmployee(ctx context.Context, employeeID string, keycloakUserID string) error {
+	s.logger.Info(logger.LogEmployeeDeleting, "employee_id", employeeID, "keycloak_user_id", keycloakUserID)
+
+	// Step 1: Delete from Keycloak first (if user has a Keycloak ID)
+	if keycloakUserID != "" {
+		s.logger.Debug(logger.LogEmployeeDeletingKeycloak, "keycloak_user_id", keycloakUserID)
+		if err := s.keycloak.DeleteUser(ctx, keycloakUserID); err != nil {
+			s.logger.Error(logger.LogEmployeeDeleteKeycloakError, "keycloak_user_id", keycloakUserID, "error", err)
+			return domain.ErrUserCannotDelete
+		}
+		s.logger.Success(logger.LogEmployeeDeletedKeycloak, "keycloak_user_id", keycloakUserID)
+	}
+
+	// Step 2: Delete from database
+	s.logger.Debug(logger.LogEmployeeDeletingDB, "employee_id", employeeID)
+	if err := s.repository.DeleteEmployee(ctx, nil, employeeID); err != nil {
+		s.logger.Error(logger.LogEmployeeDeleteDBError, "employee_id", employeeID, "error", err)
+		// Note: At this point Keycloak user is already deleted, but DB delete failed
+		// This is an inconsistent state but we prioritize security (no orphan auth)
+		return domain.ErrUserCannotDelete
+	}
+
+	s.logger.Success(logger.LogEmployeeDeleteComplete, "employee_id", employeeID)
+	return nil
+}
