@@ -298,8 +298,8 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_AIR_ACTIVATE_EXI_00002":   http.StatusOK,                  // 200 - Aerolínea activada exitosamente
 	"MOD_AIR_DEACTIVATE_EXI_00003": http.StatusOK,                  // 200 - Aerolínea desactivada exitosamente
 	"MOD_AIR_NOT_FOUND_ERR_00001":  http.StatusNotFound,            // 404 - Aerolínea no encontrada
-	"MOD_AIR_ACTIVATE_ERR_00002":   http.StatusInternalServerError, // 500 - Error activando aerolínea
-	"MOD_AIR_DEACTIVATE_ERR_00003": http.StatusInternalServerError, // 500 - Error desactivando aerolínea
+	"MOD_AIR_ACTIVATE_ERR_00002":   http.StatusUnprocessableEntity, // 422 - Error activando aerolínea (controlable)
+	"MOD_AIR_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error desactivando aerolínea (controlable)
 }
 
 // GetHTTPStatus returns the HTTP status for a message code

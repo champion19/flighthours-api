@@ -220,7 +220,7 @@ func (h handler) VerifyEmailByToken() gin.HandlerFunc {
 		traceID := middleware.GetRequestID(c)
 		log := Logger.WithTraceID(traceID)
 
-		var req verifyEmailRequest
+		var req VerifyEmailRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			log.Error(logger.LogRegJSONParseError, "error", err)
 			h.Response.Error(c, domain.MsgValBadFormat)
@@ -245,7 +245,7 @@ func (h handler) VerifyEmailByToken() gin.HandlerFunc {
 			return
 		}
 
-		response := verifyEmailResponse{
+		response := VerifyEmailResponse{
 			Verified: true,
 			Email:    email,
 		}
