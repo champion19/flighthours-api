@@ -56,6 +56,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.MessageInteractor,
 		dependencies.MessagingCache,
 		dependencies.AirlineInteractor,
+		dependencies.AirportInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -147,6 +148,16 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// PATCH /airlines/:id/deactivate - Desactivar una aerolínea
 		public.PATCH("/airlines/:id/deactivate", handler.DeactivateAirline())
+
+		// Airports Endpoints
+		// GET /airports/:id - Obtener información de un aeropuerto por ID
+		public.GET("/airports/:id", handler.GetAirportByID())
+
+		// PATCH /airports/:id/activate - Activar un aeropuerto
+		public.PATCH("/airports/:id/activate", handler.ActivateAirport())
+
+		// PATCH /airports/:id/deactivate - Desactivar un aeropuerto
+		public.PATCH("/airports/:id/deactivate", handler.DeactivateAirport())
 
 		dependencies.Logger.Success(logger.LogRouteConfigured)
 

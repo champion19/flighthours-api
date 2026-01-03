@@ -102,6 +102,11 @@ var (
 	ErrAirlineNotFound = errors.New("ERR_AIRLINE_NOT_FOUND")
 )
 
+// Airport Management Errors (MOD_APT_*)
+var (
+	ErrAirportNotFound = errors.New("ERR_AIRPORT_NOT_FOUND")
+)
+
 // ============================================
 // MESSAGE CODES - Constants for use in code
 // ============================================
@@ -263,4 +268,16 @@ const (
 	MsgAirlineGetOK        = "MOD_AIR_GET_EXI_00001"
 	MsgAirlineActivateOK   = "MOD_AIR_ACTIVATE_EXI_00002"
 	MsgAirlineDeactivateOK = "MOD_AIR_DEACTIVATE_EXI_00003"
+)
+
+// Airport Module (MOD_APT_*)
+const (
+	// Errors
+	MsgAirportNotFound      = "MOD_APT_NOT_FOUND_ERR_00001"
+	MsgAirportActivateErr   = "MOD_APT_ACTIVATE_ERR_00002"
+	MsgAirportDeactivateErr = "MOD_APT_DEACTIVATE_ERR_00003"
+	// Success
+	MsgAirportGetOK        = "MOD_APT_GET_EXI_00001"
+	MsgAirportActivateOK   = "MOD_APT_ACTIVATE_EXI_00002"
+	MsgAirportDeactivateOK = "MOD_APT_DEACTIVATE_EXI_00003"
 )

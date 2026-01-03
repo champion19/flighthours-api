@@ -13,6 +13,7 @@ import (
 	messagingCache "github.com/champion19/flighthours-api/platform/cache/messaging"
 	mysql "github.com/champion19/flighthours-api/platform/databases/mysql"
 	airlineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline"
+	airportRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airport"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
 	messageRepo "github.com/champion19/flighthours-api/platform/databases/repositories/message"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
@@ -32,6 +33,7 @@ type Dependencies struct {
 	MessagingCache    *messagingCache.MessageCache
 	MessageInteractor *interactor.MessageInteractor
 	AirlineInteractor *interactor.AirlineInteractor
+	AirportInteractor *interactor.AirportInteractor
 }
 
 func Init() (*Dependencies, error) {
@@ -123,6 +125,17 @@ func Init() (*Dependencies, error) {
 	airlineService := services.NewAirlineService(airlineRepository, log)
 	airlineInteractor := interactor.NewAirlineInteractor(airlineService, log)
 
+	// Inicializar repositorio y servicio de aeropuertos
+	airportRepository, err := airportRepo.NewAirportRepository(db)
+	if err != nil {
+		log.Error(logger.LogAirportRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogAirportRepoInitOK)
+
+	airportService := services.NewAirportService(airportRepository, log)
+	airportInteractor := interactor.NewAirportInteractor(airportService, log)
+
 	return &Dependencies{
 		EmployeeService:   employeeService,
 		EmployeeRepo:      employeeRepo,
@@ -135,5 +148,6 @@ func Init() (*Dependencies, error) {
 		MessagingCache:    messagingCache,
 		MessageInteractor: messageInteractor,
 		AirlineInteractor: airlineInteractor,
+		AirportInteractor: airportInteractor,
 	}, nil
 }

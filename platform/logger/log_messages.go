@@ -595,3 +595,22 @@ const (
 	LogAirlineRepoInitOK      = "Repositorio de aerolíneas inicializado"
 	LogAirlineRepoInitError   = "Error inicializando repositorio de aerolíneas"
 )
+
+// ============================================
+// AIRPORT INTERACTOR
+// ============================================
+const (
+	LogAirportGet             = "Obteniendo información de aeropuerto"
+	LogAirportGetOK           = "Aeropuerto obtenido exitosamente"
+	LogAirportGetError        = "Error obteniendo aeropuerto"
+	LogAirportNotFound        = "Aeropuerto no encontrado"
+	LogAirportActivate        = "Activando aeropuerto"
+	LogAirportActivateOK      = "Aeropuerto activado exitosamente"
+	LogAirportActivateError   = "Error activando aeropuerto"
+	LogAirportDeactivate      = "Desactivando aeropuerto"
+	LogAirportDeactivateOK    = "Aeropuerto desactivado exitosamente"
+	LogAirportDeactivateError = "Error desactivando aeropuerto"
+	LogAirportRepoInit        = "Inicializando repositorio de aeropuertos"
+	LogAirportRepoInitOK      = "Repositorio de aeropuertos inicializado"
+	LogAirportRepoInitError   = "Error inicializando repositorio de aeropuertos"
+)

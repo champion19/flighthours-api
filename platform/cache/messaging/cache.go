@@ -310,6 +310,16 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_AIR_NOT_FOUND_ERR_00001":  http.StatusNotFound,            // 404 - Aerolínea no encontrada
 	"MOD_AIR_ACTIVATE_ERR_00002":   http.StatusUnprocessableEntity, // 422 - Error activando aerolínea (controlable)
 	"MOD_AIR_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error desactivando aerolínea (controlable)
+
+	// ========================================
+	// Airport Module (MOD_APT_*)
+	// ========================================
+	"MOD_APT_GET_EXI_00001":        http.StatusOK,                  // 200 - Airport retrieved successfully
+	"MOD_APT_ACTIVATE_EXI_00002":   http.StatusOK,                  // 200 - Airport activated successfully
+	"MOD_APT_DEACTIVATE_EXI_00003": http.StatusOK,                  // 200 - Airport deactivated successfully
+	"MOD_APT_NOT_FOUND_ERR_00001":  http.StatusNotFound,            // 404 - Airport not found
+	"MOD_APT_ACTIVATE_ERR_00002":   http.StatusUnprocessableEntity, // 422 - Error activating airport
+	"MOD_APT_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error deactivating airport
 }
 
 // GetHTTPStatus returns the HTTP status for a message code

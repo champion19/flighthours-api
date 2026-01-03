@@ -12,7 +12,7 @@ import (
 
 type fakeAirlineService struct {
 	getByIDFn      func(ctx context.Context, id string) (*domain.Airline, error)
-	updateStatusFn func(ctx context.Context, id string, status string) error
+	updateStatusFn func(ctx context.Context, id string, status bool) error
 	activateFn     func(ctx context.Context, id string) error
 	deactivateFn   func(ctx context.Context, id string) error
 	beginTxFn      func(ctx context.Context) (output.Tx, error)
@@ -34,7 +34,7 @@ func (f *fakeAirlineService) GetAirlineByID(ctx context.Context, id string) (*do
 	return nil, errors.New("not implemented")
 }
 
-func (f *fakeAirlineService) UpdateAirlineStatus(ctx context.Context, id string, status string) error {
+func (f *fakeAirlineService) UpdateAirlineStatus(ctx context.Context, id string, status bool) error {
 	if f.updateStatusFn != nil {
 		return f.updateStatusFn(ctx, id, status)
 	}

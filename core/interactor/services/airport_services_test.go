@@ -9,118 +9,120 @@ import (
 	"github.com/champion19/flighthours-api/core/ports/output"
 )
 
-// airlineFakeTx is a test transaction with tracking for commit/rollback
-type airlineFakeTx struct {
+// airportFakeTx is a test transaction with tracking for commit/rollback
+type airportFakeTx struct {
 	committed  bool
 	rolledBack bool
 }
 
-func (t *airlineFakeTx) Commit() error {
+func (t *airportFakeTx) Commit() error {
 	t.committed = true
 	return nil
 }
 
-func (t *airlineFakeTx) Rollback() error {
+func (t *airportFakeTx) Rollback() error {
 	t.rolledBack = true
 	return nil
 }
 
-type fakeAirlineRepo struct {
-	getByIDFn      func(ctx context.Context, id string) (*domain.Airline, error)
+type fakeAirportRepo struct {
+	getByIDFn      func(ctx context.Context, id string) (*domain.Airport, error)
 	updateStatusFn func(ctx context.Context, tx output.Tx, id string, status bool) error
 	beginTxFn      func(ctx context.Context) (output.Tx, error)
 }
 
-func (f fakeAirlineRepo) BeginTx(ctx context.Context) (output.Tx, error) {
+func (f fakeAirportRepo) BeginTx(ctx context.Context) (output.Tx, error) {
 	if f.beginTxFn != nil {
 		return f.beginTxFn(ctx)
 	}
-	return &airlineFakeTx{}, nil
+	return &airportFakeTx{}, nil
 }
 
-func (f fakeAirlineRepo) GetAirlineByID(ctx context.Context, id string) (*domain.Airline, error) {
+func (f fakeAirportRepo) GetAirportByID(ctx context.Context, id string) (*domain.Airport, error) {
 	if f.getByIDFn != nil {
 		return f.getByIDFn(ctx, id)
 	}
 	return nil, errors.New("not implemented")
 }
 
-func (f fakeAirlineRepo) UpdateAirlineStatus(ctx context.Context, tx output.Tx, id string, status bool) error {
+func (f fakeAirportRepo) UpdateAirportStatus(ctx context.Context, tx output.Tx, id string, status bool) error {
 	if f.updateStatusFn != nil {
 		return f.updateStatusFn(ctx, tx, id, status)
 	}
 	return errors.New("not implemented")
 }
 
-func TestAirlineService_GetAirlineByID(t *testing.T) {
+func TestAirportService_GetAirportByID(t *testing.T) {
 	ctx := context.Background()
 
-	t.Run("returns airline when found", func(t *testing.T) {
-		expectedAirline := &domain.Airline{
-			ID:          "airline-123",
-			AirlineName: "Test Airlines",
-			AirlineCode: "TST",
-			Status:      "active",
+	t.Run("returns airport when found", func(t *testing.T) {
+		expectedAirport := &domain.Airport{
+			ID:       "airport-123",
+			Name:     "El Dorado International",
+			City:     "Bogota",
+			Country:  "Colombia",
+			IATACode: "BOG",
+			Status:   true,
 		}
-		svc := NewAirlineService(fakeAirlineRepo{
-			getByIDFn: func(context.Context, string) (*domain.Airline, error) {
-				return expectedAirline, nil
+		svc := NewAirportService(fakeAirportRepo{
+			getByIDFn: func(context.Context, string) (*domain.Airport, error) {
+				return expectedAirport, nil
 			},
 		}, noopLogger{})
 
-		result, err := svc.GetAirlineByID(ctx, "airline-123")
+		result, err := svc.GetAirportByID(ctx, "airport-123")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
-		if result.ID != expectedAirline.ID {
-			t.Fatalf("expected ID %s, got %s", expectedAirline.ID, result.ID)
+		if result.ID != expectedAirport.ID {
+			t.Fatalf("expected ID %s, got %s", expectedAirport.ID, result.ID)
 		}
-		if result.AirlineName != expectedAirline.AirlineName {
-			t.Fatalf("expected name %s, got %s", expectedAirline.AirlineName, result.AirlineName)
+		if result.Name != expectedAirport.Name {
+			t.Fatalf("expected name %s, got %s", expectedAirport.Name, result.Name)
 		}
 	})
 
 	t.Run("returns error when not found", func(t *testing.T) {
-		svc := NewAirlineService(fakeAirlineRepo{
-			getByIDFn: func(context.Context, string) (*domain.Airline, error) {
-				return nil, domain.ErrAirlineNotFound
+		svc := NewAirportService(fakeAirportRepo{
+			getByIDFn: func(context.Context, string) (*domain.Airport, error) {
+				return nil, domain.ErrAirportNotFound
 			},
 		}, noopLogger{})
 
-		_, err := svc.GetAirlineByID(ctx, "non-existent")
-		if !errors.Is(err, domain.ErrAirlineNotFound) {
-			t.Fatalf("expected %v, got %v", domain.ErrAirlineNotFound, err)
+		_, err := svc.GetAirportByID(ctx, "non-existent")
+		if !errors.Is(err, domain.ErrAirportNotFound) {
+			t.Fatalf("expected %v, got %v", domain.ErrAirportNotFound, err)
 		}
 	})
 
 	t.Run("propagates repository error", func(t *testing.T) {
 		repoErr := errors.New("database connection error")
-		svc := NewAirlineService(fakeAirlineRepo{
-			getByIDFn: func(context.Context, string) (*domain.Airline, error) {
+		svc := NewAirportService(fakeAirportRepo{
+			getByIDFn: func(context.Context, string) (*domain.Airport, error) {
 				return nil, repoErr
 			},
 		}, noopLogger{})
 
-		_, err := svc.GetAirlineByID(ctx, "airline-123")
+		_, err := svc.GetAirportByID(ctx, "airport-123")
 		if !errors.Is(err, repoErr) {
 			t.Fatalf("expected %v, got %v", repoErr, err)
 		}
 	})
 }
 
-func TestAirlineService_UpdateAirlineStatus(t *testing.T) {
+func TestAirportService_UpdateAirportStatus(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("success => commit", func(t *testing.T) {
-		tx := &airlineFakeTx{}
-		svc := NewAirlineService(fakeAirlineRepo{
+		tx := &airportFakeTx{}
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return tx, nil },
 			updateStatusFn: func(context.Context, output.Tx, string, bool) error {
 				return nil
 			},
 		}, noopLogger{})
 
-		err := svc.UpdateAirlineStatus(ctx, "airline-123", true)
+		err := svc.UpdateAirportStatus(ctx, "airport-123", true)
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -131,27 +133,27 @@ func TestAirlineService_UpdateAirlineStatus(t *testing.T) {
 
 	t.Run("begin tx fails => returns error", func(t *testing.T) {
 		beginErr := errors.New("cannot begin transaction")
-		svc := NewAirlineService(fakeAirlineRepo{
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return nil, beginErr },
 		}, noopLogger{})
 
-		err := svc.UpdateAirlineStatus(ctx, "airline-123", true)
+		err := svc.UpdateAirportStatus(ctx, "airport-123", true)
 		if !errors.Is(err, beginErr) {
 			t.Fatalf("expected %v, got %v", beginErr, err)
 		}
 	})
 
 	t.Run("update fails => rollback", func(t *testing.T) {
-		tx := &airlineFakeTx{}
+		tx := &airportFakeTx{}
 		updateErr := errors.New("update failed")
-		svc := NewAirlineService(fakeAirlineRepo{
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return tx, nil },
 			updateStatusFn: func(context.Context, output.Tx, string, bool) error {
 				return updateErr
 			},
 		}, noopLogger{})
 
-		err := svc.UpdateAirlineStatus(ctx, "airline-123", true)
+		err := svc.UpdateAirportStatus(ctx, "airport-123", true)
 		if !errors.Is(err, updateErr) {
 			t.Fatalf("expected %v, got %v", updateErr, err)
 		}
@@ -159,13 +161,13 @@ func TestAirlineService_UpdateAirlineStatus(t *testing.T) {
 	})
 }
 
-func TestAirlineService_ActivateAirline(t *testing.T) {
+func TestAirportService_ActivateAirport(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("success", func(t *testing.T) {
-		tx := &airlineFakeTx{}
+		tx := &airportFakeTx{}
 		var receivedStatus bool
-		svc := NewAirlineService(fakeAirlineRepo{
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return tx, nil },
 			updateStatusFn: func(_ context.Context, _ output.Tx, _ string, status bool) error {
 				receivedStatus = status
@@ -173,7 +175,7 @@ func TestAirlineService_ActivateAirline(t *testing.T) {
 			},
 		}, noopLogger{})
 
-		err := svc.ActivateAirline(ctx, "airline-123")
+		err := svc.ActivateAirport(ctx, "airport-123")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -183,29 +185,29 @@ func TestAirlineService_ActivateAirline(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		tx := &airlineFakeTx{}
+		tx := &airportFakeTx{}
 		updateErr := errors.New("update failed")
-		svc := NewAirlineService(fakeAirlineRepo{
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return tx, nil },
 			updateStatusFn: func(context.Context, output.Tx, string, bool) error {
 				return updateErr
 			},
 		}, noopLogger{})
 
-		err := svc.ActivateAirline(ctx, "airline-123")
+		err := svc.ActivateAirport(ctx, "airport-123")
 		if !errors.Is(err, updateErr) {
 			t.Fatalf("expected %v, got %v", updateErr, err)
 		}
 	})
 }
 
-func TestAirlineService_DeactivateAirline(t *testing.T) {
+func TestAirportService_DeactivateAirport(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("success", func(t *testing.T) {
-		tx := &airlineFakeTx{}
+		tx := &airportFakeTx{}
 		var receivedStatus bool
-		svc := NewAirlineService(fakeAirlineRepo{
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return tx, nil },
 			updateStatusFn: func(_ context.Context, _ output.Tx, _ string, status bool) error {
 				receivedStatus = status
@@ -213,7 +215,7 @@ func TestAirlineService_DeactivateAirline(t *testing.T) {
 			},
 		}, noopLogger{})
 
-		err := svc.DeactivateAirline(ctx, "airline-123")
+		err := svc.DeactivateAirport(ctx, "airport-123")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -223,28 +225,28 @@ func TestAirlineService_DeactivateAirline(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		tx := &airlineFakeTx{}
+		tx := &airportFakeTx{}
 		updateErr := errors.New("update failed")
-		svc := NewAirlineService(fakeAirlineRepo{
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return tx, nil },
 			updateStatusFn: func(context.Context, output.Tx, string, bool) error {
 				return updateErr
 			},
 		}, noopLogger{})
 
-		err := svc.DeactivateAirline(ctx, "airline-123")
+		err := svc.DeactivateAirport(ctx, "airport-123")
 		if !errors.Is(err, updateErr) {
 			t.Fatalf("expected %v, got %v", updateErr, err)
 		}
 	})
 }
 
-func TestAirlineService_BeginTx(t *testing.T) {
+func TestAirportService_BeginTx(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("success", func(t *testing.T) {
-		expectedTx := &airlineFakeTx{}
-		svc := NewAirlineService(fakeAirlineRepo{
+		expectedTx := &airportFakeTx{}
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return expectedTx, nil },
 		}, noopLogger{})
 
@@ -259,7 +261,7 @@ func TestAirlineService_BeginTx(t *testing.T) {
 
 	t.Run("propagates error", func(t *testing.T) {
 		beginErr := errors.New("cannot begin transaction")
-		svc := NewAirlineService(fakeAirlineRepo{
+		svc := NewAirportService(fakeAirportRepo{
 			beginTxFn: func(context.Context) (output.Tx, error) { return nil, beginErr },
 		}, noopLogger{})
 
