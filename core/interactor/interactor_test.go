@@ -129,6 +129,9 @@ func (f *fakeService) ChangePassword(context.Context, string, string, string) (s
 func (f *fakeService) DeleteEmployee(context.Context, string, string) error {
 	return nil
 }
+func (f *fakeService) GetEmployeeByKeycloakID(context.Context, string) (*domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
 
 func TestInteractor_RegisterEmployee(t *testing.T) {
 	ctx := context.Background()

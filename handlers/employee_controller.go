@@ -664,3 +664,173 @@ func (h handler) DeleteEmployee() gin.HandlerFunc {
 		h.Response.Success(c, domain.MsgUserDeleted)
 	}
 }
+
+// GetMe godoc
+// @Summary      Obtener información del empleado autenticado
+// @Description  Obtiene la información del empleado actualmente autenticado usando el token JWT. No expone la contraseña.
+// @Tags         employees
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  middleware.APIResponse{data=EmployeeResponse}  "Empleado encontrado"
+// @Failure      401  {object}  middleware.APIResponse  "No autenticado"
+// @Failure      500  {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /employees/me [get]
+func (h handler) GetMe() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		// Get authenticated employee from JWT middleware
+		employee, ok := middleware.GetAuthenticatedUser(c)
+		if !ok || employee == nil {
+			log.Error(logger.LogEmployeeGetByIDError, "error", "no authenticated user in context", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgUnauthorized)
+			return
+		}
+
+		log.Info(logger.LogEmployeeGetByID, "employee_id", employee.ID, "email", employee.Email, "client_ip", c.ClientIP())
+
+		// Encode ID for response
+		encodedID, err := h.EncodeID(employee.ID)
+		if err != nil {
+			log.Warn(logger.LogIDEncodeError, "uuid", employee.ID, "error", err)
+			encodedID = employee.ID // Use raw ID if encoding fails
+		}
+
+		// Convert to EmployeeResponse (without password)
+		response := FromDomain(employee, encodedID)
+
+		log.Success(logger.LogEmployeeGetByIDOK, "employee_id", employee.ID, "email", employee.Email, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgUserFound, response)
+	}
+}
+
+// UpdateMe godoc
+// @Summary      Actualizar información del empleado autenticado
+// @Description  Actualiza la información del empleado actualmente autenticado. Los campos email y password NO se modifican.
+// @Tags         employees
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      UpdateEmployeeRequest    true   "Datos a actualizar"
+// @Success      200      {object}  middleware.APIResponse{data=UpdateEmployeeResponse}  "Empleado actualizado exitosamente"
+// @Failure      400      {object}  middleware.APIResponse  "Error de validación"
+// @Failure      401      {object}  middleware.APIResponse  "No autenticado"
+// @Failure      500      {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /employees/me [put]
+func (h handler) UpdateMe() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		// Get authenticated employee from JWT middleware
+		currentEmployee, ok := middleware.GetAuthenticatedUser(c)
+		if !ok || currentEmployee == nil {
+			log.Error(logger.LogEmployeeUpdateError, "error", "no authenticated user in context", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgUnauthorized)
+			return
+		}
+
+		employeeUUID := currentEmployee.ID
+		log.Info(logger.LogEmployeeUpdateRequest, "employee_id", employeeUUID, "email", currentEmployee.Email, "client_ip", c.ClientIP())
+
+		// Parse request body
+		var req UpdateEmployeeRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			log.Error(logger.LogRegJSONParseError, "error", err, "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValBadFormat)
+			return
+		}
+
+		// Build updated employee data (preserving email, password, keycloak_user_id)
+		updatedEmployee := req.ToUpdateData(currentEmployee)
+
+		// Call interactor to update
+		err := h.Interactor.UpdateEmployee(c, employeeUUID, updatedEmployee)
+		if err != nil {
+			log.Error(logger.LogEmployeeUpdateError, "employee_id", employeeUUID, "error", err, "client_ip", c.ClientIP())
+			switch err {
+			case domain.ErrPersonNotFound, domain.ErrNotFoundUserById:
+				h.Response.Error(c, domain.MsgUserNotFound)
+			case domain.ErrUserCannotUpdate:
+				h.Response.Error(c, domain.MsgUserUpdateError)
+			case domain.ErrKeycloakUpdateFailed:
+				h.Response.Error(c, domain.MsgUserKeycloakUpdateError)
+			case domain.ErrRoleUpdateFailed:
+				h.Response.Error(c, domain.MsgUserRoleUpdateError)
+			case domain.ErrInvalidForeignKey:
+				h.Response.Error(c, domain.MsgInvalidForeignKey)
+			case domain.ErrDataTooLong:
+				h.Response.Error(c, domain.MsgDataTooLong)
+			case domain.ErrDuplicateUser:
+				h.Response.Error(c, domain.MsgUserDuplicate)
+			case domain.ErrInvalidData:
+				h.Response.Error(c, domain.MsgInvalidData)
+			default:
+				h.Response.Error(c, domain.MsgServerError)
+			}
+			return
+		}
+
+		// Encode ID for response
+		encodedID, err := h.EncodeID(employeeUUID)
+		if err != nil {
+			log.Warn(logger.LogIDEncodeError, "uuid", employeeUUID, "error", err)
+			encodedID = employeeUUID
+		}
+
+		response := UpdateEmployeeResponse{
+			ID:      encodedID,
+			Updated: true,
+		}
+
+		log.Success(logger.LogEmployeeUpdateComplete, "employee_id", employeeUUID, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgUserUpdated, response)
+	}
+}
+
+// DeleteMe godoc
+// @Summary      Eliminar cuenta del empleado autenticado
+// @Description  Elimina la cuenta del empleado actualmente autenticado (BD y Keycloak). Esta operación es irreversible.
+// @Tags         employees
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  middleware.APIResponse  "Cuenta eliminada exitosamente"
+// @Failure      401  {object}  middleware.APIResponse  "No autenticado"
+// @Failure      500  {object}  middleware.APIResponse  "Error interno del servidor"
+// @Router       /employees/me [delete]
+func (h handler) DeleteMe() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		// Get authenticated employee from JWT middleware
+		employee, ok := middleware.GetAuthenticatedUser(c)
+		if !ok || employee == nil {
+			log.Error(logger.LogEmployeeDeleteDBError, "error", "no authenticated user in context", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgUnauthorized)
+			return
+		}
+
+		employeeUUID := employee.ID
+		log.Info(logger.LogEmployeeDeleting, "employee_id", employeeUUID, "email", employee.Email, "client_ip", c.ClientIP())
+
+		// Call interactor to delete
+		if err := h.Interactor.DeleteEmployee(c, employeeUUID); err != nil {
+			switch err {
+			case domain.ErrPersonNotFound:
+				h.Response.Error(c, domain.MsgUserNotFound)
+			case domain.ErrUserCannotDelete:
+				h.Response.Error(c, domain.MsgUserCannotDelete)
+			default:
+				h.Response.Error(c, domain.MsgServerError)
+			}
+			return
+		}
+
+		log.Success(logger.LogEmployeeDeleteComplete, "employee_id", employeeUUID, "client_ip", c.ClientIP())
+		h.Response.Success(c, domain.MsgUserDeleted)
+	}
+}

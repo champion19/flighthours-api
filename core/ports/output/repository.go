@@ -23,6 +23,7 @@ type Repository interface {
 	//employee operations - read
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
 	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
+	GetEmployeeByKeycloakID(ctx context.Context, keycloakUserID string) (*domain.Employee, error)
 }
 
 type MessageRepository interface {

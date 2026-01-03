@@ -49,6 +49,9 @@ func (f fakeRepo) GetEmployeeByEmail(ctx context.Context, email string) (*domain
 func (f fakeRepo) GetEmployeeByID(context.Context, string) (*domain.Employee, error) {
 	return nil, errors.New("not implemented")
 }
+func (f fakeRepo) GetEmployeeByKeycloakID(context.Context, string) (*domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
 
 type fakeKeycloak struct {
 	getUserByEmailFn func(ctx context.Context, email string) (*gocloak.User, error)

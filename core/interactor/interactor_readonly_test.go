@@ -83,6 +83,9 @@ func (f *fakeServiceForReadOnly) ChangePassword(context.Context, string, string,
 func (f *fakeServiceForReadOnly) DeleteEmployee(context.Context, string, string) error {
 	return nil
 }
+func (f *fakeServiceForReadOnly) GetEmployeeByKeycloakID(context.Context, string) (*domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
 
 var _ input.Service = (*fakeServiceForReadOnly)(nil)
 

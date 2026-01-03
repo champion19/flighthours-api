@@ -93,6 +93,9 @@ func (f *fakeService) ChangePassword(context.Context, string, string, string) (s
 func (f *fakeService) DeleteEmployee(context.Context, string, string) error {
 	return nil
 }
+func (f *fakeService) GetEmployeeByKeycloakID(context.Context, string) (*domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
 
 type fakeServiceErr struct {
 	err error
@@ -149,6 +152,9 @@ func (f *fakeServiceErr) ChangePassword(context.Context, string, string, string)
 }
 func (f *fakeServiceErr) DeleteEmployee(context.Context, string, string) error {
 	return nil
+}
+func (f *fakeServiceErr) GetEmployeeByKeycloakID(context.Context, string) (*domain.Employee, error) {
+	return nil, errors.New("not implemented")
 }
 
 type fakeMessageCacheRepo struct {
