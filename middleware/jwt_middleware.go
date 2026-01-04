@@ -74,6 +74,6 @@ func GetAuthenticatedUser(c *gin.Context) (*domain.Employee, bool) {
 		return nil, false
 	}
 
-	person, ok := user.(*domain.Employee)
-	return person, ok
+	employee, ok := user.(*domain.Employee)
+	return employee, ok
 }
