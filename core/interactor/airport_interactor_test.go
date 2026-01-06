@@ -16,6 +16,7 @@ type fakeAirportService struct {
 	activateFn     func(ctx context.Context, id string) error
 	deactivateFn   func(ctx context.Context, id string) error
 	beginTxFn      func(ctx context.Context) (output.Tx, error)
+	listAirportsFn func(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
 }
 
 var _ input.AirportService = (*fakeAirportService)(nil)
@@ -53,6 +54,13 @@ func (f *fakeAirportService) DeactivateAirport(ctx context.Context, id string) e
 		return f.deactivateFn(ctx, id)
 	}
 	return errors.New("not implemented")
+}
+
+func (f *fakeAirportService) ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error) {
+	if f.listAirportsFn != nil {
+		return f.listAirportsFn(ctx, filters)
+	}
+	return nil, errors.New("not implemented")
 }
 
 func TestAirportInteractor_GetAirportByID(t *testing.T) {

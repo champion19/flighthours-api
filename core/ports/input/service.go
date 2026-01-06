@@ -71,6 +71,7 @@ type AirlineService interface {
 
 	// Airline - queries
 	GetAirlineByID(ctx context.Context, id string) (*domain.Airline, error)
+	ListAirlines(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error)
 
 	// Airline - operations
 	UpdateAirlineStatus(ctx context.Context, id string, status bool) error
@@ -84,6 +85,7 @@ type AirportService interface {
 
 	// Airport - queries
 	GetAirportByID(ctx context.Context, id string) (*domain.Airport, error)
+	ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
 
 	// Airport - operations
 	UpdateAirportStatus(ctx context.Context, id string, status bool) error

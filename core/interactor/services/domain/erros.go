@@ -264,10 +264,12 @@ const (
 	MsgAirlineNotFound      = "MOD_AIR_NOT_FOUND_ERR_00001"
 	MsgAirlineActivateErr   = "MOD_AIR_ACTIVATE_ERR_00002"
 	MsgAirlineDeactivateErr = "MOD_AIR_DEACTIVATE_ERR_00003"
+	MsgAirlineListError     = "MOD_AIR_LIST_ERR_00004"
 	// Success
 	MsgAirlineGetOK        = "MOD_AIR_GET_EXI_00001"
 	MsgAirlineActivateOK   = "MOD_AIR_ACTIVATE_EXI_00002"
 	MsgAirlineDeactivateOK = "MOD_AIR_DEACTIVATE_EXI_00003"
+	MsgAirlineListOK       = "MOD_AIR_LIST_EXI_00004"
 )
 
 // Airport Module (MOD_APT_*)

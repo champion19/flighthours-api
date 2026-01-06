@@ -220,3 +220,53 @@ func (h *handler) DeactivateAirport() gin.HandlerFunc {
 		h.Response.SuccessWithData(c, domain.MsgAirportDeactivateOK, response)
 	}
 }
+
+// ListAirports godoc
+// @Summary      List all airports
+// @Description  Returns a list of all airports with optional status filter
+// @Tags         Airports
+// @Accept       json
+// @Produce      json
+// @Param        status  query     string  false  "Filter by status (true/false, active/inactive)"
+// @Success      200  {object}  AirportListResponse
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /airports [get]
+func (h *handler) ListAirports() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		log.Debug(logger.LogAirportList,
+			"method", c.Request.Method,
+			"path", c.Request.URL.Path,
+			"client_ip", c.ClientIP())
+
+		// Parse query parameters for filters
+		filters := make(map[string]interface{})
+		if status := c.Query("status"); status != "" {
+			if status == "true" || status == "1" || status == "active" {
+				filters["status"] = true
+			} else if status == "false" || status == "0" || status == "inactive" {
+				filters["status"] = false
+			}
+		}
+
+		airports, err := h.AirportInteractor.ListAirports(c.Request.Context(), filters)
+		if err != nil {
+			log.Error(logger.LogAirportListError,
+				"error", err,
+				"client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgServerError)
+			return
+		}
+
+		// Convert to response with encoded IDs
+		response := ToAirportListResponse(airports, h.EncodeID)
+
+		log.Debug(logger.LogAirportListOK,
+			"count", len(airports),
+			"client_ip", c.ClientIP())
+
+		h.Response.DataOnly(c, response)
+	}
+}

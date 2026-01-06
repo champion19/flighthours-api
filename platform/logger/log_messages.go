@@ -591,6 +591,9 @@ const (
 	LogAirlineDeactivate      = "Desactivando aerolínea"
 	LogAirlineDeactivateOK    = "Aerolínea desactivada exitosamente"
 	LogAirlineDeactivateError = "Error desactivando aerolínea"
+	LogAirlineList            = "Listando aerolíneas"
+	LogAirlineListOK          = "Aerolíneas listadas exitosamente"
+	LogAirlineListError       = "Error listando aerolíneas"
 	LogAirlineRepoInit        = "Inicializando repositorio de aerolíneas"
 	LogAirlineRepoInitOK      = "Repositorio de aerolíneas inicializado"
 	LogAirlineRepoInitError   = "Error inicializando repositorio de aerolíneas"
@@ -613,4 +616,7 @@ const (
 	LogAirportRepoInit        = "Inicializando repositorio de aeropuertos"
 	LogAirportRepoInitOK      = "Repositorio de aeropuertos inicializado"
 	LogAirportRepoInitError   = "Error inicializando repositorio de aeropuertos"
+	LogAirportList            = "Listando aeropuertos"
+	LogAirportListOK          = "Aeropuertos listados exitosamente"
+	LogAirportListError       = "Error listando aeropuertos"
 )

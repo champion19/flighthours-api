@@ -83,13 +83,14 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	// ===========================================
 	public := app.Group("flighthours/api/v1")
 	{
-		// Registration - New user registration
+		// ---- Authentication ----
+		// POST /register - New user registration
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
 
-		// Login - Returns JWT tokens
+		// POST /login - Returns JWT tokens
 		public.POST("/login", handler.Login())
 
-		// Email verification and password reset (public - user may not be logged in)
+		// ---- Email Verification & Password Reset (Public) ----
 		// POST /auth/resend-verification - Resend verification email
 		public.POST("/auth/resend-verification", validator.WithValidateResendVerificationEmail(), handler.ResendVerificationEmail())
 
@@ -101,6 +102,22 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// POST /auth/update-password - Update password with token (from reset email)
 		public.POST("/auth/update-password", validator.WithValidateUpdatePassword(), handler.UpdatePassword())
+
+		// ---- Airlines (Public - Read Only) ----
+		// GET /airlines - List all airlines (with optional status filter)
+		// Query params: ?status=true (active) or ?status=false (inactive)
+		public.GET("/airlines", handler.ListAirlines())
+
+		// GET /airlines/:id - Get airline information by ID
+		public.GET("/airlines/:id", handler.GetAirlineByID())
+
+		// ---- Airports (Public - Read Only) ----
+		// GET /airports - List all airports (with optional status filter)
+		// Query params: ?status=true (active) or ?status=false (inactive)
+		public.GET("/airports", handler.ListAirports())
+
+		// GET /airports/:id - Get airport information by ID
+		public.GET("/airports/:id", handler.GetAirportByID())
 	}
 
 	// ===========================================
@@ -128,7 +145,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// This operation is irreversible
 		protected.DELETE("/employees/me", handler.DeleteMe())
 
-		// ---- Messages Management (Protected) ----
+		// ---- Messages Management (Protected - Admin) ----
 		// POST /messages - Create new message
 		protected.POST("/messages", validator.WithValidateMessage(), handler.CreateMessage())
 
@@ -149,20 +166,14 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// Administrative endpoint to force reload after manual changes
 		protected.POST("/messages/cache/reload", handler.ReloadMessageCache())
 
-		// ---- Airlines Management (Protected) ----
-		// GET /airlines/:id - Get airline information by ID
-		public.GET("/airlines/:id", handler.GetAirlineByID())
-
+		// ---- Airlines Management (Protected - Write Operations) ----
 		// PATCH /airlines/:id/activate - Activate an airline
 		protected.PATCH("/airlines/:id/activate", handler.ActivateAirline())
 
 		// PATCH /airlines/:id/deactivate - Deactivate an airline
 		protected.PATCH("/airlines/:id/deactivate", handler.DeactivateAirline())
 
-		// ---- Airports Management (Protected) ----
-		// GET /airports/:id - Get airport information by ID
-		public.GET("/airports/:id", handler.GetAirportByID())
-
+		// ---- Airports Management (Protected - Write Operations) ----
 		// PATCH /airports/:id/activate - Activate an airport
 		protected.PATCH("/airports/:id/activate", handler.ActivateAirport())
 

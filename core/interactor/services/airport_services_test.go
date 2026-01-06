@@ -29,6 +29,7 @@ type fakeAirportRepo struct {
 	getByIDFn      func(ctx context.Context, id string) (*domain.Airport, error)
 	updateStatusFn func(ctx context.Context, tx output.Tx, id string, status bool) error
 	beginTxFn      func(ctx context.Context) (output.Tx, error)
+	listAirportsFn func(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
 }
 
 func (f fakeAirportRepo) BeginTx(ctx context.Context) (output.Tx, error) {
@@ -50,6 +51,13 @@ func (f fakeAirportRepo) UpdateAirportStatus(ctx context.Context, tx output.Tx, 
 		return f.updateStatusFn(ctx, tx, id, status)
 	}
 	return errors.New("not implemented")
+}
+
+func (f fakeAirportRepo) ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error) {
+	if f.listAirportsFn != nil {
+		return f.listAirportsFn(ctx, filters)
+	}
+	return nil, errors.New("not implemented")
 }
 
 func TestAirportService_GetAirportByID(t *testing.T) {

@@ -85,3 +85,20 @@ func (i *AirportInteractor) DeactivateAirport(ctx context.Context, id string) er
 	log.Success(logger.LogAirportDeactivateOK, "airport_id", id)
 	return nil
 }
+
+// ListAirports retrieves all airports with optional filters
+func (i *AirportInteractor) ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportList, "filters", filters)
+
+	airports, err := i.service.ListAirports(ctx, filters)
+	if err != nil {
+		log.Error(logger.LogAirportListError, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAirportListOK, "count", len(airports))
+	return airports, nil
+}

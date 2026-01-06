@@ -13,10 +13,10 @@
     },
     "airline": {
       "type": "string",
-      "description": "Airline ID (UUID format)",
-      "maxLength": 36,
-      "minLength": 36,
-      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      "description": "Airline ID (UUID or obfuscated ID)",
+      "maxLength": 50,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9-]+$"
     },
     "identificationNumber": {
       "type": "string",

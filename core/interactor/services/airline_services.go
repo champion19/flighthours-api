@@ -32,6 +32,11 @@ func (s *AirlineService) GetAirlineByID(ctx context.Context, id string) (*domain
 	return s.repo.GetAirlineByID(ctx, id)
 }
 
+// ListAirlines retrieves all airlines with optional filters
+func (s *AirlineService) ListAirlines(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error) {
+	return s.repo.ListAirlines(ctx, filters)
+}
+
 // UpdateAirlineStatus updates the status of an airline with transaction handling
 func (s *AirlineService) UpdateAirlineStatus(ctx context.Context, id string, status bool) error {
 	tx, err := s.repo.BeginTx(ctx)

@@ -48,6 +48,7 @@ type AirlineRepository interface {
 
 	// Airline operations - read
 	GetAirlineByID(ctx context.Context, id string) (*domain.Airline, error)
+	ListAirlines(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error)
 
 	// Airline operations - transactional
 	UpdateAirlineStatus(ctx context.Context, tx Tx, id string, status bool) error
@@ -59,6 +60,7 @@ type AirportRepository interface {
 
 	// Airport operations - read
 	GetAirportByID(ctx context.Context, id string) (*domain.Airport, error)
+	ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
 
 	// Airport operations - transactional
 	UpdateAirportStatus(ctx context.Context, tx Tx, id string, status bool) error

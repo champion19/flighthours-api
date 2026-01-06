@@ -12,6 +12,8 @@ import (
 const (
 	QueryByID         = "SELECT id, airline_name, airline_code, status FROM airline WHERE id = ? LIMIT 1"
 	QueryUpdateStatus = "UPDATE airline SET status = ? WHERE id = ?"
+	QueryGetAll       = "SELECT id, airline_name, airline_code, status FROM airline ORDER BY airline_name"
+	QueryGetByStatus  = "SELECT id, airline_name, airline_code, status FROM airline WHERE status = ? ORDER BY airline_name"
 )
 
 var log logger.Logger = logger.NewSlogLogger()
@@ -19,6 +21,8 @@ var log logger.Logger = logger.NewSlogLogger()
 type repository struct {
 	stmtGetByID      *sql.Stmt
 	stmtUpdateStatus *sql.Stmt
+	stmtGetAll       *sql.Stmt
+	stmtGetByStatus  *sql.Stmt
 	db               *sql.DB
 }
 
@@ -40,10 +44,24 @@ func NewAirlineRepository(db *sql.DB) (*repository, error) {
 		return nil, err
 	}
 
+	stmtGetAll, err := db.Prepare(QueryGetAll)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
+	stmtGetByStatus, err := db.Prepare(QueryGetByStatus)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
 	return &repository{
 		db:               db,
 		stmtGetByID:      stmtGetByID,
 		stmtUpdateStatus: stmtUpdateStatus,
+		stmtGetAll:       stmtGetAll,
+		stmtGetByStatus:  stmtGetByStatus,
 	}, nil
 }
 

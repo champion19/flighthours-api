@@ -32,6 +32,11 @@ func (s *AirportService) GetAirportByID(ctx context.Context, id string) (*domain
 	return s.repo.GetAirportByID(ctx, id)
 }
 
+// ListAirports retrieves all airports with optional filters
+func (s *AirportService) ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error) {
+	return s.repo.ListAirports(ctx, filters)
+}
+
 // UpdateAirportStatus updates the status of an airport with transaction handling
 func (s *AirportService) UpdateAirportStatus(ctx context.Context, id string, status bool) error {
 	tx, err := s.repo.BeginTx(ctx)
