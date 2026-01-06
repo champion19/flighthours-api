@@ -11,6 +11,7 @@ type AirportResponse struct {
 	IATACode    string `json:"iata_code,omitempty"`
 	Status      string `json:"status"`
 	AirportType string `json:"airport_type,omitempty"`
+	Links       []Link `json:"_links,omitempty"`
 }
 
 // FromDomainAirport converts domain.Airport to AirportResponse with encoded ID
@@ -35,16 +36,19 @@ type AirportStatusResponse struct {
 	ID      string `json:"id"`
 	Status  string `json:"status"`
 	Updated bool   `json:"updated"`
+	Links   []Link `json:"_links,omitempty"`
 }
 
 // AirportListResponse - Response DTO for listing airports
 type AirportListResponse struct {
 	Airports []AirportResponse `json:"airports"`
 	Total    int               `json:"total"`
+	Links    []Link            `json:"_links,omitempty"`
 }
 
 // ToAirportListResponse converts a slice of domain airports to AirportListResponse
-func ToAirportListResponse(airports []domain.Airport, encodeFunc func(string) (string, error)) AirportListResponse {
+// baseURL is used to build HATEOAS links for each airport
+func ToAirportListResponse(airports []domain.Airport, encodeFunc func(string) (string, error), baseURL string) AirportListResponse {
 	response := AirportListResponse{
 		Airports: make([]AirportResponse, 0, len(airports)),
 		Total:    len(airports),
@@ -60,7 +64,7 @@ func ToAirportListResponse(airports []domain.Airport, encodeFunc func(string) (s
 		if airport.Status {
 			status = "active"
 		}
-		response.Airports = append(response.Airports, AirportResponse{
+		airportResp := AirportResponse{
 			ID:          encodedID,
 			Name:        airport.Name,
 			City:        airport.City,
@@ -68,7 +72,17 @@ func ToAirportListResponse(airports []domain.Airport, encodeFunc func(string) (s
 			IATACode:    airport.IATACode,
 			Status:      status,
 			AirportType: airport.AirportType,
-		})
+		}
+		// Add HATEOAS links to each airport
+		if baseURL != "" {
+			airportResp.Links = BuildAirportLinks(baseURL, encodedID)
+		}
+		response.Airports = append(response.Airports, airportResp)
+	}
+
+	// Add collection-level links
+	if baseURL != "" {
+		response.Links = BuildAirportListLinks(baseURL)
 	}
 
 	return response

@@ -154,3 +154,225 @@ func BuildMessageListLinks(baseURL string) []Link {
 		},
 	}
 }
+
+// ============================================================================
+// AIRLINE HATEOAS LINKS
+// ============================================================================
+
+// BuildAirlineLinks construye links HATEOAS para una aerolínea específica
+func BuildAirlineLinks(baseURL string, airlineID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airlines", airlineID)
+	collectionURL := BuildCollectionURL(baseURL, "airlines")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		},
+		{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAirlineListLinks construye links para la lista de aerolíneas
+func BuildAirlineListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "airlines")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAirlineStatusLinks construye links para respuesta de cambio de status
+func BuildAirlineStatusLinks(baseURL string, airlineID string, isActive bool) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airlines", airlineID)
+	collectionURL := BuildCollectionURL(baseURL, "airlines")
+
+	links := []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+
+	// Si está activo, mostrar link para desactivar y viceversa
+	if isActive {
+		links = append(links, Link{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		})
+	} else {
+		links = append(links, Link{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		})
+	}
+
+	links = append(links, Link{
+		Href:   collectionURL,
+		Rel:    "collection",
+		Method: "GET",
+	})
+
+	return links
+}
+
+// ============================================================================
+// AIRPORT HATEOAS LINKS
+// ============================================================================
+
+// BuildAirportLinks construye links HATEOAS para un aeropuerto específico
+func BuildAirportLinks(baseURL string, airportID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airports", airportID)
+	collectionURL := BuildCollectionURL(baseURL, "airports")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		},
+		{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAirportListLinks construye links para la lista de aeropuertos
+func BuildAirportListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "airports")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAirportStatusLinks construye links para respuesta de cambio de status
+func BuildAirportStatusLinks(baseURL string, airportID string, isActive bool) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airports", airportID)
+	collectionURL := BuildCollectionURL(baseURL, "airports")
+
+	links := []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+
+	// Si está activo, mostrar link para desactivar y viceversa
+	if isActive {
+		links = append(links, Link{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		})
+	} else {
+		links = append(links, Link{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		})
+	}
+
+	links = append(links, Link{
+		Href:   collectionURL,
+		Rel:    "collection",
+		Method: "GET",
+	})
+
+	return links
+}
+
+// ============================================================================
+// EMPLOYEE HATEOAS LINKS
+// ============================================================================
+
+// BuildEmployeeLinks construye links HATEOAS para un empleado específico
+func BuildEmployeeLinks(baseURL string, employeeID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "employees", employeeID)
+	collectionURL := BuildCollectionURL(baseURL, "employees")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "delete",
+			Method: "DELETE",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildEmployeeMeLinks construye links HATEOAS para el endpoint /employees/me
+func BuildEmployeeMeLinks(baseURL string) []Link {
+	meURL := baseURL + "/flighthours/api/v1/employees/me"
+
+	return []Link{
+		{
+			Href:   meURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   meURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   meURL,
+			Rel:    "delete",
+			Method: "DELETE",
+		},
+	}
+}

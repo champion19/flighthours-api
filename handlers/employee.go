@@ -30,6 +30,7 @@ type EmployeeResponse struct {
 	EndDate              time.Time `json:"end_date"`
 	Active               bool      `json:"active"`
 	Role                 string    `json:"role"`
+	Links                []Link    `json:"_links,omitempty"`
 }
 
 // FromDomain convierte un domain.Employee a EmployeeResponse
@@ -178,6 +179,7 @@ func (u UpdateEmployeeRequest) ToUpdateData(existing *domain.Employee) domain.Em
 type UpdateEmployeeResponse struct {
 	ID      string `json:"id"`
 	Updated bool   `json:"updated"`
+	Links   []Link `json:"_links,omitempty"`
 }
 
 func (e EmployeeRequest) ToDomain() domain.Employee {

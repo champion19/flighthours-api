@@ -74,6 +74,11 @@ func (h *handler) GetAirportByID() gin.HandlerFunc {
 		}
 
 		response := FromDomainAirport(airport, responseID)
+
+		// Build HATEOAS links
+		baseURL := GetBaseURL(c)
+		response.Links = BuildAirportLinks(baseURL, responseID)
+
 		log.Success(logger.LogAirportGetOK, airport.ToLogger())
 		h.Response.SuccessWithData(c, domain.MsgAirportGetOK, response)
 	}
@@ -144,6 +149,10 @@ func (h *handler) ActivateAirport() gin.HandlerFunc {
 			Status:  "active",
 			Updated: true,
 		}
+
+		// Build HATEOAS links (isActive=true, muestra link para deactivate)
+		baseURL := GetBaseURL(c)
+		response.Links = BuildAirportStatusLinks(baseURL, responseID, true)
 
 		log.Success(logger.LogAirportActivateOK, "airport_id", airportUUID, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgAirportActivateOK, response)
@@ -216,6 +225,10 @@ func (h *handler) DeactivateAirport() gin.HandlerFunc {
 			Updated: true,
 		}
 
+		// Build HATEOAS links (isActive=false, muestra link para activate)
+		baseURL := GetBaseURL(c)
+		response.Links = BuildAirportStatusLinks(baseURL, responseID, false)
+
 		log.Success(logger.LogAirportDeactivateOK, "airport_id", airportUUID, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgAirportDeactivateOK, response)
 	}
@@ -260,8 +273,9 @@ func (h *handler) ListAirports() gin.HandlerFunc {
 			return
 		}
 
-		// Convert to response with encoded IDs
-		response := ToAirportListResponse(airports, h.EncodeID)
+		// Convert to response with encoded IDs and HATEOAS links
+		baseURL := GetBaseURL(c)
+		response := ToAirportListResponse(airports, h.EncodeID, baseURL)
 
 		log.Debug(logger.LogAirportListOK,
 			"count", len(airports),

@@ -391,6 +391,10 @@ func (h handler) GetEmployeeByID() gin.HandlerFunc {
 		// Convertir a EmployeeResponse (sin contraseña) usando FromDomain
 		response := FromDomain(employee, responseID)
 
+		// Build HATEOAS links
+		baseURL := GetBaseURL(c)
+		response.Links = BuildEmployeeLinks(baseURL, responseID)
+
 		log.Success(logger.LogEmployeeGetByIDOK, "uuid", employeeUUID, "email", employee.Email, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgUserFound, response)
 	}
@@ -551,6 +555,10 @@ func (h handler) UpdateEmployee() gin.HandlerFunc {
 			ID:      responseID,
 			Updated: true,
 		}
+
+		// Build HATEOAS links
+		baseURL := GetBaseURL(c)
+		response.Links = BuildEmployeeLinks(baseURL, responseID)
 
 		log.Success(logger.LogEmployeeUpdateComplete, "uuid", employeeUUID, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgUserUpdated, response)
@@ -717,6 +725,10 @@ func (h handler) GetMe() gin.HandlerFunc {
 		// Convert to EmployeeResponse (without password)
 		response := FromDomain(employee, encodedID)
 
+		// Build HATEOAS links for /employees/me
+		baseURL := GetBaseURL(c)
+		response.Links = BuildEmployeeMeLinks(baseURL)
+
 		log.Success(logger.LogEmployeeGetByIDOK, "employee_id", employee.ID, "email", employee.Email, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgUserFound, response)
 	}
@@ -816,6 +828,10 @@ func (h handler) UpdateMe() gin.HandlerFunc {
 			ID:      encodedID,
 			Updated: true,
 		}
+
+		// Build HATEOAS links for /employees/me
+		baseURL := GetBaseURL(c)
+		response.Links = BuildEmployeeMeLinks(baseURL)
 
 		log.Success(logger.LogEmployeeUpdateComplete, "employee_id", employeeUUID, "client_ip", c.ClientIP())
 		h.Response.SuccessWithData(c, domain.MsgUserUpdated, response)
