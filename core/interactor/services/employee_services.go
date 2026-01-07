@@ -47,6 +47,17 @@ func (s service) GetEmployeeByID(ctx context.Context, id string) (*domain.Employ
 	return employee, nil
 }
 
+func (s service) GetEmployeeByKeycloakID(ctx context.Context, keycloakUserID string) (*domain.Employee, error) {
+	s.logger.Debug(logger.LogEmployeeServiceSearchByID, "keycloak_user_id", keycloakUserID)
+	employee, err := s.repository.GetEmployeeByKeycloakID(ctx, keycloakUserID)
+	if err != nil {
+		s.logger.Error(logger.LogEmployeeServiceErrorByID, "keycloak_user_id", keycloakUserID, "error", err)
+		return nil, err
+	}
+	s.logger.Debug(logger.LogEmployeeServiceFoundByID, "keycloak_user_id", keycloakUserID, "email", employee.Email)
+	return employee, nil
+}
+
 func (s service) BeginTx(ctx context.Context) (output.Tx, error) {
 	return s.repository.BeginTx(ctx)
 }

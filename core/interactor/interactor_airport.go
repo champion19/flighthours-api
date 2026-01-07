@@ -1,0 +1,104 @@
+package interactor
+
+import (
+	"context"
+
+	"github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/core/ports/input"
+	"github.com/champion19/flighthours-api/middleware"
+	"github.com/champion19/flighthours-api/platform/logger"
+)
+
+// AirportInteractor orchestrates airport operations
+type AirportInteractor struct {
+	service input.AirportService
+	logger  logger.Logger
+}
+
+// NewAirportInteractor creates a new airport interactor
+func NewAirportInteractor(service input.AirportService, log logger.Logger) *AirportInteractor {
+	return &AirportInteractor{
+		service: service,
+		logger:  log,
+	}
+}
+
+// GetAirportByID retrieves an airport by its ID
+func (i *AirportInteractor) GetAirportByID(ctx context.Context, id string) (*domain.Airport, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportGet, "airport_id", id)
+
+	airport, err := i.service.GetAirportByID(ctx, id)
+	if err != nil {
+		log.Error(logger.LogAirportGetError, "airport_id", id, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAirportGetOK, airport.ToLogger())
+	return airport, nil
+}
+
+// ActivateAirport sets an airport's status to active
+func (i *AirportInteractor) ActivateAirport(ctx context.Context, id string) error {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportActivate, "airport_id", id)
+
+	// Verify airport exists
+	_, err := i.service.GetAirportByID(ctx, id)
+	if err != nil {
+		log.Error(logger.LogAirportNotFound, "airport_id", id)
+		return err
+	}
+
+	if err = i.service.ActivateAirport(ctx, id); err != nil {
+		log.Error(logger.LogAirportActivateError, "airport_id", id, "error", err)
+		return err
+	}
+
+	log.Success(logger.LogAirportActivateOK, "airport_id", id)
+	return nil
+}
+
+// DeactivateAirport sets an airport's status to inactive
+func (i *AirportInteractor) DeactivateAirport(ctx context.Context, id string) error {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportDeactivate, "airport_id", id)
+
+	// Verify airport exists
+	_, err := i.service.GetAirportByID(ctx, id)
+	if err != nil {
+		log.Error(logger.LogAirportNotFound, "airport_id", id)
+		return err
+	}
+
+	if err = i.service.DeactivateAirport(ctx, id); err != nil {
+		log.Error(logger.LogAirportDeactivateError, "airport_id", id, "error", err)
+		return err
+	}
+
+	log.Success(logger.LogAirportDeactivateOK, "airport_id", id)
+	return nil
+}
+
+// ListAirports retrieves all airports with optional filters
+func (i *AirportInteractor) ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportList, "filters", filters)
+
+	airports, err := i.service.ListAirports(ctx, filters)
+	if err != nil {
+		log.Error(logger.LogAirportListError, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAirportListOK, "count", len(airports))
+	return airports, nil
+}

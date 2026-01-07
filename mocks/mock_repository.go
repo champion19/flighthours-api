@@ -71,3 +71,11 @@ func (m *MockRepository) GetEmployeeByID(ctx context.Context, id string) (*domai
 	}
 	return args.Get(0).(*domain.Employee), args.Error(1)
 }
+
+func (m *MockRepository) GetEmployeeByKeycloakID(ctx context.Context, keycloakUserID string) (*domain.Employee, error) {
+	args := m.Called(ctx, keycloakUserID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.Employee), args.Error(1)
+}

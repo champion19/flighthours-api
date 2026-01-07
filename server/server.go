@@ -56,11 +56,11 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.MessageInteractor,
 		dependencies.MessagingCache,
 		dependencies.AirlineInteractor,
+		dependencies.AirportInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
 	if err != nil {
-
 		dependencies.Logger.Error(logger.LogRouteValidatorError, err)
 		dependencies.Logger.Fatal(logger.LogRouteValidatorError, err)
 		return
@@ -78,84 +78,114 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 	app.NoRoute(middleware.NotFoundHandler())
 
-	// Rutas públicas (sin autenticación)
+	// ===========================================
+	// PUBLIC ROUTES (no authentication required)
+	// ===========================================
 	public := app.Group("flighthours/api/v1")
 	{
-		// Registro de usuario
+		// ---- Authentication ----
+		// POST /register - New user registration
 		public.POST("/register", validator.WithValidateRegister(), handler.RegisterEmployee())
 
-		// GET /employees/:id - Obtener información de un empleado por ID (sin contraseña)
-		public.GET("/employees/:id", handler.GetEmployeeByID())
-
-		// PUT /employees/:id - Actualizar información general de un empleado
-		// No modifica email ni password (se manejan en endpoints separados)
-		// Sincroniza cambios de active y role con Keycloak
-		// Valida: longitud de campos, formato de fechas, rol válido
-		public.PUT("/employees/:id", validator.WithValidateUpdateEmployee(), handler.UpdateEmployee())
-
-		// DELETE /employees/:id - Eliminar empleado (BD y Keycloak)
-		// Esta operación es irreversible
-		public.DELETE("/employees/:id", handler.DeleteEmployee())
-
-		// Login - devuelve tokens JWT
+		// POST /login - Returns JWT tokens
 		public.POST("/login", handler.Login())
-		//public.GET("/user/email/:email", handler.GetEmployeeByEmail())
 
-		// Email verification and password reset
-		//POST /auth/resend-verification - Reenviar correo de verificación
+		// ---- Email Verification & Password Reset (Public) ----
+		// POST /auth/resend-verification - Resend verification email
 		public.POST("/auth/resend-verification", validator.WithValidateResendVerificationEmail(), handler.ResendVerificationEmail())
 
-		//POST /auth/password-reset - Solicitar restablecimiento de contraseña
+		// POST /auth/password-reset - Request password reset
 		public.POST("/auth/password-reset", validator.WithValidatePasswordResetRequest(), handler.RequestPasswordReset())
 
-		//POST /auth/verify-email - Verificar correo con token
+		// POST /auth/verify-email - Verify email with token
 		public.POST("/auth/verify-email", handler.VerifyEmailByToken())
 
-		//POST /auth/update-password - Actualizar contraseña con token
+		// POST /auth/update-password - Update password with token (from reset email)
 		public.POST("/auth/update-password", validator.WithValidateUpdatePassword(), handler.UpdatePassword())
 
-		//POST /auth/change-password - Cambiar contraseña (usuario autenticado conoce su contraseña actual)
-		public.POST("/auth/change-password", validator.WithValidateChangePassword(), handler.ChangePassword())
+		// ---- Airlines (Public - Read Only) ----
+		// GET /airlines - List all airlines (with optional status filter)
+		// Query params: ?status=true (active) or ?status=false (inactive)
+		public.GET("/airlines", handler.ListAirlines())
 
-		//Messages Endpoints
-		// POST /messages - Crear nuevo mensaje
-		public.POST("/messages", validator.WithValidateMessage(), handler.CreateMessage())
-
-		// PUT /messages/:id - Actualizar mensaje existente
-		public.PUT("/messages/:id", validator.WithValidateMessage(), handler.UpdateMessage())
-
-		// DELETE /messages/:id - Eliminar mensaje
-		public.DELETE("/messages/:id", handler.DeleteMessage())
-
-		// GET /messages/:id - Obtener mensaje por ID
-		public.GET("/messages/:id", handler.GetMessageByID())
-
-		// GET /messages - Listar mensajes (con filtros opcionales)
-		// Query params: ?module=users&type=ERROR&category=usuario_final&active=true
-		public.GET("/messages", handler.ListMessages())
-
-		// POST /messages/cache/reload - Recargar caché de mensajes desde BD
-		// Endpoint administrativo para forzar recarga después de cambios manuales
-		public.POST("/messages/cache/reload", handler.ReloadMessageCache())
-
-		// Airlines Endpoints
-		// GET /airlines/:id - Obtener información de una aerolínea por ID
+		// GET /airlines/:id - Get airline information by ID
 		public.GET("/airlines/:id", handler.GetAirlineByID())
 
-		// PATCH /airlines/:id/activate - Activar una aerolínea
-		public.PATCH("/airlines/:id/activate", handler.ActivateAirline())
+		// ---- Airports (Public - Read Only) ----
+		// GET /airports - List all airports (with optional status filter)
+		// Query params: ?status=true (active) or ?status=false (inactive)
+		public.GET("/airports", handler.ListAirports())
 
-		// PATCH /airlines/:id/deactivate - Desactivar una aerolínea
-		public.PATCH("/airlines/:id/deactivate", handler.DeactivateAirline())
-
-		dependencies.Logger.Success(logger.LogRouteConfigured)
-
+		// GET /airports/:id - Get airport information by ID
+		public.GET("/airports/:id", handler.GetAirportByID())
 	}
 
+	// ===========================================
+	// PROTECTED ROUTES (authentication required)
+	// ===========================================
+	protected := app.Group("flighthours/api/v1")
+	// Use the RequireAuth middleware from jwt_middleware.go
+	// This validates JWT tokens and injects the authenticated user into context
+	protected.Use(middleware.RequireAuth(dependencies.EmployeeService, dependencies.MessagingCache))
+	{
+		// ---- Authenticated User Endpoints ----
+		// POST /auth/change-password - Change password (authenticated user knows current password)
+		protected.POST("/auth/change-password", validator.WithValidateChangePassword(), handler.ChangePassword())
+
+		// ---- Employee Self-Service (Protected) ----
+		// GET /employees/me - Get current authenticated employee's information
+		protected.GET("/employees/me", handler.GetMe())
+
+		// PUT /employees/me - Update current authenticated employee's information
+		// Does not modify email or password (handled in separate endpoints)
+		// Syncs active and role changes with Keycloak
+		protected.PUT("/employees/me", validator.WithValidateUpdateEmployee(), handler.UpdateMe())
+
+		// DELETE /employees/me - Delete current authenticated employee (DB and Keycloak)
+		// This operation is irreversible
+		protected.DELETE("/employees/me", handler.DeleteMe())
+
+		// ---- Messages Management (Protected - Admin) ----
+		// POST /messages - Create new message
+		protected.POST("/messages", validator.WithValidateMessage(), handler.CreateMessage())
+
+		// PUT /messages/:id - Update existing message
+		protected.PUT("/messages/:id", validator.WithValidateMessage(), handler.UpdateMessage())
+
+		// DELETE /messages/:id - Delete message
+		protected.DELETE("/messages/:id", handler.DeleteMessage())
+
+		// GET /messages/:id - Get message by ID
+		protected.GET("/messages/:id", handler.GetMessageByID())
+
+		// GET /messages - List messages (with optional filters)
+		// Query params: ?module=users&type=ERROR&category=usuario_final&active=true
+		protected.GET("/messages", handler.ListMessages())
+
+		// POST /messages/cache/reload - Reload message cache from DB
+		// Administrative endpoint to force reload after manual changes
+		protected.POST("/messages/cache/reload", handler.ReloadMessageCache())
+
+		// ---- Airlines Management (Protected - Write Operations) ----
+		// PATCH /airlines/:id/activate - Activate an airline
+		protected.PATCH("/airlines/:id/activate", handler.ActivateAirline())
+
+		// PATCH /airlines/:id/deactivate - Deactivate an airline
+		protected.PATCH("/airlines/:id/deactivate", handler.DeactivateAirline())
+
+		// ---- Airports Management (Protected - Write Operations) ----
+		// PATCH /airports/:id/activate - Activate an airport
+		protected.PATCH("/airports/:id/activate", handler.ActivateAirport())
+
+		// PATCH /airports/:id/deactivate - Deactivate an airport
+		protected.PATCH("/airports/:id/deactivate", handler.DeactivateAirport())
+	}
+
+	dependencies.Logger.Success(logger.LogRouteConfigured)
 }
 
 func Bootstrap(app *gin.Engine) *dependency.Dependencies {
-	// Inicializar métricas de Prometheus
+	// Initialize Prometheus metrics
 	dependencies, err := dependency.Init()
 	if err != nil {
 		slog.Error(logger.LogDepInitError, slog.String("error", err.Error()))

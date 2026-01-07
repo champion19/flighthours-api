@@ -14,6 +14,70 @@ definitions:
     - TypeWarning
     - TypeInfo
     - TypeDebug
+  handlers.AirlineListResponse:
+    properties:
+      _links:
+        items:
+          $ref: '#/definitions/handlers.Link'
+        type: array
+      airlines:
+        items:
+          $ref: '#/definitions/handlers.AirlineResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  handlers.AirlineResponse:
+    properties:
+      _links:
+        items:
+          $ref: '#/definitions/handlers.Link'
+        type: array
+      airline_code:
+        type: string
+      airline_name:
+        type: string
+      id:
+        type: string
+      status:
+        type: string
+      uuid:
+        type: string
+    type: object
+  handlers.AirportListResponse:
+    properties:
+      _links:
+        items:
+          $ref: '#/definitions/handlers.Link'
+        type: array
+      airports:
+        items:
+          $ref: '#/definitions/handlers.AirportResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  handlers.AirportResponse:
+    properties:
+      _links:
+        items:
+          $ref: '#/definitions/handlers.Link'
+        type: array
+      airport_type:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      iata_code:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+    type: object
   handlers.CacheReloadResponse:
     properties:
       after_count:
@@ -24,6 +88,31 @@ definitions:
         type: string
       success:
         type: boolean
+    type: object
+  handlers.ChangePasswordRequest:
+    properties:
+      confirm_password:
+        minLength: 8
+        type: string
+      current_password:
+        type: string
+      email:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - current_password
+    - email
+    - new_password
+    type: object
+  handlers.ChangePasswordResponse:
+    properties:
+      changed:
+        type: boolean
+      email:
+        type: string
     type: object
   handlers.EmployeeRequest:
     properties:
@@ -50,6 +139,10 @@ definitions:
     type: object
   handlers.EmployeeResponse:
     properties:
+      _links:
+        items:
+          $ref: '#/definitions/handlers.Link'
+        type: array
       active:
         type: boolean
       airline:
@@ -226,6 +319,10 @@ definitions:
     type: object
   handlers.UpdateEmployeeResponse:
     properties:
+      _links:
+        items:
+          $ref: '#/definitions/handlers.Link'
+        type: array
       id:
         type: string
       updated:
@@ -307,6 +404,29 @@ info:
   title: Flighthours Backend API
   version: "1.0"
 paths:
+  /airlines:
+    get:
+      description: Returns a list of all airlines with optional status filter
+      parameters:
+      - description: Filter by status (true for active, false for inactive)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AirlineListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all airlines
+      tags:
+      - Airlines
   /airlines/{id}:
     get:
       consumes:
@@ -421,6 +541,189 @@ paths:
       summary: Deactivate airline
       tags:
       - Airlines
+  /airports:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all airports with optional status filter
+      parameters:
+      - description: Filter by status (true/false, active/inactive)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AirportListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List all airports
+      tags:
+      - Airports
+  /airports/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns airport information by ID (accepts both UUID and obfuscated
+        ID)
+      parameters:
+      - description: Airport ID (UUID or obfuscated)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get airport by ID
+      tags:
+      - Airports
+  /airports/{id}/activate:
+    patch:
+      consumes:
+      - application/json
+      description: Sets airport status to active (accepts both UUID and obfuscated
+        ID)
+      parameters:
+      - description: Airport ID (UUID or obfuscated)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Activate airport
+      tags:
+      - Airports
+  /airports/{id}/deactivate:
+    patch:
+      consumes:
+      - application/json
+      description: Sets airport status to inactive (accepts both UUID and obfuscated
+        ID)
+      parameters:
+      - description: Airport ID (UUID or obfuscated)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Deactivate airport
+      tags:
+      - Airports
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Permite a un usuario cambiar su contraseña conociendo la contraseña
+        actual. Este flujo no requiere salir de la API ni tokens por email.
+      parameters:
+      - description: Email, contraseña actual y nueva contraseña
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contraseña cambiada exitosamente
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.ChangePasswordResponse'
+              type: object
+        "400":
+          description: Error de validación - Contraseñas no coinciden
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "401":
+          description: Contraseña actual incorrecta
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Cambiar contraseña de usuario autenticado
+      tags:
+      - authentication
   /auth/login:
     post:
       consumes:
@@ -625,6 +928,39 @@ paths:
       tags:
       - Autenticación
   /employees/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Elimina un empleado del sistema (BD y Keycloak). Esta operación
+        es irreversible.
+      parameters:
+      - description: ID del empleado (UUID o ID ofuscado)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Empleado eliminado exitosamente
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "404":
+          description: Empleado no encontrado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      summary: Eliminar empleado
+      tags:
+      - employees
     get:
       consumes:
       - application/json
@@ -708,6 +1044,103 @@ paths:
           schema:
             $ref: '#/definitions/middleware.APIResponse'
       summary: Actualizar información de empleado
+      tags:
+      - employees
+  /employees/me:
+    delete:
+      consumes:
+      - application/json
+      description: Elimina la cuenta del empleado actualmente autenticado (BD y Keycloak).
+        Esta operación es irreversible.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cuenta eliminada exitosamente
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Eliminar cuenta del empleado autenticado
+      tags:
+      - employees
+    get:
+      consumes:
+      - application/json
+      description: Obtiene la información del empleado actualmente autenticado usando
+        el token JWT. No expone la contraseña.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Empleado encontrado
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.EmployeeResponse'
+              type: object
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Obtener información del empleado autenticado
+      tags:
+      - employees
+    put:
+      consumes:
+      - application/json
+      description: Actualiza la información del empleado actualmente autenticado.
+        Los campos email y password NO se modifican.
+      parameters:
+      - description: Datos a actualizar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Empleado actualizado exitosamente
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/handlers.UpdateEmployeeResponse'
+              type: object
+        "400":
+          description: Error de validación
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+        "500":
+          description: Error interno del servidor
+          schema:
+            $ref: '#/definitions/middleware.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Actualizar información del empleado autenticado
       tags:
       - employees
   /messages:

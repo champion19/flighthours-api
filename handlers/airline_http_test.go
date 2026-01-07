@@ -21,10 +21,11 @@ import (
 
 type fakeAirlineService struct {
 	getByIDFn      func(ctx context.Context, id string) (*domain.Airline, error)
-	updateStatusFn func(ctx context.Context, id string, status string) error
+	updateStatusFn func(ctx context.Context, id string, status bool) error
 	activateFn     func(ctx context.Context, id string) error
 	deactivateFn   func(ctx context.Context, id string) error
 	beginTxFn      func(ctx context.Context) (output.Tx, error)
+	listAirlinesFn func(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error)
 }
 
 var _ input.AirlineService = (*fakeAirlineService)(nil)
@@ -43,7 +44,7 @@ func (f *fakeAirlineService) GetAirlineByID(ctx context.Context, id string) (*do
 	return nil, errors.New("not implemented")
 }
 
-func (f *fakeAirlineService) UpdateAirlineStatus(ctx context.Context, id string, status string) error {
+func (f *fakeAirlineService) UpdateAirlineStatus(ctx context.Context, id string, status bool) error {
 	if f.updateStatusFn != nil {
 		return f.updateStatusFn(ctx, id, status)
 	}
@@ -62,6 +63,13 @@ func (f *fakeAirlineService) DeactivateAirline(ctx context.Context, id string) e
 		return f.deactivateFn(ctx, id)
 	}
 	return errors.New("not implemented")
+}
+
+func (f *fakeAirlineService) ListAirlines(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error) {
+	if f.listAirlinesFn != nil {
+		return f.listAirlinesFn(ctx, filters)
+	}
+	return nil, errors.New("not implemented")
 }
 
 func newTestAirlineMessageCache(t *testing.T) *messaging.MessageCache {
@@ -96,7 +104,7 @@ func TestHTTP_GetAirlineByID(t *testing.T) {
 
 	newRouter := func(svc input.AirlineService) *gin.Engine {
 		airlineInteractor := interactor.NewAirlineInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor)
+		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -221,7 +229,7 @@ func TestHTTP_ActivateAirline(t *testing.T) {
 
 	newRouter := func(svc input.AirlineService) *gin.Engine {
 		airlineInteractor := interactor.NewAirlineInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor)
+		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -300,7 +308,7 @@ func TestHTTP_DeactivateAirline(t *testing.T) {
 
 	newRouter := func(svc input.AirlineService) *gin.Engine {
 		airlineInteractor := interactor.NewAirlineInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor)
+		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
