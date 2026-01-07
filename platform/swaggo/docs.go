@@ -24,6 +24,41 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/airlines": {
+            "get": {
+                "description": "Returns a list of all airlines with optional status filter",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airlines"
+                ],
+                "summary": "List all airlines",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by status (true for active, false for inactive)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AirlineListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/airlines/{id}": {
             "get": {
                 "description": "Returns airline information by ID (accepts both UUID and obfuscated ID)",
@@ -181,6 +216,276 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/airports": {
+            "get": {
+                "description": "Returns a list of all airports with optional status filter",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "List all airports",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by status (true/false, active/inactive)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AirportListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/{id}": {
+            "get": {
+                "description": "Returns airport information by ID (accepts both UUID and obfuscated ID)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Get airport by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Airport ID (UUID or obfuscated)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/{id}/activate": {
+            "patch": {
+                "description": "Sets airport status to active (accepts both UUID and obfuscated ID)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Activate airport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Airport ID (UUID or obfuscated)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/airports/{id}/deactivate": {
+            "patch": {
+                "description": "Sets airport status to inactive (accepts both UUID and obfuscated ID)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Airports"
+                ],
+                "summary": "Deactivate airport",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Airport ID (UUID or obfuscated)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/change-password": {
+            "post": {
+                "description": "Permite a un usuario cambiar su contraseña conociendo la contraseña actual. Este flujo no requiere salir de la API ni tokens por email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Cambiar contraseña de usuario autenticado",
+                "parameters": [
+                    {
+                        "description": "Email, contraseña actual y nueva contraseña",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contraseña cambiada exitosamente",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handlers.ChangePasswordResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación - Contraseñas no coinciden",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Contraseña actual incorrecta",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
                         }
                     }
                 }
@@ -512,6 +817,163 @@ const docTemplate = `{
                 }
             }
         },
+        "/employees/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Obtiene la información del empleado actualmente autenticado usando el token JWT. No expone la contraseña.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "employees"
+                ],
+                "summary": "Obtener información del empleado autenticado",
+                "responses": {
+                    "200": {
+                        "description": "Empleado encontrado",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handlers.EmployeeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Actualiza la información del empleado actualmente autenticado. Los campos email y password NO se modifican.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "employees"
+                ],
+                "summary": "Actualizar información del empleado autenticado",
+                "parameters": [
+                    {
+                        "description": "Datos a actualizar",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpdateEmployeeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Empleado actualizado exitosamente",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.APIResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handlers.UpdateEmployeeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Error de validación",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Elimina la cuenta del empleado actualmente autenticado (BD y Keycloak). Esta operación es irreversible.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "employees"
+                ],
+                "summary": "Eliminar cuenta del empleado autenticado",
+                "responses": {
+                    "200": {
+                        "description": "Cuenta eliminada exitosamente",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/employees/{id}": {
             "get": {
                 "description": "Obtiene la información de un empleado por su ID. Acepta tanto UUID como ID ofuscado. No expone la contraseña del usuario.",
@@ -624,6 +1086,54 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Error de validación - JSON inválido o ID inválido",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Empleado no encontrado",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Elimina un empleado del sistema (BD y Keycloak). Esta operación es irreversible.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "employees"
+                ],
+                "summary": "Eliminar empleado",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID del empleado (UUID o ID ofuscado)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Empleado eliminado exitosamente",
+                        "schema": {
+                            "$ref": "#/definitions/middleware.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "ID inválido",
                         "schema": {
                             "$ref": "#/definitions/middleware.APIResponse"
                         }
@@ -1003,6 +1513,104 @@ const docTemplate = `{
                 "TypeDebug"
             ]
         },
+        "handlers.AirlineListResponse": {
+            "type": "object",
+            "properties": {
+                "_links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Link"
+                    }
+                },
+                "airlines": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.AirlineResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.AirlineResponse": {
+            "type": "object",
+            "properties": {
+                "_links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Link"
+                    }
+                },
+                "airline_code": {
+                    "type": "string"
+                },
+                "airline_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.AirportListResponse": {
+            "type": "object",
+            "properties": {
+                "_links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Link"
+                    }
+                },
+                "airports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.AirportResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.AirportResponse": {
+            "type": "object",
+            "properties": {
+                "_links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Link"
+                    }
+                },
+                "airport_type": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "iata_code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.CacheReloadResponse": {
             "type": "object",
             "properties": {
@@ -1017,6 +1625,42 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "handlers.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirm_password",
+                "current_password",
+                "email",
+                "new_password"
+            ],
+            "properties": {
+                "confirm_password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "current_password": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        },
+        "handlers.ChangePasswordResponse": {
+            "type": "object",
+            "properties": {
+                "changed": {
+                    "type": "boolean"
+                },
+                "email": {
+                    "type": "string"
                 }
             }
         },
@@ -1058,6 +1702,12 @@ const docTemplate = `{
         "handlers.EmployeeResponse": {
             "type": "object",
             "properties": {
+                "_links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Link"
+                    }
+                },
                 "active": {
                     "type": "boolean"
                 },
@@ -1329,6 +1979,12 @@ const docTemplate = `{
         "handlers.UpdateEmployeeResponse": {
             "type": "object",
             "properties": {
+                "_links": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Link"
+                    }
+                },
                 "id": {
                     "type": "string"
                 },

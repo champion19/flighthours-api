@@ -242,6 +242,10 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_V_FK_ERR_00014":   http.StatusUnprocessableEntity, // 422 - Invalid foreign key (e.g., airline doesn't exist)
 	"MOD_V_LEN_ERR_00015":  http.StatusUnprocessableEntity, // 422 - Data too long for column
 	"MOD_V_DATA_ERR_00016": http.StatusUnprocessableEntity, // 422 - Invalid data
+	// Date validation errors
+	"MOD_V_DATE_ERR_00017":  http.StatusBadRequest, // 400 - Start date after end date
+	"MOD_V_DATE_ERR_00018":  http.StatusBadRequest, // 400 - Invalid date format
+	"MOD_V_EMPTY_ERR_00019": http.StatusBadRequest, // 400 - Field contains only whitespace
 
 	// ========================================
 	// Keycloak Module (MOD_KC_*) - Email Verification & Auth

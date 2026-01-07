@@ -6,10 +6,10 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Name of the employee (letters, spaces, accents allowed)",
+      "description": "Name of the employee (cannot be only whitespace)",
       "maxLength": 120,
       "minLength": 1,
-      "pattern": "^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\\s]+$"
+      "pattern": ".*\\S.*"
     },
     "airline": {
       "type": "string",

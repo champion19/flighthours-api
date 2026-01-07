@@ -41,7 +41,26 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			"email", employeeRequest.Email,
 			"role", employeeRequest.Role)
 
-		result, err := h.Interactor.RegisterEmployee(c, employeeRequest.ToDomain())
+		// Convert to domain and validate dates
+		employeeDomain, err := employeeRequest.ToDomain()
+		if err != nil {
+			log.Error(logger.LogRegProcessError,
+				"email", employeeRequest.Email,
+				"error", err,
+				"client_ip", c.ClientIP())
+			// Handle specific validation errors
+			switch err {
+			case domain.ErrStartDateAfterEndDate:
+				h.Response.Error(c, domain.MsgValStartDateAfterEndDate)
+			case domain.ErrInvalidDateFormat:
+				h.Response.Error(c, domain.MsgValInvalidDateFormat)
+			default:
+				h.Response.Error(c, domain.MsgValBadFormat)
+			}
+			return
+		}
+
+		result, err := h.Interactor.RegisterEmployee(c, employeeDomain)
 		if err != nil {
 			log.Error(logger.LogRegProcessError,
 				"email", employeeRequest.Email,
@@ -520,9 +539,21 @@ func (h handler) UpdateEmployee() gin.HandlerFunc {
 		}
 
 		// Step 6: Build updated employee data (preserving email, password, keycloak_user_id)
-		updatedEmployee := req.ToUpdateData(currentEmployee)
+		updatedEmployee, err := req.ToUpdateData(currentEmployee)
+		if err != nil {
+			log.Error(logger.LogEmployeeUpdateError, "uuid", employeeUUID, "error", err, "client_ip", c.ClientIP())
+			switch err {
+			case domain.ErrStartDateAfterEndDate:
+				h.Response.Error(c, domain.MsgValStartDateAfterEndDate)
+			case domain.ErrInvalidDateFormat:
+				h.Response.Error(c, domain.MsgValInvalidDateFormat)
+			default:
+				h.Response.Error(c, domain.MsgValBadFormat)
+			}
+			return
+		}
 
-		// Step 6: Call interactor to update
+		// Step 7: Call interactor to update
 		err = h.Interactor.UpdateEmployee(c, employeeUUID, updatedEmployee)
 		if err != nil {
 			log.Error(logger.LogEmployeeUpdateError, "uuid", employeeUUID, "error", err, "client_ip", c.ClientIP())
@@ -788,10 +819,22 @@ func (h handler) UpdateMe() gin.HandlerFunc {
 		}
 
 		// Build updated employee data (preserving email, password, keycloak_user_id)
-		updatedEmployee := req.ToUpdateData(currentEmployee)
+		updatedEmployee, err := req.ToUpdateData(currentEmployee)
+		if err != nil {
+			log.Error(logger.LogEmployeeUpdateError, "employee_id", employeeUUID, "error", err, "client_ip", c.ClientIP())
+			switch err {
+			case domain.ErrStartDateAfterEndDate:
+				h.Response.Error(c, domain.MsgValStartDateAfterEndDate)
+			case domain.ErrInvalidDateFormat:
+				h.Response.Error(c, domain.MsgValInvalidDateFormat)
+			default:
+				h.Response.Error(c, domain.MsgValBadFormat)
+			}
+			return
+		}
 
 		// Call interactor to update
-		err := h.Interactor.UpdateEmployee(c, employeeUUID, updatedEmployee)
+		err = h.Interactor.UpdateEmployee(c, employeeUUID, updatedEmployee)
 		if err != nil {
 			log.Error(logger.LogEmployeeUpdateError, "employee_id", employeeUUID, "error", err, "client_ip", c.ClientIP())
 			switch err {

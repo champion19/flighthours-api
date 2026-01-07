@@ -142,21 +142,32 @@ type UpdateEmployeeRequest struct {
 
 // ToUpdateData convierte el request a un mapa de campos actualizables
 // Se usa con un empleado existente para preservar email, password y keycloak_user_id
-func (u UpdateEmployeeRequest) ToUpdateData(existing *domain.Employee) domain.Employee {
+// Returns error if date validation fails (invalid format or start_date > end_date)
+func (u UpdateEmployeeRequest) ToUpdateData(existing *domain.Employee) (domain.Employee, error) {
 	layout := "2006-01-02"
 
 	startDate := existing.StartDate
 	if u.StartDate != "" {
-		if parsed, err := time.Parse(layout, u.StartDate); err == nil {
-			startDate = parsed
+		parsed, err := time.Parse(layout, u.StartDate)
+		if err != nil {
+			return domain.Employee{}, domain.ErrInvalidDateFormat
 		}
+		startDate = parsed
 	}
 
 	endDate := existing.EndDate
 	if u.EndDate != "" {
-		if parsed, err := time.Parse(layout, u.EndDate); err == nil {
-			endDate = parsed
+		parsed, err := time.Parse(layout, u.EndDate)
+		if err != nil {
+			return domain.Employee{}, domain.ErrInvalidDateFormat
 		}
+		endDate = parsed
+	}
+
+	// Validate: start_date cannot be after end_date
+	// Only validate if both dates are set (endDate is not zero)
+	if !endDate.IsZero() && startDate.After(endDate) {
+		return domain.Employee{}, domain.ErrStartDateAfterEndDate
 	}
 
 	return domain.Employee{
@@ -172,7 +183,7 @@ func (u UpdateEmployeeRequest) ToUpdateData(existing *domain.Employee) domain.Em
 		Active:               u.Active,
 		Role:                 u.Role,
 		KeycloakUserID:       existing.KeycloakUserID, // Preservar keycloak_user_id
-	}
+	}, nil
 }
 
 // UpdateEmployeeResponse - Respuesta de actualización de empleado
@@ -182,19 +193,24 @@ type UpdateEmployeeResponse struct {
 	Links   []Link `json:"_links,omitempty"`
 }
 
-func (e EmployeeRequest) ToDomain() domain.Employee {
+func (e EmployeeRequest) ToDomain() (domain.Employee, error) {
 	layout := "2006-01-02"
 
 	startDate, err := time.Parse(layout, e.StartDate)
 	if err != nil {
-		return domain.Employee{}
+		return domain.Employee{}, domain.ErrInvalidDateFormat
 	}
 
 	var endDate time.Time
 	if e.EndDate != "" {
 		endDate, err = time.Parse(layout, e.EndDate)
 		if err != nil {
-			return domain.Employee{}
+			return domain.Employee{}, domain.ErrInvalidDateFormat
+		}
+
+		// Validate: start_date cannot be after end_date
+		if startDate.After(endDate) {
+			return domain.Employee{}, domain.ErrStartDateAfterEndDate
 		}
 	}
 
@@ -209,5 +225,5 @@ func (e EmployeeRequest) ToDomain() domain.Employee {
 		EndDate:              endDate,
 		Active:               e.Active,
 		Role:                 e.Role,
-	}
+	}, nil
 }
