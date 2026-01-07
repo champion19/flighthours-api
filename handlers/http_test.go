@@ -93,6 +93,9 @@ func (f *fakeService) ChangePassword(context.Context, string, string, string) (s
 func (f *fakeService) DeleteEmployee(context.Context, string, string) error {
 	return nil
 }
+func (f *fakeService) GetEmployeeByKeycloakID(context.Context, string) (*domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
 
 type fakeServiceErr struct {
 	err error
@@ -150,6 +153,9 @@ func (f *fakeServiceErr) ChangePassword(context.Context, string, string, string)
 func (f *fakeServiceErr) DeleteEmployee(context.Context, string, string) error {
 	return nil
 }
+func (f *fakeServiceErr) GetEmployeeByKeycloakID(context.Context, string) (*domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
 
 type fakeMessageCacheRepo struct {
 	messages []cachetypes.CachedMessage
@@ -195,7 +201,7 @@ func TestHTTP_RegisterEmployee(t *testing.T) {
 
 	newRouter := func(svc input.Service) *gin.Engine {
 		inter := interactor.NewInteractor(svc, noopLogger{})
-		h := New(nil, inter, enc, resp, nil, nil, nil)
+		h := New(nil, inter, enc, resp, nil, nil, nil, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())

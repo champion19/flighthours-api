@@ -242,6 +242,10 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_V_FK_ERR_00014":   http.StatusUnprocessableEntity, // 422 - Invalid foreign key (e.g., airline doesn't exist)
 	"MOD_V_LEN_ERR_00015":  http.StatusUnprocessableEntity, // 422 - Data too long for column
 	"MOD_V_DATA_ERR_00016": http.StatusUnprocessableEntity, // 422 - Invalid data
+	// Date validation errors
+	"MOD_V_DATE_ERR_00017":  http.StatusBadRequest, // 400 - Start date after end date
+	"MOD_V_DATE_ERR_00018":  http.StatusBadRequest, // 400 - Invalid date format
+	"MOD_V_EMPTY_ERR_00019": http.StatusBadRequest, // 400 - Field contains only whitespace
 
 	// ========================================
 	// Keycloak Module (MOD_KC_*) - Email Verification & Auth
@@ -310,6 +314,16 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_AIR_NOT_FOUND_ERR_00001":  http.StatusNotFound,            // 404 - Aerolínea no encontrada
 	"MOD_AIR_ACTIVATE_ERR_00002":   http.StatusUnprocessableEntity, // 422 - Error activando aerolínea (controlable)
 	"MOD_AIR_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error desactivando aerolínea (controlable)
+
+	// ========================================
+	// Airport Module (MOD_APT_*)
+	// ========================================
+	"MOD_APT_GET_EXI_00001":        http.StatusOK,                  // 200 - Airport retrieved successfully
+	"MOD_APT_ACTIVATE_EXI_00002":   http.StatusOK,                  // 200 - Airport activated successfully
+	"MOD_APT_DEACTIVATE_EXI_00003": http.StatusOK,                  // 200 - Airport deactivated successfully
+	"MOD_APT_NOT_FOUND_ERR_00001":  http.StatusNotFound,            // 404 - Airport not found
+	"MOD_APT_ACTIVATE_ERR_00002":   http.StatusUnprocessableEntity, // 422 - Error activating airport
+	"MOD_APT_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error deactivating airport
 }
 
 // GetHTTPStatus returns the HTTP status for a message code

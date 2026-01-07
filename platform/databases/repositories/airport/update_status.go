@@ -1,4 +1,4 @@
-package airline
+package airport
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"github.com/champion19/flighthours-api/platform/databases/common"
 )
 
-// UpdateAirlineStatus updates the status of an airline (active/inactive)
-func (r *repository) UpdateAirlineStatus(ctx context.Context, tx output.Tx, id string, status bool) error {
+// UpdateAirportStatus updates the status of an airport (active/inactive)
+func (r *repository) UpdateAirportStatus(ctx context.Context, tx output.Tx, id string, status bool) error {
 	sqlTx := tx.(*common.SQLTX)
 
 	result, err := sqlTx.ExecContext(ctx, QueryUpdateStatus, status, id)
@@ -23,7 +23,7 @@ func (r *repository) UpdateAirlineStatus(ctx context.Context, tx output.Tx, id s
 	}
 
 	if rowsAffected == 0 {
-		return domain.ErrAirlineNotFound
+		return domain.ErrAirportNotFound
 	}
 
 	return nil

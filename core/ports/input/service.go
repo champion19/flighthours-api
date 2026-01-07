@@ -16,6 +16,7 @@ type Service interface {
 	RegisterEmployee(ctx context.Context, employee domain.Employee) (*dto.RegisterEmployee, error)
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
 	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
+	GetEmployeeByKeycloakID(ctx context.Context, keycloakUserID string) (*domain.Employee, error)
 	LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error)
 	CheckAndCleanInconsistentState(ctx context.Context, email string) error
 
@@ -70,9 +71,24 @@ type AirlineService interface {
 
 	// Airline - queries
 	GetAirlineByID(ctx context.Context, id string) (*domain.Airline, error)
+	ListAirlines(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error)
 
 	// Airline - operations
-	UpdateAirlineStatus(ctx context.Context, id string, status string) error
+	UpdateAirlineStatus(ctx context.Context, id string, status bool) error
 	ActivateAirline(ctx context.Context, id string) error
 	DeactivateAirline(ctx context.Context, id string) error
+}
+
+// AirportService defines the interface for airport business operations
+type AirportService interface {
+	BeginTx(ctx context.Context) (output.Tx, error)
+
+	// Airport - queries
+	GetAirportByID(ctx context.Context, id string) (*domain.Airport, error)
+	ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
+
+	// Airport - operations
+	UpdateAirportStatus(ctx context.Context, id string, status bool) error
+	ActivateAirport(ctx context.Context, id string) error
+	DeactivateAirport(ctx context.Context, id string) error
 }

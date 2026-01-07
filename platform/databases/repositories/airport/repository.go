@@ -1,4 +1,4 @@
-package airline
+package airport
 
 import (
 	"context"
@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	QueryByID         = "SELECT id, airline_name, airline_code, status FROM airline WHERE id = ? LIMIT 1"
-	QueryUpdateStatus = "UPDATE airline SET status = ? WHERE id = ?"
-	QueryGetAll       = "SELECT id, airline_name, airline_code, status FROM airline ORDER BY airline_name"
-	QueryGetByStatus  = "SELECT id, airline_name, airline_code, status FROM airline WHERE status = ? ORDER BY airline_name"
+	QueryByID         = "SELECT id, name, city, country, iata_code, status, airport_type FROM airport WHERE id = ? LIMIT 1"
+	QueryUpdateStatus = "UPDATE airport SET status = ? WHERE id = ?"
+	QueryGetAll       = "SELECT id, name, city, country, iata_code, status, airport_type FROM airport ORDER BY name"
+	QueryGetByStatus  = "SELECT id, name, city, country, iata_code, status, airport_type FROM airport WHERE status = ? ORDER BY name"
 )
 
 var log logger.Logger = logger.NewSlogLogger()
@@ -26,33 +26,33 @@ type repository struct {
 	db               *sql.DB
 }
 
-// NewAirlineRepository creates a new airline repository with prepared statements
-func NewAirlineRepository(db *sql.DB) (*repository, error) {
+// NewAirportRepository creates a new airport repository with prepared statements
+func NewAirportRepository(db *sql.DB) (*repository, error) {
 	if db == nil {
 		return nil, sql.ErrConnDone
 	}
 
 	stmtGetByID, err := db.Prepare(QueryByID)
 	if err != nil {
-		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		log.Error(logger.LogAirportRepoInitError, "error preparing statement", err)
 		return nil, err
 	}
 
 	stmtUpdateStatus, err := db.Prepare(QueryUpdateStatus)
 	if err != nil {
-		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		log.Error(logger.LogAirportRepoInitError, "error preparing statement", err)
 		return nil, err
 	}
 
 	stmtGetAll, err := db.Prepare(QueryGetAll)
 	if err != nil {
-		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		log.Error(logger.LogAirportRepoInitError, "error preparing statement", err)
 		return nil, err
 	}
 
 	stmtGetByStatus, err := db.Prepare(QueryGetByStatus)
 	if err != nil {
-		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		log.Error(logger.LogAirportRepoInitError, "error preparing statement", err)
 		return nil, err
 	}
 

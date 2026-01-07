@@ -5,34 +5,56 @@ import (
 
 	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 )
+
 type Employee struct {
 	ID                   string    `db:"id"`
 	Name                 string    `db:"name"`
-	Airline              string    `db:"airline"`
+	Airline              *string   `db:"airline"` // Nullable FK
 	Email                string    `db:"email"`
 	IdentificationNumber string    `db:"identification_number"`
-	Bp                   string    `db:"bp"`
+	Bp                   *string   `db:"bp"` // Nullable
 	StartDate            time.Time `db:"start_date"`
 	EndDate              time.Time `db:"end_date"`
 	Active               bool      `db:"active"`
 	Role                 string    `db:"role"`
-	KeycloakUserID       string    `db:"keycloak_user_id"`
+	KeycloakUserID       *string   `db:"keycloak_user_id"` // Nullable
 }
 
 func (e Employee) ToDomain() domain.Employee {
+	airline := ""
+	if e.Airline != nil {
+		airline = *e.Airline
+	}
+	bp := ""
+	if e.Bp != nil {
+		bp = *e.Bp
+	}
+	keycloakUserID := ""
+	if e.KeycloakUserID != nil {
+		keycloakUserID = *e.KeycloakUserID
+	}
+
 	return domain.Employee{
 		ID:                   e.ID,
 		Name:                 e.Name,
 		Email:                e.Email,
-		Airline:              e.Airline,
+		Airline:              airline,
 		IdentificationNumber: e.IdentificationNumber,
-		Bp:                   e.Bp,
+		Bp:                   bp,
 		StartDate:            e.StartDate,
 		EndDate:              e.EndDate,
 		Active:               e.Active,
 		Role:                 e.Role,
-		KeycloakUserID:       e.KeycloakUserID,
+		KeycloakUserID:       keycloakUserID,
 	}
+}
+
+// stringPtrOrNil returns nil for empty strings, otherwise a pointer to the string
+func stringPtrOrNil(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
 }
 
 func FromDomain(domainEmployee domain.Employee) Employee {
@@ -40,13 +62,13 @@ func FromDomain(domainEmployee domain.Employee) Employee {
 		ID:                   domainEmployee.ID,
 		Name:                 domainEmployee.Name,
 		Email:                domainEmployee.Email,
-		Airline:              domainEmployee.Airline,
+		Airline:              stringPtrOrNil(domainEmployee.Airline),
 		IdentificationNumber: domainEmployee.IdentificationNumber,
-		Bp:                   domainEmployee.Bp,
+		Bp:                   stringPtrOrNil(domainEmployee.Bp),
 		StartDate:            domainEmployee.StartDate,
 		EndDate:              domainEmployee.EndDate,
 		Active:               domainEmployee.Active,
 		Role:                 domainEmployee.Role,
-		KeycloakUserID:       domainEmployee.KeycloakUserID,
+		KeycloakUserID:       stringPtrOrNil(domainEmployee.KeycloakUserID),
 	}
 }

@@ -7,19 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetAirlineByID godoc
-// @Summary      Get airline by ID
-// @Description  Returns airline information by ID (accepts both UUID and obfuscated ID)
-// @Tags         Airlines
+// GetAirportByID godoc
+// @Summary      Get airport by ID
+// @Description  Returns airport information by ID (accepts both UUID and obfuscated ID)
+// @Tags         Airports
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Airline ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Airport ID (UUID or obfuscated)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
 // @Failure      500  {object}  map[string]interface{}
-// @Router       /airlines/{id} [get]
-func (h *handler) GetAirlineByID() gin.HandlerFunc {
+// @Router       /airports/{id} [get]
+func (h *handler) GetAirportByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		traceID := middleware.GetRequestID(c)
 		log := Logger.WithTraceID(traceID)
@@ -31,15 +31,15 @@ func (h *handler) GetAirlineByID() gin.HandlerFunc {
 			return
 		}
 
-		log.Info(logger.LogAirlineGet, "input_id", inputID, "client_ip", c.ClientIP())
+		log.Info(logger.LogAirportGet, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var airlineUUID string
+		var airportUUID string
 		var responseID string
 
 		// Detect if it's a valid UUID or obfuscated ID
 		if isValidUUID(inputID) {
 			// It's a direct UUID
-			airlineUUID = inputID
+			airportUUID = inputID
 			// Encode UUID for response (maintain consistency)
 			encodedID, err := h.EncodeID(inputID)
 			if err != nil {
@@ -48,7 +48,7 @@ func (h *handler) GetAirlineByID() gin.HandlerFunc {
 			} else {
 				responseID = encodedID
 			}
-			log.Debug(logger.LogAirlineGet, "detected_format", "UUID", "uuid", airlineUUID)
+			log.Debug(logger.LogAirportGet, "detected_format", "UUID", "uuid", airportUUID)
 		} else {
 			// It's an obfuscated ID, decode it
 			uuid, err := h.DecodeID(inputID)
@@ -56,47 +56,47 @@ func (h *handler) GetAirlineByID() gin.HandlerFunc {
 				h.HandleIDDecodingError(c, inputID, err)
 				return
 			}
-			airlineUUID = uuid
+			airportUUID = uuid
 			responseID = inputID
-			log.Debug(logger.LogAirlineGet, "detected_format", "encoded", "decoded_uuid", airlineUUID)
+			log.Debug(logger.LogAirportGet, "detected_format", "encoded", "decoded_uuid", airportUUID)
 		}
 
-		// Get airline from interactor
-		airline, err := h.AirlineInteractor.GetAirlineByID(c.Request.Context(), airlineUUID)
+		// Get airport from interactor
+		airport, err := h.AirportInteractor.GetAirportByID(c.Request.Context(), airportUUID)
 		if err != nil {
-			log.Error(logger.LogAirlineGetError, "airline_id", airlineUUID, "error", err, "client_ip", c.ClientIP())
-			if err == domain.ErrAirlineNotFound {
-				h.Response.Error(c, domain.MsgAirlineNotFound)
+			log.Error(logger.LogAirportGetError, "airport_id", airportUUID, "error", err, "client_ip", c.ClientIP())
+			if err == domain.ErrAirportNotFound {
+				h.Response.Error(c, domain.MsgAirportNotFound)
 				return
 			}
 			h.Response.Error(c, domain.MsgServerError)
 			return
 		}
 
-		response := FromDomainAirline(airline, responseID)
+		response := FromDomainAirport(airport, responseID)
 
 		// Build HATEOAS links
 		baseURL := GetBaseURL(c)
-		response.Links = BuildAirlineLinks(baseURL, responseID)
+		response.Links = BuildAirportLinks(baseURL, responseID)
 
-		log.Success(logger.LogAirlineGetOK, airline.ToLogger())
-		h.Response.SuccessWithData(c, domain.MsgAirlineGetOK, response)
+		log.Success(logger.LogAirportGetOK, airport.ToLogger())
+		h.Response.SuccessWithData(c, domain.MsgAirportGetOK, response)
 	}
 }
 
-// ActivateAirline godoc
-// @Summary      Activate airline
-// @Description  Sets airline status to active (accepts both UUID and obfuscated ID)
-// @Tags         Airlines
+// ActivateAirport godoc
+// @Summary      Activate airport
+// @Description  Sets airport status to active (accepts both UUID and obfuscated ID)
+// @Tags         Airports
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Airline ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Airport ID (UUID or obfuscated)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
 // @Failure      500  {object}  map[string]interface{}
-// @Router       /airlines/{id}/activate [patch]
-func (h *handler) ActivateAirline() gin.HandlerFunc {
+// @Router       /airports/{id}/activate [patch]
+func (h *handler) ActivateAirport() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		traceID := middleware.GetRequestID(c)
 		log := Logger.WithTraceID(traceID)
@@ -108,14 +108,14 @@ func (h *handler) ActivateAirline() gin.HandlerFunc {
 			return
 		}
 
-		log.Info(logger.LogAirlineActivate, "input_id", inputID, "client_ip", c.ClientIP())
+		log.Info(logger.LogAirportActivate, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var airlineUUID string
+		var airportUUID string
 		var responseID string
 
 		// Detect if it's a valid UUID or obfuscated ID
 		if isValidUUID(inputID) {
-			airlineUUID = inputID
+			airportUUID = inputID
 			encodedID, err := h.EncodeID(inputID)
 			if err != nil {
 				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
@@ -129,22 +129,22 @@ func (h *handler) ActivateAirline() gin.HandlerFunc {
 				h.HandleIDDecodingError(c, inputID, err)
 				return
 			}
-			airlineUUID = uuid
+			airportUUID = uuid
 			responseID = inputID
 		}
 
-		// Activate airline via interactor
-		if err := h.AirlineInteractor.ActivateAirline(c.Request.Context(), airlineUUID); err != nil {
-			log.Error(logger.LogAirlineActivateError, "airline_id", airlineUUID, "error", err, "client_ip", c.ClientIP())
-			if err == domain.ErrAirlineNotFound {
-				h.Response.Error(c, domain.MsgAirlineNotFound)
+		// Activate airport via interactor
+		if err := h.AirportInteractor.ActivateAirport(c.Request.Context(), airportUUID); err != nil {
+			log.Error(logger.LogAirportActivateError, "airport_id", airportUUID, "error", err, "client_ip", c.ClientIP())
+			if err == domain.ErrAirportNotFound {
+				h.Response.Error(c, domain.MsgAirportNotFound)
 				return
 			}
 			h.Response.Error(c, domain.MsgServerError)
 			return
 		}
 
-		response := AirlineStatusResponse{
+		response := AirportStatusResponse{
 			ID:      responseID,
 			Status:  "active",
 			Updated: true,
@@ -152,26 +152,26 @@ func (h *handler) ActivateAirline() gin.HandlerFunc {
 
 		// Build HATEOAS links (isActive=true, muestra link para deactivate)
 		baseURL := GetBaseURL(c)
-		response.Links = BuildAirlineStatusLinks(baseURL, responseID, true)
+		response.Links = BuildAirportStatusLinks(baseURL, responseID, true)
 
-		log.Success(logger.LogAirlineActivateOK, "airline_id", airlineUUID, "client_ip", c.ClientIP())
-		h.Response.SuccessWithData(c, domain.MsgAirlineActivateOK, response)
+		log.Success(logger.LogAirportActivateOK, "airport_id", airportUUID, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgAirportActivateOK, response)
 	}
 }
 
-// DeactivateAirline godoc
-// @Summary      Deactivate airline
-// @Description  Sets airline status to inactive (accepts both UUID and obfuscated ID)
-// @Tags         Airlines
+// DeactivateAirport godoc
+// @Summary      Deactivate airport
+// @Description  Sets airport status to inactive (accepts both UUID and obfuscated ID)
+// @Tags         Airports
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Airline ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Airport ID (UUID or obfuscated)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
 // @Failure      500  {object}  map[string]interface{}
-// @Router       /airlines/{id}/deactivate [patch]
-func (h *handler) DeactivateAirline() gin.HandlerFunc {
+// @Router       /airports/{id}/deactivate [patch]
+func (h *handler) DeactivateAirport() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		traceID := middleware.GetRequestID(c)
 		log := Logger.WithTraceID(traceID)
@@ -183,14 +183,14 @@ func (h *handler) DeactivateAirline() gin.HandlerFunc {
 			return
 		}
 
-		log.Info(logger.LogAirlineDeactivate, "input_id", inputID, "client_ip", c.ClientIP())
+		log.Info(logger.LogAirportDeactivate, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var airlineUUID string
+		var airportUUID string
 		var responseID string
 
 		// Detect if it's a valid UUID or obfuscated ID
 		if isValidUUID(inputID) {
-			airlineUUID = inputID
+			airportUUID = inputID
 			encodedID, err := h.EncodeID(inputID)
 			if err != nil {
 				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
@@ -204,22 +204,22 @@ func (h *handler) DeactivateAirline() gin.HandlerFunc {
 				h.HandleIDDecodingError(c, inputID, err)
 				return
 			}
-			airlineUUID = uuid
+			airportUUID = uuid
 			responseID = inputID
 		}
 
-		// Deactivate airline via interactor
-		if err := h.AirlineInteractor.DeactivateAirline(c.Request.Context(), airlineUUID); err != nil {
-			log.Error(logger.LogAirlineDeactivateError, "airline_id", airlineUUID, "error", err, "client_ip", c.ClientIP())
-			if err == domain.ErrAirlineNotFound {
-				h.Response.Error(c, domain.MsgAirlineNotFound)
+		// Deactivate airport via interactor
+		if err := h.AirportInteractor.DeactivateAirport(c.Request.Context(), airportUUID); err != nil {
+			log.Error(logger.LogAirportDeactivateError, "airport_id", airportUUID, "error", err, "client_ip", c.ClientIP())
+			if err == domain.ErrAirportNotFound {
+				h.Response.Error(c, domain.MsgAirportNotFound)
 				return
 			}
 			h.Response.Error(c, domain.MsgServerError)
 			return
 		}
 
-		response := AirlineStatusResponse{
+		response := AirportStatusResponse{
 			ID:      responseID,
 			Status:  "inactive",
 			Updated: true,
@@ -227,28 +227,29 @@ func (h *handler) DeactivateAirline() gin.HandlerFunc {
 
 		// Build HATEOAS links (isActive=false, muestra link para activate)
 		baseURL := GetBaseURL(c)
-		response.Links = BuildAirlineStatusLinks(baseURL, responseID, false)
+		response.Links = BuildAirportStatusLinks(baseURL, responseID, false)
 
-		log.Success(logger.LogAirlineDeactivateOK, "airline_id", airlineUUID, "client_ip", c.ClientIP())
-		h.Response.SuccessWithData(c, domain.MsgAirlineDeactivateOK, response)
+		log.Success(logger.LogAirportDeactivateOK, "airport_id", airportUUID, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgAirportDeactivateOK, response)
 	}
 }
 
-// ListAirlines godoc
-// @Summary      List all airlines
-// @Description  Returns a list of all airlines with optional status filter
-// @Tags         Airlines
+// ListAirports godoc
+// @Summary      List all airports
+// @Description  Returns a list of all airports with optional status filter
+// @Tags         Airports
+// @Accept       json
 // @Produce      json
-// @Param        status query string false "Filter by status (true for active, false for inactive)"
-// @Success      200  {object}  AirlineListResponse
+// @Param        status  query     string  false  "Filter by status (true/false, active/inactive)"
+// @Success      200  {object}  AirportListResponse
 // @Failure      500  {object}  map[string]interface{}
-// @Router       /airlines [get]
-func (h *handler) ListAirlines() gin.HandlerFunc {
+// @Router       /airports [get]
+func (h *handler) ListAirports() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		traceID := middleware.GetRequestID(c)
 		log := Logger.WithTraceID(traceID)
 
-		log.Debug(logger.LogAirlineList,
+		log.Debug(logger.LogAirportList,
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
@@ -263,9 +264,9 @@ func (h *handler) ListAirlines() gin.HandlerFunc {
 			}
 		}
 
-		airlines, err := h.AirlineInteractor.ListAirlines(c.Request.Context(), filters)
+		airports, err := h.AirportInteractor.ListAirports(c.Request.Context(), filters)
 		if err != nil {
-			log.Error(logger.LogAirlineListError,
+			log.Error(logger.LogAirportListError,
 				"error", err,
 				"client_ip", c.ClientIP())
 			h.Response.Error(c, domain.MsgServerError)
@@ -274,10 +275,10 @@ func (h *handler) ListAirlines() gin.HandlerFunc {
 
 		// Convert to response with encoded IDs and HATEOAS links
 		baseURL := GetBaseURL(c)
-		response := ToAirlineListResponse(airlines, h.EncodeID, baseURL)
+		response := ToAirportListResponse(airports, h.EncodeID, baseURL)
 
-		log.Debug(logger.LogAirlineListOK,
-			"count", len(airlines),
+		log.Debug(logger.LogAirportListOK,
+			"count", len(airports),
 			"client_ip", c.ClientIP())
 
 		h.Response.DataOnly(c, response)

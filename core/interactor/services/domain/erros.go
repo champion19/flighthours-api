@@ -33,6 +33,10 @@ var (
 	ErrInvalidForeignKey = errors.New("Err_INVALID_FOREIGN_KEY") // 1452 - FK constraint fails
 	ErrDataTooLong       = errors.New("Err_DATA_TOO_LONG")       // 1406 - Data too long for column
 	ErrInvalidData       = errors.New("Err_INVALID_DATA")        // Generic invalid data
+	// Date validation errors
+	ErrStartDateAfterEndDate = errors.New("Err_START_DATE_AFTER_END_DATE") // start_date > end_date
+	ErrInvalidDateFormat     = errors.New("Err_INVALID_DATE_FORMAT")       // Date format is invalid
+	ErrEmptyField            = errors.New("Err_EMPTY_FIELD")               // Field contains only whitespace
 )
 
 // Infrastructure Errors
@@ -102,6 +106,11 @@ var (
 	ErrAirlineNotFound = errors.New("ERR_AIRLINE_NOT_FOUND")
 )
 
+// Airport Management Errors (MOD_APT_*)
+var (
+	ErrAirportNotFound = errors.New("ERR_AIRPORT_NOT_FOUND")
+)
+
 // ============================================
 // MESSAGE CODES - Constants for use in code
 // ============================================
@@ -161,6 +170,10 @@ const (
 	MsgValMultiple      = "MOD_V_VAL_ERR_00011"
 	MsgValJSONInvalid   = "MOD_V_JSON_ERR_00012"
 	MsgValIDInvalid     = "MOD_V_ID_ERR_00013"
+	// Date validation errors
+	MsgValStartDateAfterEndDate = "MOD_V_DATE_ERR_00017"  // start_date > end_date
+	MsgValInvalidDateFormat     = "MOD_V_DATE_ERR_00018"  // Invalid date format
+	MsgValEmptyField            = "MOD_V_EMPTY_ERR_00019" // Field contains only whitespace
 )
 
 // Authorization Module (MOD_A_*)
@@ -259,8 +272,22 @@ const (
 	MsgAirlineNotFound      = "MOD_AIR_NOT_FOUND_ERR_00001"
 	MsgAirlineActivateErr   = "MOD_AIR_ACTIVATE_ERR_00002"
 	MsgAirlineDeactivateErr = "MOD_AIR_DEACTIVATE_ERR_00003"
+	MsgAirlineListError     = "MOD_AIR_LIST_ERR_00004"
 	// Success
 	MsgAirlineGetOK        = "MOD_AIR_GET_EXI_00001"
 	MsgAirlineActivateOK   = "MOD_AIR_ACTIVATE_EXI_00002"
 	MsgAirlineDeactivateOK = "MOD_AIR_DEACTIVATE_EXI_00003"
+	MsgAirlineListOK       = "MOD_AIR_LIST_EXI_00004"
+)
+
+// Airport Module (MOD_APT_*)
+const (
+	// Errors
+	MsgAirportNotFound      = "MOD_APT_NOT_FOUND_ERR_00001"
+	MsgAirportActivateErr   = "MOD_APT_ACTIVATE_ERR_00002"
+	MsgAirportDeactivateErr = "MOD_APT_DEACTIVATE_ERR_00003"
+	// Success
+	MsgAirportGetOK        = "MOD_APT_GET_EXI_00001"
+	MsgAirportActivateOK   = "MOD_APT_ACTIVATE_EXI_00002"
+	MsgAirportDeactivateOK = "MOD_APT_DEACTIVATE_EXI_00003"
 )

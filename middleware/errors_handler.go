@@ -82,6 +82,10 @@ var errorToMessageCode = map[error]string{
 	// Incomplete registration (cleanup in progress)
 	domain.ErrIncompleteRegistration: domain.MsgIncompleteRegistration,
 
+	// Authentication errors (JWT/Token)
+	domain.ErrInvalidToken: domain.MsgUnauthorized,
+	domain.ErrUserNotFound: domain.MsgUserNotFound,
+
 	// General errors
 	domain.ErrInternalServer: domain.MsgServerError,
 }

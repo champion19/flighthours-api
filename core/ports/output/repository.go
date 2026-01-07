@@ -23,6 +23,7 @@ type Repository interface {
 	//employee operations - read
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
 	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
+	GetEmployeeByKeycloakID(ctx context.Context, keycloakUserID string) (*domain.Employee, error)
 }
 
 type MessageRepository interface {
@@ -47,7 +48,20 @@ type AirlineRepository interface {
 
 	// Airline operations - read
 	GetAirlineByID(ctx context.Context, id string) (*domain.Airline, error)
+	ListAirlines(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error)
 
 	// Airline operations - transactional
-	UpdateAirlineStatus(ctx context.Context, tx Tx, id string, status string) error
+	UpdateAirlineStatus(ctx context.Context, tx Tx, id string, status bool) error
+}
+
+// AirportRepository defines the interface for airport data persistence
+type AirportRepository interface {
+	BeginTx(ctx context.Context) (Tx, error)
+
+	// Airport operations - read
+	GetAirportByID(ctx context.Context, id string) (*domain.Airport, error)
+	ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
+
+	// Airport operations - transactional
+	UpdateAirportStatus(ctx context.Context, tx Tx, id string, status bool) error
 }

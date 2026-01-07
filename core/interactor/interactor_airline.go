@@ -85,3 +85,20 @@ func (i *AirlineInteractor) DeactivateAirline(ctx context.Context, id string) er
 	log.Success(logger.LogAirlineDeactivateOK, "airline_id", id)
 	return nil
 }
+
+// ListAirlines retrieves all airlines with optional filters
+func (i *AirlineInteractor) ListAirlines(ctx context.Context, filters map[string]interface{}) ([]domain.Airline, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirlineList, "filters", filters)
+
+	airlines, err := i.service.ListAirlines(ctx, filters)
+	if err != nil {
+		log.Error(logger.LogAirlineListError, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAirlineListOK, "count", len(airlines))
+	return airlines, nil
+}
