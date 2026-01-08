@@ -39,6 +39,11 @@ type CreateDailyLogbookRequest struct {
 	BookPage *int   `json:"book_page,omitempty"`
 }
 
+// Sanitize trims whitespace from CreateDailyLogbookRequest fields
+func (r *CreateDailyLogbookRequest) Sanitize() {
+	r.LogDate = TrimString(r.LogDate)
+}
+
 // ToDomain converts the request to a domain model
 func (r *CreateDailyLogbookRequest) ToDomain(employeeID string) (*domain.DailyLogbook, error) {
 	logDate, err := time.Parse("2006-01-02", r.LogDate)
@@ -61,6 +66,11 @@ type UpdateDailyLogbookRequest struct {
 	LogDate  string `json:"log_date" binding:"required"`
 	BookPage *int   `json:"book_page,omitempty"`
 	Status   *bool  `json:"status,omitempty"`
+}
+
+// Sanitize trims whitespace from UpdateDailyLogbookRequest fields
+func (r *UpdateDailyLogbookRequest) Sanitize() {
+	r.LogDate = TrimString(r.LogDate)
 }
 
 // ToDomain converts the request to a domain model for update

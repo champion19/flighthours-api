@@ -167,3 +167,16 @@ func (c *Config) GetKeycloakAdminURL() string {
 		c.Keycloak.ServerURL,
 		c.Keycloak.Realm)
 }
+
+func (c *Config) GetKeycloakJWKSURL() string {
+	return fmt.Sprintf("%s/realms/%s/protocol/openid-connect/certs",
+		c.Keycloak.ServerURL,
+		c.Keycloak.Realm)
+}
+
+
+func (c *Config) GetKeycloakIssuerURL() string {
+	return fmt.Sprintf("%s/realms/%s",
+		c.Keycloak.ServerURL,
+		c.Keycloak.Realm)
+}

@@ -139,6 +139,9 @@ func (h *handler) CreateDailyLogbook() gin.HandlerFunc {
 			return
 		}
 
+		// Sanitize input data
+		req.Sanitize()
+
 		logbook, err := req.ToDomain(employee.ID)
 		if err != nil {
 			Logger.Error(logger.LogDailyLogbookCreateError, "error", err)
@@ -225,6 +228,9 @@ func (h *handler) UpdateDailyLogbook() gin.HandlerFunc {
 			c.Error(domain.ErrInvalidRequest)
 			return
 		}
+
+		// Sanitize input data
+		req.Sanitize()
 
 		logbook, err := req.ToDomain(logbookUUID, employee.ID)
 		if err != nil {

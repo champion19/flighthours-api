@@ -127,7 +127,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	protected := app.Group("flighthours/api/v1")
 	// Use the RequireAuth middleware from jwt_middleware.go
 	// This validates JWT tokens and injects the authenticated user into context
-	protected.Use(middleware.RequireAuth(dependencies.EmployeeService, dependencies.MessagingCache))
+	protected.Use(middleware.RequireAuth(dependencies.EmployeeService, dependencies.MessagingCache,dependencies.JWTValidator))
 	{
 		// ---- Authenticated User Endpoints ----
 		// POST /auth/change-password - Change password (authenticated user knows current password)

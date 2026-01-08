@@ -14,6 +14,15 @@ type MessageRequest struct {
 	Active   bool               `json:"active"`
 }
 
+// Sanitize trims whitespace from all string fields in MessageRequest
+func (m *MessageRequest) Sanitize() {
+	m.Code = TrimString(m.Code)
+	m.Category = TrimString(m.Category)
+	m.Module = TrimString(m.Module)
+	m.Title = TrimString(m.Title)
+	m.Content = TrimString(m.Content)
+}
+
 // MessageResponse represents the response payload for a message
 type MessageResponse struct {
 	ID       string             `json:"id"`
