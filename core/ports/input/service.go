@@ -92,3 +92,19 @@ type AirportService interface {
 	ActivateAirport(ctx context.Context, id string) error
 	DeactivateAirport(ctx context.Context, id string) error
 }
+
+// DailyLogbookService defines the interface for daily logbook business operations
+type DailyLogbookService interface {
+	BeginTx(ctx context.Context) (output.Tx, error)
+
+	// DailyLogbook - queries
+	GetDailyLogbookByID(ctx context.Context, id string) (*domain.DailyLogbook, error)
+	ListDailyLogbooksByEmployee(ctx context.Context, employeeID string, filters map[string]interface{}) ([]domain.DailyLogbook, error)
+
+	// DailyLogbook - operations
+	CreateDailyLogbook(ctx context.Context, logbook domain.DailyLogbook) error
+	UpdateDailyLogbook(ctx context.Context, logbook domain.DailyLogbook) error
+	DeleteDailyLogbook(ctx context.Context, id string) error
+	ActivateDailyLogbook(ctx context.Context, id string) error
+	DeactivateDailyLogbook(ctx context.Context, id string) error
+}

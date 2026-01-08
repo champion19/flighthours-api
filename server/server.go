@@ -57,6 +57,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.MessagingCache,
 		dependencies.AirlineInteractor,
 		dependencies.AirportInteractor,
+		dependencies.DailyLogbookInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -126,7 +127,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	protected := app.Group("flighthours/api/v1")
 	// Use the RequireAuth middleware from jwt_middleware.go
 	// This validates JWT tokens and injects the authenticated user into context
-	protected.Use(middleware.RequireAuth(dependencies.EmployeeService, dependencies.MessagingCache))
+	protected.Use(middleware.RequireAuth(dependencies.EmployeeService, dependencies.MessagingCache,dependencies.JWTValidator))
 	{
 		// ---- Authenticated User Endpoints ----
 		// POST /auth/change-password - Change password (authenticated user knows current password)
@@ -179,6 +180,29 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// PATCH /airports/:id/deactivate - Deactivate an airport
 		protected.PATCH("/airports/:id/deactivate", handler.DeactivateAirport())
+
+		// ---- Daily Logbooks Management (Protected) ----
+		// GET /daily-logbooks - List daily logbooks for authenticated employee
+		// Query params: ?status=true (active) or ?status=false (inactive)
+		protected.GET("/daily-logbooks", handler.ListDailyLogbooks())
+
+		// GET /daily-logbooks/:id - Get a specific daily logbook by ID
+		protected.GET("/daily-logbooks/:id", handler.GetDailyLogbookByID())
+
+		// POST /daily-logbooks - Create a new daily logbook
+		protected.POST("/daily-logbooks", handler.CreateDailyLogbook())
+
+		// PUT /daily-logbooks/:id - Update an existing daily logbook
+		protected.PUT("/daily-logbooks/:id", handler.UpdateDailyLogbook())
+
+		// DELETE /daily-logbooks/:id - Delete a daily logbook
+		protected.DELETE("/daily-logbooks/:id", handler.DeleteDailyLogbook())
+
+		// PATCH /daily-logbooks/:id/activate - Activate a daily logbook
+		protected.PATCH("/daily-logbooks/:id/activate", handler.ActivateDailyLogbook())
+
+		// PATCH /daily-logbooks/:id/deactivate - Deactivate a daily logbook
+		protected.PATCH("/daily-logbooks/:id/deactivate", handler.DeactivateDailyLogbook())
 	}
 
 	dependencies.Logger.Success(logger.LogRouteConfigured)

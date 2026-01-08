@@ -14,26 +14,30 @@ import (
 	mysql "github.com/champion19/flighthours-api/platform/databases/mysql"
 	airlineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline"
 	airportRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airport"
+	dailyLogbookRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
 	messageRepo "github.com/champion19/flighthours-api/platform/databases/repositories/message"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
+	"github.com/champion19/flighthours-api/platform/jwt"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/champion19/flighthours-api/tools/idencoder"
 )
 
 type Dependencies struct {
-	EmployeeService   input.Service
-	EmployeeRepo      output.Repository
-	Interactor        *interactor.Interactor
-	KeycloakClient    output.AuthClient
-	Config            *config.Config
-	Logger            logger.Logger
-	IDEncoder         *idencoder.HashidsEncoder
-	ResponseHandler   *middleware.ResponseHandler
-	MessagingCache    *messagingCache.MessageCache
-	MessageInteractor *interactor.MessageInteractor
-	AirlineInteractor *interactor.AirlineInteractor
-	AirportInteractor *interactor.AirportInteractor
+	EmployeeService        input.Service
+	EmployeeRepo           output.Repository
+	Interactor             *interactor.Interactor
+	KeycloakClient         output.AuthClient
+	Config                 *config.Config
+	Logger                 logger.Logger
+	IDEncoder              *idencoder.HashidsEncoder
+	ResponseHandler        *middleware.ResponseHandler
+	MessagingCache         *messagingCache.MessageCache
+	MessageInteractor      *interactor.MessageInteractor
+	AirlineInteractor      *interactor.AirlineInteractor
+	AirportInteractor      *interactor.AirportInteractor
+	DailyLogbookInteractor *interactor.DailyLogbookInteractor
+	JWTValidator           *jwt.JWKSValidator
 }
 
 func Init() (*Dependencies, error) {
@@ -136,18 +140,49 @@ func Init() (*Dependencies, error) {
 	airportService := services.NewAirportService(airportRepository, log)
 	airportInteractor := interactor.NewAirportInteractor(airportService, log)
 
+	// Inicializar repositorio y servicio de bitácoras diarias
+	dailyLogbookRepository, err := dailyLogbookRepo.NewDailyLogbookRepository(db)
+	if err != nil {
+		log.Error(logger.LogDailyLogbookRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogDailyLogbookRepoInitOK)
+
+	dailyLogbookService := services.NewDailyLogbookService(dailyLogbookRepository, log)
+	dailyLogbookInteractor := interactor.NewDailyLogbookInteractor(dailyLogbookService, log)
+
+	// JWKS Validator (JWT signature and expiration validation)
+	// This fetches Keycloak's public keys for local token validation
+	var jwtValidator *jwt.JWKSValidator
+	jwtConfig := jwt.JWKSConfig{
+		JWKSURL:         cfg.GetKeycloakJWKSURL(),
+		Issuer:          cfg.GetKeycloakIssuerURL(),
+		RefreshInterval: 15 * time.Minute, // Refresh keys every 15 minutes
+	}
+	jwtValidator, err = jwt.NewJWKSValidator(context.Background(), jwtConfig)
+	if err != nil {
+		log.Warn("JWKS validator initialization failed, using fallback validation", "error", err)
+		// Don't fail startup - middleware will fall back to simple parsing
+		// This allows the app to start even if Keycloak is temporarily unavailable
+		jwtValidator = nil
+	} else {
+		log.Success("JWKS validator initialized", "jwks_url", jwtConfig.JWKSURL)
+	}
+
 	return &Dependencies{
-		EmployeeService:   employeeService,
-		EmployeeRepo:      employeeRepo,
-		Interactor:        interactorFacade,
-		KeycloakClient:    keycloakClient,
-		Config:            cfg,
-		Logger:            log,
-		IDEncoder:         encoder,
-		ResponseHandler:   responseHandler,
-		MessagingCache:    messagingCache,
-		MessageInteractor: messageInteractor,
-		AirlineInteractor: airlineInteractor,
-		AirportInteractor: airportInteractor,
+		EmployeeService:        employeeService,
+		EmployeeRepo:           employeeRepo,
+		Interactor:             interactorFacade,
+		KeycloakClient:         keycloakClient,
+		Config:                 cfg,
+		Logger:                 log,
+		IDEncoder:              encoder,
+		ResponseHandler:        responseHandler,
+		MessagingCache:         messagingCache,
+		MessageInteractor:      messageInteractor,
+		AirlineInteractor:      airlineInteractor,
+		AirportInteractor:      airportInteractor,
+		DailyLogbookInteractor: dailyLogbookInteractor,
+		JWTValidator:           jwtValidator,
 	}, nil
 }

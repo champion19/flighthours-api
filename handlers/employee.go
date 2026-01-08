@@ -140,6 +140,56 @@ type UpdateEmployeeRequest struct {
 	Role                 string `json:"role"`
 }
 
+// ===== SANITIZE METHODS =====
+// These methods implement the Sanitizable interface and clean input data
+// NOTE: Passwords are NOT trimmed - whitespace could be intentional in passwords
+
+// Sanitize trims whitespace from all string fields in EmployeeRequest
+func (e *EmployeeRequest) Sanitize() {
+	e.Name = TrimString(e.Name)
+	e.Airline = TrimString(e.Airline)
+	e.Email = TrimString(e.Email)
+	// Password NOT trimmed - whitespace could be intentional
+	e.IdentificationNumber = TrimString(e.IdentificationNumber)
+	e.Bp = TrimString(e.Bp)
+	e.StartDate = TrimString(e.StartDate)
+	e.EndDate = TrimString(e.EndDate)
+	e.Role = TrimString(e.Role)
+}
+
+// Sanitize trims whitespace from LoginRequest fields
+func (l *LoginRequest) Sanitize() {
+	l.Email = TrimString(l.Email)
+	// Password NOT trimmed
+}
+
+// Sanitize trims whitespace from ResendVerificationEmailRequest fields
+func (r *ResendVerificationEmailRequest) Sanitize() {
+	r.Email = TrimString(r.Email)
+}
+
+// Sanitize trims whitespace from PasswordResetRequest fields
+func (p *PasswordResetRequest) Sanitize() {
+	p.Email = TrimString(p.Email)
+}
+
+// Sanitize trims whitespace from ChangePasswordRequest fields
+func (c *ChangePasswordRequest) Sanitize() {
+	c.Email = TrimString(c.Email)
+	// Passwords NOT trimmed
+}
+
+// Sanitize trims whitespace from UpdateEmployeeRequest fields
+func (u *UpdateEmployeeRequest) Sanitize() {
+	u.Name = TrimString(u.Name)
+	u.Airline = TrimString(u.Airline)
+	u.IdentificationNumber = TrimString(u.IdentificationNumber)
+	u.Bp = TrimString(u.Bp)
+	u.StartDate = TrimString(u.StartDate)
+	u.EndDate = TrimString(u.EndDate)
+	u.Role = TrimString(u.Role)
+}
+
 // ToUpdateData convierte el request a un mapa de campos actualizables
 // Se usa con un empleado existente para preservar email, password y keycloak_user_id
 // Returns error if date validation fails (invalid format or start_date > end_date)
