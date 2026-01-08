@@ -291,3 +291,63 @@ const (
 	MsgAirportActivateOK   = "MOD_APT_ACTIVATE_EXI_00002"
 	MsgAirportDeactivateOK = "MOD_APT_DEACTIVATE_EXI_00003"
 )
+
+// DailyLogbook Management Errors (BIT_*)
+var (
+	ErrDailyLogbookNotFound     = errors.New("ERR_DAILY_LOGBOOK_NOT_FOUND")
+	ErrDailyLogbookCannotSave   = errors.New("ERR_DAILY_LOGBOOK_CANNOT_SAVE")
+	ErrDailyLogbookCannotUpdate = errors.New("ERR_DAILY_LOGBOOK_CANNOT_UPDATE")
+	ErrDailyLogbookCannotDelete = errors.New("ERR_DAILY_LOGBOOK_CANNOT_DELETE")
+	ErrDailyLogbookUnauthorized = errors.New("ERR_DAILY_LOGBOOK_UNAUTHORIZED")
+)
+
+// DailyLogbook Module (BIT_*) - Bitácora Diaria
+const (
+	// ========================================
+	// Consultar (HU7) - BIT_CON_*
+	// ========================================
+	MsgDailyLogbookGetOK    = "BIT_CON_EXI_01901" // Éxito - Bitácora consultada
+	MsgDailyLogbookNotFound = "BIT_CON_ERR_01903" // Error - Bitácora no encontrada
+	MsgDailyLogbookGetErr   = "BIT_CON_ERR_01904" // Error - Error técnico al consultar
+
+	// ========================================
+	// Agregar (HU8) - BIT_AGR_*
+	// ========================================
+	MsgDailyLogbookCreated   = "BIT_AGR_EXI_01801" // Éxito - Bitácora creada
+	MsgDailyLogbookSaveError = "BIT_AGR_ERR_01804" // Error - Error técnico al crear
+
+	// ========================================
+	// Editar (HU9) - BIT_EDI_*
+	// ========================================
+	MsgDailyLogbookUpdated     = "BIT_EDI_EXI_01701" // Éxito - Bitácora actualizada
+	MsgDailyLogbookUpdateError = "BIT_EDI_ERR_01704" // Error - Error técnico al editar
+
+	// ========================================
+	// Eliminar (HU10) - BIT_DEL_*
+	// ========================================
+	MsgDailyLogbookDeleted     = "BIT_DEL_EXI_01601" // Éxito - Bitácora eliminada
+	MsgDailyLogbookDeleteError = "BIT_DEL_ERR_01604" // Error - Error técnico al eliminar
+
+	// ========================================
+	// Activar (HU11) - BIT_ACT_*
+	// ========================================
+	MsgDailyLogbookActivateOK  = "BIT_ACT_EXI_01501" // Éxito - Bitácora activada
+	MsgDailyLogbookActivateErr = "BIT_ACT_ERR_01504" // Error - Error técnico al activar
+
+	// ========================================
+	// Inactivar (HU12) - BIT_INA_*
+	// ========================================
+	MsgDailyLogbookDeactivateOK  = "BIT_INA_EXI_01401" // Éxito - Bitácora inactivada
+	MsgDailyLogbookDeactivateErr = "BIT_INA_ERR_01404" // Error - Error técnico al inactivar
+
+	// ========================================
+	// Listar - BIT_LIST_*
+	// ========================================
+	MsgDailyLogbookListOK    = "BIT_LIST_EXI_01001" // Éxito - Lista de bitácoras obtenida
+	MsgDailyLogbookListError = "BIT_LIST_ERR_01002" // Error - Error al listar bitácoras
+
+	// ========================================
+	// Autorización - BIT_AUTH_*
+	// ========================================
+	MsgDailyLogbookUnauthorized = "BIT_AUTH_ERR_00001" // Error - No autorizado para esta bitácora
+)

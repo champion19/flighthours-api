@@ -12,14 +12,15 @@ import (
 )
 
 type handler struct {
-	EmployeeService   input.Service
-	Interactor        *interactor.Interactor
-	IDEncoder         *idencoder.HashidsEncoder
-	Response          *middleware.ResponseHandler
-	MessageInteractor *interactor.MessageInteractor
-	MessagingCache    *messaging.MessageCache
-	AirlineInteractor *interactor.AirlineInteractor
-	AirportInteractor *interactor.AirportInteractor
+	EmployeeService        input.Service
+	Interactor             *interactor.Interactor
+	IDEncoder              *idencoder.HashidsEncoder
+	Response               *middleware.ResponseHandler
+	MessageInteractor      *interactor.MessageInteractor
+	MessagingCache         *messaging.MessageCache
+	AirlineInteractor      *interactor.AirlineInteractor
+	AirportInteractor      *interactor.AirportInteractor
+	DailyLogbookInteractor *interactor.DailyLogbookInteractor
 }
 
 func New(
@@ -30,16 +31,18 @@ func New(
 	messageInteractor *interactor.MessageInteractor,
 	messagingCache *messaging.MessageCache,
 	airlineInteractor *interactor.AirlineInteractor,
-	airportInteractor *interactor.AirportInteractor) *handler {
+	airportInteractor *interactor.AirportInteractor,
+	dailyLogbookInteractor *interactor.DailyLogbookInteractor) *handler {
 	return &handler{
-		EmployeeService:   service,
-		Interactor:        interactor,
-		IDEncoder:         idEncoder,
-		Response:          response,
-		MessageInteractor: messageInteractor,
-		MessagingCache:    messagingCache,
-		AirlineInteractor: airlineInteractor,
-		AirportInteractor: airportInteractor,
+		EmployeeService:        service,
+		Interactor:             interactor,
+		IDEncoder:              idEncoder,
+		Response:               response,
+		MessageInteractor:      messageInteractor,
+		MessagingCache:         messagingCache,
+		AirlineInteractor:      airlineInteractor,
+		AirportInteractor:      airportInteractor,
+		DailyLogbookInteractor: dailyLogbookInteractor,
 	}
 }
 

@@ -620,3 +620,34 @@ const (
 	LogAirportListOK          = "Aeropuertos listados exitosamente"
 	LogAirportListError       = "Error listando aeropuertos"
 )
+
+// ============================================
+// DAILY LOGBOOK INTERACTOR
+// ============================================
+const (
+	LogDailyLogbookGet             = "Obteniendo información de bitácora diaria"
+	LogDailyLogbookGetOK           = "Bitácora diaria obtenida exitosamente"
+	LogDailyLogbookGetError        = "Error obteniendo bitácora diaria"
+	LogDailyLogbookNotFound        = "Bitácora diaria no encontrada"
+	LogDailyLogbookCreate          = "Creando bitácora diaria"
+	LogDailyLogbookCreateOK        = "Bitácora diaria creada exitosamente"
+	LogDailyLogbookCreateError     = "Error creando bitácora diaria"
+	LogDailyLogbookUpdate          = "Actualizando bitácora diaria"
+	LogDailyLogbookUpdateOK        = "Bitácora diaria actualizada exitosamente"
+	LogDailyLogbookUpdateError     = "Error actualizando bitácora diaria"
+	LogDailyLogbookDelete          = "Eliminando bitácora diaria"
+	LogDailyLogbookDeleteOK        = "Bitácora diaria eliminada exitosamente"
+	LogDailyLogbookDeleteError     = "Error eliminando bitácora diaria"
+	LogDailyLogbookActivate        = "Activando bitácora diaria"
+	LogDailyLogbookActivateOK      = "Bitácora diaria activada exitosamente"
+	LogDailyLogbookActivateError   = "Error activando bitácora diaria"
+	LogDailyLogbookDeactivate      = "Desactivando bitácora diaria"
+	LogDailyLogbookDeactivateOK    = "Bitácora diaria desactivada exitosamente"
+	LogDailyLogbookDeactivateError = "Error desactivando bitácora diaria"
+	LogDailyLogbookList            = "Listando bitácoras diarias"
+	LogDailyLogbookListOK          = "Bitácoras diarias listadas exitosamente"
+	LogDailyLogbookListError       = "Error listando bitácoras diarias"
+	LogDailyLogbookRepoInit        = "Inicializando repositorio de bitácoras diarias"
+	LogDailyLogbookRepoInitOK      = "Repositorio de bitácoras diarias inicializado"
+	LogDailyLogbookRepoInitError   = "Error inicializando repositorio de bitácoras diarias"
+)

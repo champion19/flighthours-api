@@ -37,6 +37,9 @@ func (h handler) RegisterEmployee() func(c *gin.Context) {
 			return
 		}
 
+		// Sanitize input data (trim whitespace)
+		employeeRequest.Sanitize()
+
 		log.Info(logger.LogRegProcessing,
 			"email", employeeRequest.Email,
 			"role", employeeRequest.Role)
@@ -119,6 +122,9 @@ func (h handler) ResendVerificationEmail() gin.HandlerFunc {
 			return
 		}
 
+		// Sanitize input data
+		req.Sanitize()
+
 		err := h.Interactor.ResendVerificationEmail(c, req.Email)
 		if err != nil {
 			// Manejar diferentes tipos de errores
@@ -156,6 +162,9 @@ func (h handler) RequestPasswordReset() gin.HandlerFunc {
 			return
 		}
 
+		// Sanitize input data
+		req.Sanitize()
+
 		// Este método SIEMPRE retorna nil por seguridad (no revela si el email existe)
 		// El logging interno sí registra el resultado real
 		_ = h.Interactor.RequestPasswordReset(c, req.Email)
@@ -187,6 +196,9 @@ func (h handler) Login() gin.HandlerFunc {
 			h.Response.Error(c, domain.MsgValBadFormat)
 			return
 		}
+
+		// Sanitize input data (email only, password preserved as-is)
+		req.Sanitize()
 
 		log.Info(logger.LogKeycloakUserLogin, "email", req.Email, "client_ip", c.ClientIP())
 
@@ -503,6 +515,9 @@ func (h handler) UpdateEmployee() gin.HandlerFunc {
 			return
 		}
 
+		// Sanitize input data
+		req.Sanitize()
+
 		// Step 4: Get current employee to preserve protected fields
 		currentEmployee, err := h.EmployeeService.GetEmployeeByID(c, employeeUUID)
 		if err != nil {
@@ -620,6 +635,9 @@ func (h handler) ChangePassword() gin.HandlerFunc {
 			h.Response.Error(c, domain.MsgValBadFormat)
 			return
 		}
+
+		// Sanitize input data (email only, passwords preserved as-is)
+		req.Sanitize()
 
 		// Validate new passwords match
 		if req.NewPassword != req.ConfirmPassword {
@@ -801,6 +819,9 @@ func (h handler) UpdateMe() gin.HandlerFunc {
 			h.Response.Error(c, domain.MsgValBadFormat)
 			return
 		}
+
+		// Sanitize input data
+		req.Sanitize()
 
 		// Decode airline ID if it's obfuscated
 		// The airline field can come as: empty, UUID, or obfuscated ID

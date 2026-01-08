@@ -28,6 +28,11 @@ type UpdateAirlineStatusRequest struct {
 	Status string `json:"status" binding:"required,oneof=active inactive"`
 }
 
+// Sanitize trims whitespace from UpdateAirlineStatusRequest fields
+func (r *UpdateAirlineStatusRequest) Sanitize() {
+	r.Status = TrimString(r.Status)
+}
+
 // AirlineStatusResponse - Response DTO for status update
 type AirlineStatusResponse struct {
 	ID      string `json:"id"`

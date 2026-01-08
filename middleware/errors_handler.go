@@ -86,6 +86,13 @@ var errorToMessageCode = map[error]string{
 	domain.ErrInvalidToken: domain.MsgUnauthorized,
 	domain.ErrUserNotFound: domain.MsgUserNotFound,
 
+	// DailyLogbook errors (BIT_*)
+	domain.ErrDailyLogbookNotFound:     domain.MsgDailyLogbookNotFound,
+	domain.ErrDailyLogbookCannotSave:   domain.MsgDailyLogbookSaveError,
+	domain.ErrDailyLogbookCannotUpdate: domain.MsgDailyLogbookUpdateError,
+	domain.ErrDailyLogbookCannotDelete: domain.MsgDailyLogbookDeleteError,
+	domain.ErrDailyLogbookUnauthorized: domain.MsgDailyLogbookUnauthorized,
+
 	// General errors
 	domain.ErrInternalServer: domain.MsgServerError,
 }

@@ -376,3 +376,148 @@ func BuildEmployeeMeLinks(baseURL string) []Link {
 		},
 	}
 }
+
+// ============================================================================
+// DAILY LOGBOOK HATEOAS LINKS
+// ============================================================================
+
+// BuildDailyLogbookLinks construye links HATEOAS para una bitácora diaria específica
+func BuildDailyLogbookLinks(baseURL string, logbookID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "daily-logbooks", logbookID)
+	collectionURL := BuildCollectionURL(baseURL, "daily-logbooks")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "delete",
+			Method: "DELETE",
+		},
+		{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		},
+		{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildDailyLogbookListLinks construye links para la lista de bitácoras diarias
+func BuildDailyLogbookListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "daily-logbooks")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "create",
+			Method: "POST",
+		},
+	}
+}
+
+// BuildDailyLogbookStatusLinks construye links para respuesta de cambio de status
+func BuildDailyLogbookStatusLinks(baseURL string, logbookID string, isActive bool) []Link {
+	resourceURL := BuildResourceURL(baseURL, "daily-logbooks", logbookID)
+	collectionURL := BuildCollectionURL(baseURL, "daily-logbooks")
+
+	links := []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+
+	// Si está activo, mostrar link para desactivar y viceversa
+	if isActive {
+		links = append(links, Link{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		})
+	} else {
+		links = append(links, Link{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		})
+	}
+
+	links = append(links, Link{
+		Href:   collectionURL,
+		Rel:    "collection",
+		Method: "GET",
+	})
+
+	return links
+}
+
+// BuildDailyLogbookCreatedLinks construye links para una bitácora recién creada
+func BuildDailyLogbookCreatedLinks(baseURL string, logbookID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "daily-logbooks", logbookID)
+	collectionURL := BuildCollectionURL(baseURL, "daily-logbooks")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "delete",
+			Method: "DELETE",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "list",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildDailyLogbookDeletedLinks construye links para respuesta de eliminación
+func BuildDailyLogbookDeletedLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "daily-logbooks")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "list",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "create",
+			Method: "POST",
+		},
+	}
+}
