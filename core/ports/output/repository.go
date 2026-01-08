@@ -65,3 +65,18 @@ type AirportRepository interface {
 	// Airport operations - transactional
 	UpdateAirportStatus(ctx context.Context, tx Tx, id string, status bool) error
 }
+
+// DailyLogbookRepository defines the interface for daily logbook data persistence
+type DailyLogbookRepository interface {
+	BeginTx(ctx context.Context) (Tx, error)
+
+	// DailyLogbook operations - read
+	GetDailyLogbookByID(ctx context.Context, id string) (*domain.DailyLogbook, error)
+	ListDailyLogbooksByEmployee(ctx context.Context, employeeID string, filters map[string]interface{}) ([]domain.DailyLogbook, error)
+
+	// DailyLogbook operations - transactional
+	SaveDailyLogbook(ctx context.Context, tx Tx, logbook domain.DailyLogbook) error
+	UpdateDailyLogbook(ctx context.Context, tx Tx, logbook domain.DailyLogbook) error
+	DeleteDailyLogbook(ctx context.Context, tx Tx, id string) error
+	UpdateDailyLogbookStatus(ctx context.Context, tx Tx, id string, status bool) error
+}

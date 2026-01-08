@@ -2,11 +2,10 @@ package handlers
 
 import (
 	domain "github.com/champion19/flighthours-api/core/interactor/services/domain"
+	"github.com/champion19/flighthours-api/middleware"
 	"github.com/champion19/flighthours-api/platform/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/champion19/flighthours-api/middleware"
 )
-
 
 // CreateMessage godoc
 // @Summary Crear un nuevo mensaje del sistema
@@ -72,6 +71,7 @@ func (h handler) CreateMessage() func(c *gin.Context) {
 
 		response := MessageCreatedResponse{
 			ID:    encodedID,
+			UUID:  result.ID,
 			Links: links,
 		}
 
@@ -268,8 +268,7 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 
 		// Build HATEOAS links
 		baseURL := GetBaseURL(c)
-		response := ToMessageResponse(message)
-		response.ID = encodedIDForResponse // Use encoded ID in response
+		response := ToMessageResponse(message, encodedIDForResponse)
 		response.Links = BuildMessageLinks(baseURL, encodedIDForResponse)
 
 		log.Debug(logger.LogMessageGetOK,
@@ -331,17 +330,13 @@ func (h handler) ListMessages() func(c *gin.Context) {
 			return
 		}
 
-		// Encode UUIDs for each message in response
+		// Build response with encoded IDs
 		baseURL := GetBaseURL(c)
-		response := ToMessageListResponse(messages)
+		response := ToMessageListResponse(messages, h.EncodeID)
+
+		// Add HATEOAS links to each message
 		for i := range response.Messages {
-			encodedID, err := h.IDEncoder.Encode(messages[i].ID)
-			if err != nil {
-				h.HandleIDEncodingError(c, messages[i].ID, err)
-				return
-			}
-			response.Messages[i].ID = encodedID
-			response.Messages[i].Links = BuildMessageLinks(baseURL, encodedID)
+			response.Messages[i].Links = BuildMessageLinks(baseURL, response.Messages[i].ID)
 		}
 		response.Links = BuildMessageListLinks(baseURL)
 

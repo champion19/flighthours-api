@@ -14,6 +14,7 @@ import (
 	mysql "github.com/champion19/flighthours-api/platform/databases/mysql"
 	airlineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline"
 	airportRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airport"
+	dailyLogbookRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
 	messageRepo "github.com/champion19/flighthours-api/platform/databases/repositories/message"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
@@ -22,18 +23,19 @@ import (
 )
 
 type Dependencies struct {
-	EmployeeService   input.Service
-	EmployeeRepo      output.Repository
-	Interactor        *interactor.Interactor
-	KeycloakClient    output.AuthClient
-	Config            *config.Config
-	Logger            logger.Logger
-	IDEncoder         *idencoder.HashidsEncoder
-	ResponseHandler   *middleware.ResponseHandler
-	MessagingCache    *messagingCache.MessageCache
-	MessageInteractor *interactor.MessageInteractor
-	AirlineInteractor *interactor.AirlineInteractor
-	AirportInteractor *interactor.AirportInteractor
+	EmployeeService        input.Service
+	EmployeeRepo           output.Repository
+	Interactor             *interactor.Interactor
+	KeycloakClient         output.AuthClient
+	Config                 *config.Config
+	Logger                 logger.Logger
+	IDEncoder              *idencoder.HashidsEncoder
+	ResponseHandler        *middleware.ResponseHandler
+	MessagingCache         *messagingCache.MessageCache
+	MessageInteractor      *interactor.MessageInteractor
+	AirlineInteractor      *interactor.AirlineInteractor
+	AirportInteractor      *interactor.AirportInteractor
+	DailyLogbookInteractor *interactor.DailyLogbookInteractor
 }
 
 func Init() (*Dependencies, error) {
@@ -136,18 +138,30 @@ func Init() (*Dependencies, error) {
 	airportService := services.NewAirportService(airportRepository, log)
 	airportInteractor := interactor.NewAirportInteractor(airportService, log)
 
+	// Inicializar repositorio y servicio de bitácoras diarias
+	dailyLogbookRepository, err := dailyLogbookRepo.NewDailyLogbookRepository(db)
+	if err != nil {
+		log.Error(logger.LogDailyLogbookRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogDailyLogbookRepoInitOK)
+
+	dailyLogbookService := services.NewDailyLogbookService(dailyLogbookRepository, log)
+	dailyLogbookInteractor := interactor.NewDailyLogbookInteractor(dailyLogbookService, log)
+
 	return &Dependencies{
-		EmployeeService:   employeeService,
-		EmployeeRepo:      employeeRepo,
-		Interactor:        interactorFacade,
-		KeycloakClient:    keycloakClient,
-		Config:            cfg,
-		Logger:            log,
-		IDEncoder:         encoder,
-		ResponseHandler:   responseHandler,
-		MessagingCache:    messagingCache,
-		MessageInteractor: messageInteractor,
-		AirlineInteractor: airlineInteractor,
-		AirportInteractor: airportInteractor,
+		EmployeeService:        employeeService,
+		EmployeeRepo:           employeeRepo,
+		Interactor:             interactorFacade,
+		KeycloakClient:         keycloakClient,
+		Config:                 cfg,
+		Logger:                 log,
+		IDEncoder:              encoder,
+		ResponseHandler:        responseHandler,
+		MessagingCache:         messagingCache,
+		MessageInteractor:      messageInteractor,
+		AirlineInteractor:      airlineInteractor,
+		AirportInteractor:      airportInteractor,
+		DailyLogbookInteractor: dailyLogbookInteractor,
 	}, nil
 }

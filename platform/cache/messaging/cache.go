@@ -324,6 +324,52 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_APT_NOT_FOUND_ERR_00001":  http.StatusNotFound,            // 404 - Airport not found
 	"MOD_APT_ACTIVATE_ERR_00002":   http.StatusUnprocessableEntity, // 422 - Error activating airport
 	"MOD_APT_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error deactivating airport
+
+	// ========================================
+	// DailyLogbook Module (BIT_*) - Bitácora Diaria
+	// ========================================
+	// Consultar (HU7)
+	"BIT_CON_EXI_01901": http.StatusOK,                  // 200 - Bitácora consultada exitosamente
+	"BIT_CON_ERR_01902": http.StatusBadRequest,          // 400 - Bitácora no seleccionada
+	"BIT_CON_ERR_01903": http.StatusNotFound,            // 404 - Bitácora no encontrada
+	"BIT_CON_ERR_01904": http.StatusInternalServerError, // 500 - Error técnico al consultar
+
+	// Agregar (HU8)
+	"BIT_AGR_EXI_01801": http.StatusCreated,             // 201 - Bitácora creada exitosamente
+	"BIT_AGR_ERR_01802": http.StatusBadRequest,          // 400 - Campos requeridos incompletos
+	"BIT_AGR_ERR_01803": http.StatusBadRequest,          // 400 - Formato inválido
+	"BIT_AGR_ERR_01804": http.StatusInternalServerError, // 500 - Error técnico al crear
+
+	// Editar (HU9)
+	"BIT_EDI_EXI_01701": http.StatusOK,                  // 200 - Bitácora actualizada exitosamente
+	"BIT_EDI_ERR_01702": http.StatusBadRequest,          // 400 - Bitácora no seleccionada
+	"BIT_EDI_ERR_01703": http.StatusBadRequest,          // 400 - Datos inválidos
+	"BIT_EDI_ERR_01704": http.StatusInternalServerError, // 500 - Error técnico al editar
+
+	// Eliminar (HU10)
+	"BIT_DEL_EXI_01601": http.StatusOK,                  // 200 - Bitácora eliminada exitosamente
+	"BIT_DEL_ERR_01602": http.StatusBadRequest,          // 400 - Bitácora no seleccionada
+	"BIT_DEL_ERR_01603": http.StatusNotFound,            // 404 - Bitácora no existe o ya eliminada
+	"BIT_DEL_ERR_01604": http.StatusInternalServerError, // 500 - Error técnico al eliminar
+
+	// Activar (HU11)
+	"BIT_ACT_EXI_01501": http.StatusOK,                  // 200 - Bitácora activada exitosamente
+	"BIT_ACT_ERR_01502": http.StatusBadRequest,          // 400 - Bitácora no seleccionada
+	"BIT_ACT_ERR_01503": http.StatusConflict,            // 409 - Bitácora ya está activa
+	"BIT_ACT_ERR_01504": http.StatusInternalServerError, // 500 - Error técnico al activar
+
+	// Inactivar (HU12)
+	"BIT_INA_EXI_01401": http.StatusOK,                  // 200 - Bitácora inactivada exitosamente
+	"BIT_INA_ERR_01402": http.StatusBadRequest,          // 400 - Bitácora no seleccionada
+	"BIT_INA_ERR_01403": http.StatusConflict,            // 409 - Bitácora ya está inactiva
+	"BIT_INA_ERR_01404": http.StatusInternalServerError, // 500 - Error técnico al inactivar
+
+	// Listar
+	"BIT_LIST_EXI_01001": http.StatusOK,                  // 200 - Lista obtenida exitosamente
+	"BIT_LIST_ERR_01002": http.StatusInternalServerError, // 500 - Error al listar
+
+	// Autorización
+	"BIT_AUTH_ERR_00001": http.StatusForbidden, // 403 - No autorizado para esta bitácora
 }
 
 // GetHTTPStatus returns the HTTP status for a message code
