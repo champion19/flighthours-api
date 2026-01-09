@@ -58,7 +58,6 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.AirlineInteractor,
 		dependencies.AirportInteractor,
 		dependencies.DailyLogbookInteractor,
-		dependencies.AircraftRegistrationInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -128,7 +127,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 	protected := app.Group("flighthours/api/v1")
 	// Use the RequireAuth middleware from jwt_middleware.go
 	// This validates JWT tokens and injects the authenticated user into context
-	protected.Use(middleware.RequireAuth(dependencies.EmployeeService, dependencies.MessagingCache, dependencies.JWTValidator))
+	protected.Use(middleware.RequireAuth(dependencies.EmployeeService, dependencies.MessagingCache,dependencies.JWTValidator))
 	{
 		// ---- Authenticated User Endpoints ----
 		// POST /auth/change-password - Change password (authenticated user knows current password)
@@ -204,20 +203,6 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// PATCH /daily-logbooks/:id/deactivate - Deactivate a daily logbook
 		protected.PATCH("/daily-logbooks/:id/deactivate", handler.DeactivateDailyLogbook())
-
-		// ---- Aircraft Registrations Management (Protected) ----
-		// GET /aircraft-registrations - List all aircraft registrations
-		// Query params: ?airline_id=xxx (filter by airline)
-		protected.GET("/aircraft-registrations", handler.ListAircraftRegistrations())
-
-		// GET /aircraft-registrations/:id - Get aircraft registration by ID (HU33)
-		protected.GET("/aircraft-registrations/:id", handler.GetAircraftRegistrationByID())
-
-		// POST /aircraft-registrations - Create a new aircraft registration (HU34)
-		protected.POST("/aircraft-registrations", validator.WithValidateCreateAircraftRegistration(), handler.CreateAircraftRegistration())
-
-		// PUT /aircraft-registrations/:id - Update an existing aircraft registration (HU35)
-		protected.PUT("/aircraft-registrations/:id", validator.WithValidateUpdateAircraftRegistration(), handler.UpdateAircraftRegistration())
 	}
 
 	dependencies.Logger.Success(logger.LogRouteConfigured)

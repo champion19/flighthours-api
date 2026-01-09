@@ -651,25 +651,3 @@ const (
 	LogDailyLogbookRepoInitOK      = "Repositorio de bitácoras diarias inicializado"
 	LogDailyLogbookRepoInitError   = "Error inicializando repositorio de bitácoras diarias"
 )
-
-// ============================================
-// AIRCRAFT REGISTRATION INTERACTOR
-// ============================================
-const (
-	LogAircraftRegistrationGet           = "Obteniendo información de matrícula"
-	LogAircraftRegistrationGetOK         = "Matrícula obtenida exitosamente"
-	LogAircraftRegistrationGetError      = "Error obteniendo matrícula"
-	LogAircraftRegistrationNotFound      = "Matrícula no encontrada"
-	LogAircraftRegistrationCreate        = "Creando matrícula"
-	LogAircraftRegistrationCreateOK      = "Matrícula creada exitosamente"
-	LogAircraftRegistrationCreateError   = "Error creando matrícula"
-	LogAircraftRegistrationUpdate        = "Actualizando matrícula"
-	LogAircraftRegistrationUpdateOK      = "Matrícula actualizada exitosamente"
-	LogAircraftRegistrationUpdateError   = "Error actualizando matrícula"
-	LogAircraftRegistrationList          = "Listando matrículas"
-	LogAircraftRegistrationListOK        = "Matrículas listadas exitosamente"
-	LogAircraftRegistrationListError     = "Error listando matrículas"
-	LogAircraftRegistrationRepoInit      = "Inicializando repositorio de matrículas"
-	LogAircraftRegistrationRepoInitOK    = "Repositorio de matrículas inicializado"
-	LogAircraftRegistrationRepoInitError = "Error inicializando repositorio de matrículas"
-)

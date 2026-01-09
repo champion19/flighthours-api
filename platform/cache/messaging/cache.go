@@ -370,31 +370,6 @@ var messageCodeToHTTPStatus = map[string]int{
 
 	// Autorización
 	"BIT_AUTH_ERR_00001": http.StatusForbidden, // 403 - No autorizado para esta bitácora
-
-	// ========================================
-	// Aircraft Registration Module (MAT_*) - Matrícula
-	// ========================================
-	// Consultar (HU33)
-	"MAT_CON_EXI_03301": http.StatusOK,                  // 200 - Matrícula consultada exitosamente
-	"MAT_CON_ERR_03302": http.StatusNotFound,            // 404 - Matrícula no encontrada
-	"MAT_CON_ERR_03303": http.StatusInternalServerError, // 500 - Error técnico al consultar
-
-	// Agregar (HU34)
-	"MAT_AGR_EXI_03401": http.StatusCreated,    // 201 - Matrícula creada exitosamente
-	"MAT_AGR_ERR_03402": http.StatusBadRequest, // 400 - Error al crear matrícula
-	"MAT_AGR_ERR_03403": http.StatusConflict,   // 409 - Matrícula duplicada
-
-	// Editar (HU35)
-	"MAT_EDI_EXI_03501": http.StatusOK,         // 200 - Matrícula actualizada exitosamente
-	"MAT_EDI_ERR_03502": http.StatusBadRequest, // 400 - Error al actualizar matrícula
-
-	// Listar
-	"MAT_LIST_EXI_03001": http.StatusOK,                  // 200 - Lista obtenida exitosamente
-	"MAT_LIST_ERR_03002": http.StatusInternalServerError, // 500 - Error al listar
-
-	// Validaciones
-	"MAT_VAL_ERR_03601": http.StatusBadRequest, // 400 - Modelo de aeronave inválido
-	"MAT_VAL_ERR_03602": http.StatusBadRequest, // 400 - Aerolínea inválida
 }
 
 // GetHTTPStatus returns the HTTP status for a message code

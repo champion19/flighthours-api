@@ -80,16 +80,3 @@ type DailyLogbookRepository interface {
 	DeleteDailyLogbook(ctx context.Context, tx Tx, id string) error
 	UpdateDailyLogbookStatus(ctx context.Context, tx Tx, id string, status bool) error
 }
-
-// AircraftRegistrationRepository defines the interface for aircraft registration data persistence
-type AircraftRegistrationRepository interface {
-	BeginTx(ctx context.Context) (Tx, error)
-
-	// AircraftRegistration operations - read
-	GetAircraftRegistrationByID(ctx context.Context, id string) (*domain.AircraftRegistration, error)
-	ListAircraftRegistrations(ctx context.Context, filters map[string]interface{}) ([]domain.AircraftRegistration, error)
-
-	// AircraftRegistration operations - transactional
-	SaveAircraftRegistration(ctx context.Context, tx Tx, registration domain.AircraftRegistration) error
-	UpdateAircraftRegistration(ctx context.Context, tx Tx, registration domain.AircraftRegistration) error
-}

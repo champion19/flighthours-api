@@ -93,14 +93,6 @@ var errorToMessageCode = map[error]string{
 	domain.ErrDailyLogbookCannotDelete: domain.MsgDailyLogbookDeleteError,
 	domain.ErrDailyLogbookUnauthorized: domain.MsgDailyLogbookUnauthorized,
 
-	// AircraftRegistration errors (MAT_*)
-	domain.ErrAircraftRegistrationNotFound:       domain.MsgAircraftRegistrationNotFound,
-	domain.ErrAircraftRegistrationCannotSave:     domain.MsgAircraftRegistrationSaveError,
-	domain.ErrAircraftRegistrationCannotUpdate:   domain.MsgAircraftRegistrationUpdateError,
-	domain.ErrAircraftRegistrationDuplicatePlate: domain.MsgAircraftRegistrationDuplicate,
-	domain.ErrAircraftRegistrationInvalidModel:   domain.MsgAircraftRegistrationInvalidModel,
-	domain.ErrAircraftRegistrationInvalidAirline: domain.MsgAircraftRegistrationInvalidAirline,
-
 	// General errors
 	domain.ErrInternalServer: domain.MsgServerError,
 }

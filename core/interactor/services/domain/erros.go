@@ -111,16 +111,6 @@ var (
 	ErrAirportNotFound = errors.New("ERR_AIRPORT_NOT_FOUND")
 )
 
-// Aircraft Registration Management Errors (MAT_*)
-var (
-	ErrAircraftRegistrationNotFound       = errors.New("ERR_AIRCRAFT_REGISTRATION_NOT_FOUND")
-	ErrAircraftRegistrationCannotSave     = errors.New("ERR_AIRCRAFT_REGISTRATION_CANNOT_SAVE")
-	ErrAircraftRegistrationCannotUpdate   = errors.New("ERR_AIRCRAFT_REGISTRATION_CANNOT_UPDATE")
-	ErrAircraftRegistrationDuplicatePlate = errors.New("ERR_AIRCRAFT_REGISTRATION_DUPLICATE_PLATE")
-	ErrAircraftRegistrationInvalidModel   = errors.New("ERR_AIRCRAFT_REGISTRATION_INVALID_MODEL")
-	ErrAircraftRegistrationInvalidAirline = errors.New("ERR_AIRCRAFT_REGISTRATION_INVALID_AIRLINE")
-)
-
 // ============================================
 // MESSAGE CODES - Constants for use in code
 // ============================================
@@ -300,41 +290,6 @@ const (
 	MsgAirportGetOK        = "MOD_APT_GET_EXI_00001"
 	MsgAirportActivateOK   = "MOD_APT_ACTIVATE_EXI_00002"
 	MsgAirportDeactivateOK = "MOD_APT_DEACTIVATE_EXI_00003"
-)
-
-// Aircraft Registration Module (MAT_*) - Matrícula
-const (
-	// ========================================
-	// Consultar (HU33) - MAT_CON_*
-	// ========================================
-	MsgAircraftRegistrationGetOK    = "MAT_CON_EXI_03301" // Éxito - Matrícula consultada
-	MsgAircraftRegistrationNotFound = "MAT_CON_ERR_03302" // Error - Matrícula no encontrada
-	MsgAircraftRegistrationGetErr   = "MAT_CON_ERR_03303" // Error - Error técnico al consultar
-
-	// ========================================
-	// Agregar (HU34) - MAT_AGR_*
-	// ========================================
-	MsgAircraftRegistrationCreated   = "MAT_AGR_EXI_03401" // Éxito - Matrícula creada
-	MsgAircraftRegistrationSaveError = "MAT_AGR_ERR_03402" // Error - Error técnico al crear
-	MsgAircraftRegistrationDuplicate = "MAT_AGR_ERR_03403" // Error - Matrícula duplicada
-
-	// ========================================
-	// Editar (HU35) - MAT_EDI_*
-	// ========================================
-	MsgAircraftRegistrationUpdated     = "MAT_EDI_EXI_03501" // Éxito - Matrícula actualizada
-	MsgAircraftRegistrationUpdateError = "MAT_EDI_ERR_03502" // Error - Error técnico al editar
-
-	// ========================================
-	// Listar - MAT_LIST_*
-	// ========================================
-	MsgAircraftRegistrationListOK    = "MAT_LIST_EXI_03001" // Éxito - Lista de matrículas obtenida
-	MsgAircraftRegistrationListError = "MAT_LIST_ERR_03002" // Error - Error al listar matrículas
-
-	// ========================================
-	// Validaciones - MAT_VAL_*
-	// ========================================
-	MsgAircraftRegistrationInvalidModel   = "MAT_VAL_ERR_03601" // Error - Modelo de aeronave inválido
-	MsgAircraftRegistrationInvalidAirline = "MAT_VAL_ERR_03602" // Error - Aerolínea inválida
 )
 
 // DailyLogbook Management Errors (BIT_*)
