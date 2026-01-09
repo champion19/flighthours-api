@@ -521,3 +521,73 @@ func BuildDailyLogbookDeletedLinks(baseURL string) []Link {
 		},
 	}
 }
+
+// ============================================================================
+// AIRCRAFT REGISTRATION HATEOAS LINKS
+// ============================================================================
+
+// BuildAircraftRegistrationLinks construye links HATEOAS para una matrícula específica
+func BuildAircraftRegistrationLinks(baseURL string, registrationID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "aircraft-registrations", registrationID)
+	collectionURL := BuildCollectionURL(baseURL, "aircraft-registrations")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAircraftRegistrationListLinks construye links para la lista de matrículas
+func BuildAircraftRegistrationListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "aircraft-registrations")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "create",
+			Method: "POST",
+		},
+	}
+}
+
+// BuildAircraftRegistrationCreatedLinks construye links para una matrícula recién creada
+func BuildAircraftRegistrationCreatedLinks(baseURL string, registrationID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "aircraft-registrations", registrationID)
+	collectionURL := BuildCollectionURL(baseURL, "aircraft-registrations")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "list",
+			Method: "GET",
+		},
+	}
+}

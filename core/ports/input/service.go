@@ -108,3 +108,16 @@ type DailyLogbookService interface {
 	ActivateDailyLogbook(ctx context.Context, id string) error
 	DeactivateDailyLogbook(ctx context.Context, id string) error
 }
+
+// AircraftRegistrationService defines the interface for aircraft registration business operations
+type AircraftRegistrationService interface {
+	BeginTx(ctx context.Context) (output.Tx, error)
+
+	// AircraftRegistration - queries
+	GetAircraftRegistrationByID(ctx context.Context, id string) (*domain.AircraftRegistration, error)
+	ListAircraftRegistrations(ctx context.Context, filters map[string]interface{}) ([]domain.AircraftRegistration, error)
+
+	// AircraftRegistration - operations
+	CreateAircraftRegistration(ctx context.Context, registration domain.AircraftRegistration) error
+	UpdateAircraftRegistration(ctx context.Context, registration domain.AircraftRegistration) error
+}
