@@ -407,6 +407,18 @@ var messageCodeToHTTPStatus = map[string]int{
 	// Listar tipos (HU43)
 	"MOD_AM_LIST_EXI_04301": http.StatusOK,                  // 200 - Lista de modelos/tipos obtenida
 	"MOD_AM_LIST_ERR_04302": http.StatusInternalServerError, // 500 - Error al listar modelos/tipos
+
+	// ========================================
+	// Route Module (RUT_*) - Ruta
+	// ========================================
+	// Consultar (HU39)
+	"RUT_CON_EXI_03901": http.StatusOK,                  // 200 - Ruta consultada exitosamente
+	"RUT_CON_ERR_03902": http.StatusNotFound,            // 404 - Ruta no encontrada
+	"RUT_CON_ERR_03903": http.StatusInternalServerError, // 500 - Error técnico al consultar
+
+	// Listar
+	"RUT_LIST_EXI_03001": http.StatusOK,                  // 200 - Lista de rutas obtenida
+	"RUT_LIST_ERR_03002": http.StatusInternalServerError, // 500 - Error al listar rutas
 }
 
 // GetHTTPStatus returns the HTTP status for a message code

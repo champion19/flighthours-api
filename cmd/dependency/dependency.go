@@ -19,6 +19,7 @@ import (
 	dailyLogbookRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
 	messageRepo "github.com/champion19/flighthours-api/platform/databases/repositories/message"
+	routeRepo "github.com/champion19/flighthours-api/platform/databases/repositories/route"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
 	"github.com/champion19/flighthours-api/platform/jwt"
 	"github.com/champion19/flighthours-api/platform/logger"
@@ -41,6 +42,7 @@ type Dependencies struct {
 	DailyLogbookInteractor         *interactor.DailyLogbookInteractor
 	AircraftRegistrationInteractor *interactor.AircraftRegistrationInteractor
 	AircraftModelInteractor        *interactor.AircraftModelInteractor
+	RouteInteractor                *interactor.RouteInteractor
 	JWTValidator                   *jwt.JWKSValidator
 }
 
@@ -177,6 +179,17 @@ func Init() (*Dependencies, error) {
 	aircraftModelService := services.NewAircraftModelService(aircraftModelRepository, log)
 	aircraftModelInteractor := interactor.NewAircraftModelInteractor(aircraftModelService, log)
 
+	// Inicializar repositorio y servicio de rutas
+	routeRepository, err := routeRepo.NewRouteRepository(db)
+	if err != nil {
+		log.Error(logger.LogRouteRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogRouteRepoInitOK)
+
+	routeService := services.NewRouteService(routeRepository, log)
+	routeInteractor := interactor.NewRouteInteractor(routeService, log)
+
 	// JWKS Validator (JWT signature and expiration validation)
 	// This fetches Keycloak's public keys for local token validation
 	var jwtValidator *jwt.JWKSValidator
@@ -211,6 +224,7 @@ func Init() (*Dependencies, error) {
 		DailyLogbookInteractor:         dailyLogbookInteractor,
 		AircraftRegistrationInteractor: aircraftRegistrationInteractor,
 		AircraftModelInteractor:        aircraftModelInteractor,
+		RouteInteractor:                routeInteractor,
 		JWTValidator:                   jwtValidator,
 	}, nil
 }

@@ -100,3 +100,10 @@ type AircraftModelRepository interface {
 	GetAircraftModelByID(ctx context.Context, id string) (*domain.AircraftModel, error)
 	ListAircraftModels(ctx context.Context, filters map[string]interface{}) ([]domain.AircraftModel, error)
 }
+
+// RouteRepository defines the interface for route data persistence
+type RouteRepository interface {
+	// Route operations - read only (no transactions needed for HU39)
+	GetRouteByID(ctx context.Context, id string) (*domain.Route, error)
+	ListRoutes(ctx context.Context, filters map[string]interface{}) ([]domain.Route, error)
+}

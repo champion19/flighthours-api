@@ -627,3 +627,39 @@ func BuildAircraftModelListLinks(baseURL string) []Link {
 		},
 	}
 }
+
+// ============================================================================
+// ROUTE HATEOAS LINKS
+// ============================================================================
+
+// BuildRouteLinks construye links HATEOAS para una ruta específica
+func BuildRouteLinks(baseURL string, routeID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "routes", routeID)
+	collectionURL := BuildCollectionURL(baseURL, "routes")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildRouteListLinks construye links para la lista de rutas
+func BuildRouteListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "routes")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+}
