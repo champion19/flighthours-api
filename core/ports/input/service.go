@@ -121,3 +121,10 @@ type AircraftRegistrationService interface {
 	CreateAircraftRegistration(ctx context.Context, registration domain.AircraftRegistration) error
 	UpdateAircraftRegistration(ctx context.Context, registration domain.AircraftRegistration) error
 }
+
+// AircraftModelService defines the interface for aircraft model business operations
+type AircraftModelService interface {
+	// AircraftModel - queries only (read-only module)
+	GetAircraftModelByID(ctx context.Context, id string) (*domain.AircraftModel, error)
+	ListAircraftModels(ctx context.Context, filters map[string]interface{}) ([]domain.AircraftModel, error)
+}

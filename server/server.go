@@ -59,6 +59,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.AirportInteractor,
 		dependencies.DailyLogbookInteractor,
 		dependencies.AircraftRegistrationInteractor,
+		dependencies.AircraftModelInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -120,6 +121,14 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// GET /airports/:id - Get airport information by ID
 		public.GET("/airports/:id", handler.GetAirportByID())
+
+		// ---- Aircraft Models (Public - Read Only) ----
+		// GET /aircraft-models - List all aircraft models (HU43)
+		// Query params: ?engine_type=JET (filter by engine type)
+		public.GET("/aircraft-models", handler.ListAircraftModels())
+
+		// GET /aircraft-models/:id - Get aircraft model by ID (HU36)
+		public.GET("/aircraft-models/:id", handler.GetAircraftModelByID())
 	}
 
 	// ===========================================

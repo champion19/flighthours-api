@@ -22,6 +22,7 @@ type handler struct {
 	AirportInteractor              *interactor.AirportInteractor
 	DailyLogbookInteractor         *interactor.DailyLogbookInteractor
 	AircraftRegistrationInteractor *interactor.AircraftRegistrationInteractor
+	AircraftModelInteractor        *interactor.AircraftModelInteractor
 }
 
 func New(
@@ -34,7 +35,8 @@ func New(
 	airlineInteractor *interactor.AirlineInteractor,
 	airportInteractor *interactor.AirportInteractor,
 	dailyLogbookInteractor *interactor.DailyLogbookInteractor,
-	aircraftRegistrationInteractor *interactor.AircraftRegistrationInteractor) *handler {
+	aircraftRegistrationInteractor *interactor.AircraftRegistrationInteractor,
+	aircraftModelInteractor *interactor.AircraftModelInteractor) *handler {
 	return &handler{
 		EmployeeService:                service,
 		Interactor:                     interactor,
@@ -46,6 +48,7 @@ func New(
 		AirportInteractor:              airportInteractor,
 		DailyLogbookInteractor:         dailyLogbookInteractor,
 		AircraftRegistrationInteractor: aircraftRegistrationInteractor,
+		AircraftModelInteractor:        aircraftModelInteractor,
 	}
 }
 
