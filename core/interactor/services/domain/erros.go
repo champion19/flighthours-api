@@ -358,6 +358,27 @@ const (
 	MsgAircraftModelListError = "MOD_AM_LIST_ERR_04302" // Error - Error al listar modelos/tipos
 )
 
+// Route Management Errors (RUT_*)
+var (
+	ErrRouteNotFound = errors.New("ERR_ROUTE_NOT_FOUND")
+)
+
+// Route Module (RUT_*) - Ruta
+const (
+	// ========================================
+	// Consultar (HU39) - RUT_CON_*
+	// ========================================
+	MsgRouteGetOK    = "RUT_CON_EXI_03901" // Éxito - Ruta consultada exitosamente
+	MsgRouteNotFound = "RUT_CON_ERR_03902" // Error - Ruta no encontrada
+	MsgRouteGetErr   = "RUT_CON_ERR_03903" // Error - Error técnico al consultar
+
+	// ========================================
+	// Listar - RUT_LIST_*
+	// ========================================
+	MsgRouteListOK    = "RUT_LIST_EXI_03001" // Éxito - Lista de rutas obtenida
+	MsgRouteListError = "RUT_LIST_ERR_03002" // Error - Error al listar rutas
+)
+
 // DailyLogbook Management Errors (BIT_*)
 var (
 	ErrDailyLogbookNotFound     = errors.New("ERR_DAILY_LOGBOOK_NOT_FOUND")

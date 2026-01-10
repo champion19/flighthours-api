@@ -689,3 +689,19 @@ const (
 	LogAircraftModelRepoInitOK    = "Repositorio de modelos de aeronave inicializado"
 	LogAircraftModelRepoInitError = "Error inicializando repositorio de modelos de aeronave"
 )
+
+// ============================================
+// ROUTE INTERACTOR
+// ============================================
+const (
+	LogRouteGet           = "Obteniendo información de ruta"
+	LogRouteGetOK         = "Ruta obtenida exitosamente"
+	LogRouteGetError      = "Error obteniendo ruta"
+	LogRouteNotFound      = "Ruta no encontrada"
+	LogRouteList          = "Listando rutas"
+	LogRouteListOK        = "Rutas listadas exitosamente"
+	LogRouteListError     = "Error listando rutas"
+	LogRouteRepoInit      = "Inicializando repositorio de rutas"
+	LogRouteRepoInitOK    = "Repositorio de rutas inicializado"
+	LogRouteRepoInitError = "Error inicializando repositorio de rutas"
+)
