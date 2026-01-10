@@ -12,6 +12,7 @@ import (
 	"github.com/champion19/flighthours-api/middleware"
 	messagingCache "github.com/champion19/flighthours-api/platform/cache/messaging"
 	mysql "github.com/champion19/flighthours-api/platform/databases/mysql"
+	aircraftModelRepo "github.com/champion19/flighthours-api/platform/databases/repositories/aircraft_model"
 	aircraftRegistrationRepo "github.com/champion19/flighthours-api/platform/databases/repositories/aircraft_registration"
 	airlineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline"
 	airportRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airport"
@@ -39,6 +40,7 @@ type Dependencies struct {
 	AirportInteractor              *interactor.AirportInteractor
 	DailyLogbookInteractor         *interactor.DailyLogbookInteractor
 	AircraftRegistrationInteractor *interactor.AircraftRegistrationInteractor
+	AircraftModelInteractor        *interactor.AircraftModelInteractor
 	JWTValidator                   *jwt.JWKSValidator
 }
 
@@ -164,6 +166,17 @@ func Init() (*Dependencies, error) {
 	aircraftRegistrationService := services.NewAircraftRegistrationService(aircraftRegistrationRepository, log)
 	aircraftRegistrationInteractor := interactor.NewAircraftRegistrationInteractor(aircraftRegistrationService, log)
 
+	// Inicializar repositorio y servicio de modelos de aeronave
+	aircraftModelRepository, err := aircraftModelRepo.NewAircraftModelRepository(db)
+	if err != nil {
+		log.Error(logger.LogAircraftModelRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogAircraftModelRepoInitOK)
+
+	aircraftModelService := services.NewAircraftModelService(aircraftModelRepository, log)
+	aircraftModelInteractor := interactor.NewAircraftModelInteractor(aircraftModelService, log)
+
 	// JWKS Validator (JWT signature and expiration validation)
 	// This fetches Keycloak's public keys for local token validation
 	var jwtValidator *jwt.JWKSValidator
@@ -197,6 +210,7 @@ func Init() (*Dependencies, error) {
 		AirportInteractor:              airportInteractor,
 		DailyLogbookInteractor:         dailyLogbookInteractor,
 		AircraftRegistrationInteractor: aircraftRegistrationInteractor,
+		AircraftModelInteractor:        aircraftModelInteractor,
 		JWTValidator:                   jwtValidator,
 	}, nil
 }

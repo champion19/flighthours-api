@@ -395,6 +395,18 @@ var messageCodeToHTTPStatus = map[string]int{
 	// Validaciones
 	"MAT_VAL_ERR_03601": http.StatusBadRequest, // 400 - Modelo de aeronave inválido
 	"MAT_VAL_ERR_03602": http.StatusBadRequest, // 400 - Aerolínea inválida
+
+	// ========================================
+	// Aircraft Model Module (MOD_AM_*) - Modelo de Aeronave
+	// ========================================
+	// Consultar (HU36)
+	"MOD_AM_CON_EXI_03601": http.StatusOK,                  // 200 - Modelo de aeronave consultado
+	"MOD_AM_CON_ERR_03602": http.StatusNotFound,            // 404 - Modelo de aeronave no encontrado
+	"MOD_AM_CON_ERR_03603": http.StatusInternalServerError, // 500 - Error técnico al consultar
+
+	// Listar tipos (HU43)
+	"MOD_AM_LIST_EXI_04301": http.StatusOK,                  // 200 - Lista de modelos/tipos obtenida
+	"MOD_AM_LIST_ERR_04302": http.StatusInternalServerError, // 500 - Error al listar modelos/tipos
 }
 
 // GetHTTPStatus returns the HTTP status for a message code
