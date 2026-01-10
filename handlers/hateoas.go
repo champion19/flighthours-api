@@ -591,3 +591,39 @@ func BuildAircraftRegistrationCreatedLinks(baseURL string, registrationID string
 		},
 	}
 }
+
+// ============================================================================
+// AIRCRAFT MODEL HATEOAS LINKS
+// ============================================================================
+
+// BuildAircraftModelLinks construye links HATEOAS para un modelo de aeronave específico
+func BuildAircraftModelLinks(baseURL string, modelID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "aircraft-models", modelID)
+	collectionURL := BuildCollectionURL(baseURL, "aircraft-models")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAircraftModelListLinks construye links para la lista de modelos de aeronave
+func BuildAircraftModelListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "aircraft-models")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+}

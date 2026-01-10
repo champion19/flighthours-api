@@ -93,3 +93,10 @@ type AircraftRegistrationRepository interface {
 	SaveAircraftRegistration(ctx context.Context, tx Tx, registration domain.AircraftRegistration) error
 	UpdateAircraftRegistration(ctx context.Context, tx Tx, registration domain.AircraftRegistration) error
 }
+
+// AircraftModelRepository defines the interface for aircraft model data persistence
+type AircraftModelRepository interface {
+	// AircraftModel operations - read only (no transactions needed)
+	GetAircraftModelByID(ctx context.Context, id string) (*domain.AircraftModel, error)
+	ListAircraftModels(ctx context.Context, filters map[string]interface{}) ([]domain.AircraftModel, error)
+}

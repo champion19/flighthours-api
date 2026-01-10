@@ -121,6 +121,11 @@ var (
 	ErrAircraftRegistrationInvalidAirline = errors.New("ERR_AIRCRAFT_REGISTRATION_INVALID_AIRLINE")
 )
 
+// Aircraft Model Management Errors (MOD_AM_*)
+var (
+	ErrAircraftModelNotFound = errors.New("ERR_AIRCRAFT_MODEL_NOT_FOUND")
+)
+
 // ============================================
 // MESSAGE CODES - Constants for use in code
 // ============================================
@@ -335,6 +340,22 @@ const (
 	// ========================================
 	MsgAircraftRegistrationInvalidModel   = "MAT_VAL_ERR_03601" // Error - Modelo de aeronave inválido
 	MsgAircraftRegistrationInvalidAirline = "MAT_VAL_ERR_03602" // Error - Aerolínea inválida
+)
+
+// Aircraft Model Module (MOD_AM_*) - Modelo de Aeronave
+const (
+	// ========================================
+	// Consultar (HU36) - MOD_AM_CON_*
+	// ========================================
+	MsgAircraftModelGetOK    = "MOD_AM_CON_EXI_03601" // Éxito - Modelo de aeronave consultado
+	MsgAircraftModelNotFound = "MOD_AM_CON_ERR_03602" // Error - Modelo de aeronave no encontrado
+	MsgAircraftModelGetErr   = "MOD_AM_CON_ERR_03603" // Error - Error técnico al consultar
+
+	// ========================================
+	// Listar tipos (HU43) - MOD_AM_LIST_*
+	// ========================================
+	MsgAircraftModelListOK    = "MOD_AM_LIST_EXI_04301" // Éxito - Lista de modelos/tipos obtenida
+	MsgAircraftModelListError = "MOD_AM_LIST_ERR_04302" // Error - Error al listar modelos/tipos
 )
 
 // DailyLogbook Management Errors (BIT_*)
