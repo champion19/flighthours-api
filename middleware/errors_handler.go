@@ -101,6 +101,13 @@ var errorToMessageCode = map[error]string{
 	domain.ErrAircraftRegistrationInvalidModel:   domain.MsgAircraftRegistrationInvalidModel,
 	domain.ErrAircraftRegistrationInvalidAirline: domain.MsgAircraftRegistrationInvalidAirline,
 
+	// AirlineRoute errors (RUT_AIR_*)
+	domain.ErrAirlineRouteNotFound:       domain.MsgAirlineRouteNotFound,
+	domain.ErrAirlineRouteCannotSave:     domain.MsgAirlineRouteGetErr,
+	domain.ErrAirlineRouteCannotUpdate:   domain.MsgAirlineRouteDeactivateErr,
+	domain.ErrAirlineRouteInvalidRoute:   domain.MsgAirlineRouteInvalidRoute,
+	domain.ErrAirlineRouteInvalidAirline: domain.MsgAirlineRouteInvalidAirline,
+
 	// General errors
 	domain.ErrInternalServer: domain.MsgServerError,
 }

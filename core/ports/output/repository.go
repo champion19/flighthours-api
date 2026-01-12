@@ -107,3 +107,15 @@ type RouteRepository interface {
 	GetRouteByID(ctx context.Context, id string) (*domain.Route, error)
 	ListRoutes(ctx context.Context, filters map[string]interface{}) ([]domain.Route, error)
 }
+
+// AirlineRouteRepository defines the interface for airline route data persistence
+type AirlineRouteRepository interface {
+	BeginTx(ctx context.Context) (Tx, error)
+
+	// AirlineRoute operations - read
+	GetAirlineRouteByID(ctx context.Context, id string) (*domain.AirlineRoute, error)
+	ListAirlineRoutes(ctx context.Context, filters map[string]interface{}) ([]domain.AirlineRoute, error)
+
+	// AirlineRoute operations - transactional
+	UpdateAirlineRouteStatus(ctx context.Context, tx Tx, id string, status bool) error
+}
