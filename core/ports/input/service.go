@@ -135,3 +135,16 @@ type RouteService interface {
 	GetRouteByID(ctx context.Context, id string) (*domain.Route, error)
 	ListRoutes(ctx context.Context, filters map[string]interface{}) ([]domain.Route, error)
 }
+
+// AirlineRouteService defines the interface for airline route business operations
+type AirlineRouteService interface {
+	BeginTx(ctx context.Context) (output.Tx, error)
+
+	// AirlineRoute - queries
+	GetAirlineRouteByID(ctx context.Context, id string) (*domain.AirlineRoute, error)
+	ListAirlineRoutes(ctx context.Context, filters map[string]interface{}) ([]domain.AirlineRoute, error)
+
+	// AirlineRoute - operations
+	ActivateAirlineRoute(ctx context.Context, id string) error
+	DeactivateAirlineRoute(ctx context.Context, id string) error
+}

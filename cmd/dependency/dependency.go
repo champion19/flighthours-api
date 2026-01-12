@@ -15,6 +15,7 @@ import (
 	aircraftModelRepo "github.com/champion19/flighthours-api/platform/databases/repositories/aircraft_model"
 	aircraftRegistrationRepo "github.com/champion19/flighthours-api/platform/databases/repositories/aircraft_registration"
 	airlineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline"
+	airlineRouteRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline_route"
 	airportRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airport"
 	dailyLogbookRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
@@ -43,6 +44,7 @@ type Dependencies struct {
 	AircraftRegistrationInteractor *interactor.AircraftRegistrationInteractor
 	AircraftModelInteractor        *interactor.AircraftModelInteractor
 	RouteInteractor                *interactor.RouteInteractor
+	AirlineRouteInteractor         *interactor.AirlineRouteInteractor
 	JWTValidator                   *jwt.JWKSValidator
 }
 
@@ -190,6 +192,17 @@ func Init() (*Dependencies, error) {
 	routeService := services.NewRouteService(routeRepository, log)
 	routeInteractor := interactor.NewRouteInteractor(routeService, log)
 
+	// Inicializar repositorio y servicio de rutas aerolínea
+	airlineRouteRepository, err := airlineRouteRepo.NewAirlineRouteRepository(db)
+	if err != nil {
+		log.Error(logger.LogAirlineRouteRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogAirlineRouteRepoInitOK)
+
+	airlineRouteService := services.NewAirlineRouteService(airlineRouteRepository)
+	airlineRouteInteractor := interactor.NewAirlineRouteInteractor(airlineRouteService)
+
 	// JWKS Validator (JWT signature and expiration validation)
 	// This fetches Keycloak's public keys for local token validation
 	var jwtValidator *jwt.JWKSValidator
@@ -225,6 +238,7 @@ func Init() (*Dependencies, error) {
 		AircraftRegistrationInteractor: aircraftRegistrationInteractor,
 		AircraftModelInteractor:        aircraftModelInteractor,
 		RouteInteractor:                routeInteractor,
+		AirlineRouteInteractor:         airlineRouteInteractor,
 		JWTValidator:                   jwtValidator,
 	}, nil
 }

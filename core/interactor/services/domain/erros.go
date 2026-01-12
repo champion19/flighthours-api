@@ -438,3 +438,46 @@ const (
 	// ========================================
 	MsgDailyLogbookUnauthorized = "BIT_AUTH_ERR_00001" // Error - No autorizado para esta bitácora
 )
+
+// AirlineRoute Management Errors (RUT_AIR_*)
+var (
+	ErrAirlineRouteNotFound       = errors.New("ERR_AIRLINE_ROUTE_NOT_FOUND")
+	ErrAirlineRouteCannotSave     = errors.New("ERR_AIRLINE_ROUTE_CANNOT_SAVE")
+	ErrAirlineRouteCannotUpdate   = errors.New("ERR_AIRLINE_ROUTE_CANNOT_UPDATE")
+	ErrAirlineRouteInvalidRoute   = errors.New("ERR_AIRLINE_ROUTE_INVALID_ROUTE")
+	ErrAirlineRouteInvalidAirline = errors.New("ERR_AIRLINE_ROUTE_INVALID_AIRLINE")
+)
+
+// AirlineRoute Module (RUT_AIR_*) - Ruta Aerolinea
+const (
+	// ========================================
+	// Consultar (HU40) - RUT_AIR_CON_*
+	// ========================================
+	MsgAirlineRouteGetOK    = "RUT_AIR_CON_EXI_04001" // Éxito - Ruta aerolínea consultada exitosamente
+	MsgAirlineRouteNotFound = "RUT_AIR_CON_ERR_04002" // Error - Ruta aerolínea no encontrada
+	MsgAirlineRouteGetErr   = "RUT_AIR_CON_ERR_04003" // Error - Error técnico al consultar
+
+	// ========================================
+	// Desactivar (HU41) - RUT_AIR_INA_*
+	// ========================================
+	MsgAirlineRouteDeactivateOK  = "RUT_AIR_INA_EXI_04101" // Éxito - Ruta aerolínea desactivada
+	MsgAirlineRouteDeactivateErr = "RUT_AIR_INA_ERR_04102" // Error - Error técnico al desactivar
+
+	// ========================================
+	// Activar (HU42) - RUT_AIR_ACT_*
+	// ========================================
+	MsgAirlineRouteActivateOK  = "RUT_AIR_ACT_EXI_04201" // Éxito - Ruta aerolínea activada
+	MsgAirlineRouteActivateErr = "RUT_AIR_ACT_ERR_04202" // Error - Error técnico al activar
+
+	// ========================================
+	// Listar - RUT_AIR_LIST_*
+	// ========================================
+	MsgAirlineRouteListOK    = "RUT_AIR_LIST_EXI_04001" // Éxito - Lista de rutas aerolínea obtenida
+	MsgAirlineRouteListError = "RUT_AIR_LIST_ERR_04002" // Error - Error al listar rutas aerolínea
+
+	// ========================================
+	// Validaciones - RUT_AIR_VAL_*
+	// ========================================
+	MsgAirlineRouteInvalidRoute   = "RUT_AIR_VAL_ERR_04301" // Error - Ruta inválida
+	MsgAirlineRouteInvalidAirline = "RUT_AIR_VAL_ERR_04302" // Error - Aerolínea inválida
+)

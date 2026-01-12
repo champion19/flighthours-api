@@ -61,6 +61,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.AircraftRegistrationInteractor,
 		dependencies.AircraftModelInteractor,
 		dependencies.RouteInteractor,
+		dependencies.AirlineRouteInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -138,6 +139,14 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// GET /routes/:id - Get route by ID (HU39)
 		public.GET("/routes/:id", handler.GetRouteByID())
+
+		// ---- Airline Routes (Public - Read Only) ----
+		// GET /airline-routes - List all airline routes
+		// Query params: ?airline_code=AV, ?status=true
+		public.GET("/airline-routes", handler.ListAirlineRoutes())
+
+		// GET /airline-routes/:id - Get airline route by ID (HU40)
+		public.GET("/airline-routes/:id", handler.GetAirlineRoute())
 	}
 
 	// ===========================================
@@ -236,6 +245,13 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// PUT /aircraft-registrations/:id - Update an existing aircraft registration (HU35)
 		protected.PUT("/aircraft-registrations/:id", validator.WithValidateUpdateAircraftRegistration(), handler.UpdateAircraftRegistration())
+
+		// ---- Airline Routes Management (Protected - Write Operations) ----
+		// PATCH /airline-routes/:id/activate - Activate an airline route (HU42)
+		protected.PATCH("/airline-routes/:id/activate", handler.ActivateAirlineRoute())
+
+		// PATCH /airline-routes/:id/deactivate - Deactivate an airline route (HU41)
+		protected.PATCH("/airline-routes/:id/deactivate", handler.DeactivateAirlineRoute())
 	}
 
 	dependencies.Logger.Success(logger.LogRouteConfigured)
