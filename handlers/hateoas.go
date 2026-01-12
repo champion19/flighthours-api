@@ -663,3 +663,94 @@ func BuildRouteListLinks(baseURL string) []Link {
 		},
 	}
 }
+
+// ============================================================================
+// AIRLINE ROUTE HATEOAS LINKS
+// ============================================================================
+
+// BuildAirlineRouteLinks construye links HATEOAS para una ruta aerolínea específica
+func BuildAirlineRouteLinks(baseURL string, airlineRouteID string, isActive bool) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airline-routes", airlineRouteID)
+	collectionURL := BuildCollectionURL(baseURL, "airline-routes")
+
+	links := []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+
+	// Si está activo, mostrar link para desactivar y viceversa
+	if isActive {
+		links = append(links, Link{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		})
+	} else {
+		links = append(links, Link{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		})
+	}
+
+	links = append(links, Link{
+		Href:   collectionURL,
+		Rel:    "collection",
+		Method: "GET",
+	})
+
+	return links
+}
+
+// BuildAirlineRouteListLinks construye links para la lista de rutas aerolínea
+func BuildAirlineRouteListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "airline-routes")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAirlineRouteStatusLinks construye links para respuesta de cambio de status
+func BuildAirlineRouteStatusLinks(baseURL string, airlineRouteID string, isActive bool) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airline-routes", airlineRouteID)
+	collectionURL := BuildCollectionURL(baseURL, "airline-routes")
+
+	links := []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+
+	// Si está activo, mostrar link para desactivar y viceversa
+	if isActive {
+		links = append(links, Link{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		})
+	} else {
+		links = append(links, Link{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		})
+	}
+
+	links = append(links, Link{
+		Href:   collectionURL,
+		Rel:    "collection",
+		Method: "GET",
+	})
+
+	return links
+}

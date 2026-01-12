@@ -419,6 +419,30 @@ var messageCodeToHTTPStatus = map[string]int{
 	// Listar
 	"RUT_LIST_EXI_03001": http.StatusOK,                  // 200 - Lista de rutas obtenida
 	"RUT_LIST_ERR_03002": http.StatusInternalServerError, // 500 - Error al listar rutas
+
+	// ========================================
+	// Airline Route Module (RUT_AIR_*) - Ruta Aerolínea
+	// ========================================
+	// Consultar (HU40)
+	"RUT_AIR_CON_EXI_04001": http.StatusOK,                  // 200 - Ruta aerolínea consultada exitosamente
+	"RUT_AIR_CON_ERR_04002": http.StatusNotFound,            // 404 - Ruta aerolínea no encontrada
+	"RUT_AIR_CON_ERR_04003": http.StatusInternalServerError, // 500 - Error técnico al consultar
+
+	// Desactivar (HU41)
+	"RUT_AIR_INA_EXI_04101": http.StatusOK,                  // 200 - Ruta aerolínea desactivada
+	"RUT_AIR_INA_ERR_04102": http.StatusInternalServerError, // 500 - Error técnico al desactivar
+
+	// Activar (HU42)
+	"RUT_AIR_ACT_EXI_04201": http.StatusOK,                  // 200 - Ruta aerolínea activada
+	"RUT_AIR_ACT_ERR_04202": http.StatusInternalServerError, // 500 - Error técnico al activar
+
+	// Listar
+	"RUT_AIR_LIST_EXI_04001": http.StatusOK,                  // 200 - Lista de rutas aerolínea obtenida
+	"RUT_AIR_LIST_ERR_04002": http.StatusInternalServerError, // 500 - Error al listar rutas aerolínea
+
+	// Validaciones
+	"RUT_AIR_VAL_ERR_04301": http.StatusBadRequest, // 400 - Ruta inválida
+	"RUT_AIR_VAL_ERR_04302": http.StatusBadRequest, // 400 - Aerolínea inválida
 }
 
 // GetHTTPStatus returns the HTTP status for a message code
