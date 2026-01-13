@@ -1,12 +1,14 @@
 package domain
 
 // AircraftModel represents the aircraft model domain model
-// Contains the model name, aircraft type and engine type
+// Contains the model name, aircraft type, engine type, family and manufacturer
 type AircraftModel struct {
 	ID               string `json:"id"`
 	ModelName        string `json:"model_name"`
 	AircraftTypeName string `json:"aircraft_type_name"`
 	EngineTypeName   string `json:"engine_type_name"`
+	Family           string `json:"family"`
+	Manufacturer     string `json:"manufacturer"`
 }
 
 // ToLogger returns a slice of strings for logging aircraft model information
@@ -16,5 +18,7 @@ func (am *AircraftModel) ToLogger() []string {
 		"model_name:" + am.ModelName,
 		"aircraft_type_name:" + am.AircraftTypeName,
 		"engine_type_name:" + am.EngineTypeName,
+		"family:" + am.Family,
+		"manufacturer:" + am.Manufacturer,
 	}
 }

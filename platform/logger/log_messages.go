@@ -727,3 +727,25 @@ const (
 	LogAirlineRouteRepoInitOK      = "Repositorio de rutas aerolínea inicializado"
 	LogAirlineRouteRepoInitError   = "Error inicializando repositorio de rutas aerolínea"
 )
+
+// ============================================
+// FLIGHT INTERACTOR
+// ============================================
+const (
+	LogFlightGet           = "Obteniendo información de vuelo"
+	LogFlightGetOK         = "Vuelo obtenido exitosamente"
+	LogFlightGetError      = "Error obteniendo vuelo"
+	LogFlightNotFound      = "Vuelo no encontrado"
+	LogFlightList          = "Listando vuelos"
+	LogFlightListOK        = "Vuelos listados exitosamente"
+	LogFlightListError     = "Error listando vuelos"
+	LogFlightCreate        = "Creando vuelo"
+	LogFlightCreateOK      = "Vuelo creado exitosamente"
+	LogFlightCreateError   = "Error creando vuelo"
+	LogFlightUpdate        = "Actualizando vuelo"
+	LogFlightUpdateOK      = "Vuelo actualizado exitosamente"
+	LogFlightUpdateError   = "Error actualizando vuelo"
+	LogFlightRepoInit      = "Inicializando repositorio de vuelos"
+	LogFlightRepoInitOK    = "Repositorio de vuelos inicializado"
+	LogFlightRepoInitError = "Error inicializando repositorio de vuelos"
+)

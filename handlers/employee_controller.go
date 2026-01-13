@@ -431,28 +431,6 @@ func (h handler) GetEmployeeByID() gin.HandlerFunc {
 	}
 }
 
-// isValidUUID verifica si un string es un UUID válido
-func isValidUUID(str string) bool {
-	// UUID tiene formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 caracteres con guiones)
-	if len(str) != 36 {
-		return false
-	}
-	// Verificar posiciones de los guiones
-	if str[8] != '-' || str[13] != '-' || str[18] != '-' || str[23] != '-' {
-		return false
-	}
-	// Verificar que los demás caracteres sean hexadecimales
-	for i, c := range str {
-		if i == 8 || i == 13 || i == 18 || i == 23 {
-			continue // Saltar guiones
-		}
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-			return false
-		}
-	}
-	return true
-}
-
 // UpdateEmployee godoc
 // @Summary      Actualizar información de empleado
 // @Description  Actualiza la información general de un empleado (nombre, airline, bp, fechas, rol, active).
