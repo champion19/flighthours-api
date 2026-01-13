@@ -455,30 +455,3 @@ func (h *handler) DeactivateDailyLogbook() gin.HandlerFunc {
 		c.JSON(http.StatusOK, response)
 	}
 }
-
-// resolveID resolves the input ID to UUID and response ID
-// It accepts both UUID format and obfuscated ID format
-// Returns: (uuid, responseID) where responseID is always the obfuscated format
-func (h *handler) resolveID(inputID string) (uuid string, responseID string) {
-	if isValidUUID(inputID) {
-		// Input is a direct UUID
-		uuid = inputID
-		// Encode UUID for response (maintain consistency)
-		encodedID, err := h.EncodeID(inputID)
-		if err != nil {
-			// If encoding fails, use the original UUID
-			responseID = inputID
-		} else {
-			responseID = encodedID
-		}
-	} else {
-		// Input is an obfuscated ID, decode it
-		decodedUUID, err := h.DecodeID(inputID)
-		if err != nil {
-			return "", ""
-		}
-		uuid = decodedUUID
-		responseID = inputID
-	}
-	return uuid, responseID
-}

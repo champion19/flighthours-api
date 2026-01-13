@@ -448,6 +448,15 @@ var (
 	ErrAirlineRouteInvalidAirline = errors.New("ERR_AIRLINE_ROUTE_INVALID_AIRLINE")
 )
 
+// Flight Management Errors (VUE_*)
+var (
+	ErrFlightNotFound     = errors.New("ERR_FLIGHT_NOT_FOUND")
+	ErrFlightCannotSave   = errors.New("ERR_FLIGHT_CANNOT_SAVE")
+	ErrFlightCannotUpdate = errors.New("ERR_FLIGHT_CANNOT_UPDATE")
+	ErrFlightUnauthorized = errors.New("ERR_FLIGHT_UNAUTHORIZED")
+	ErrFlightInvalidRoute = errors.New("ERR_FLIGHT_INVALID_ROUTE")
+)
+
 // AirlineRoute Module (RUT_AIR_*) - Ruta Aerolinea
 const (
 	// ========================================
@@ -480,4 +489,37 @@ const (
 	// ========================================
 	MsgAirlineRouteInvalidRoute   = "RUT_AIR_VAL_ERR_04301" // Error - Ruta inválida
 	MsgAirlineRouteInvalidAirline = "RUT_AIR_VAL_ERR_04302" // Error - Aerolínea inválida
+)
+
+// Flight Module (VUE_*) - Vuelo
+const (
+	// ========================================
+	// Consultar (HU48) - VUE_CON_*
+	// ========================================
+	MsgFlightGetOK    = "VUE_CON_EXI_04801" // Éxito - Vuelo consultado exitosamente
+	MsgFlightNotFound = "VUE_CON_ERR_04803" // Error - Vuelo no encontrado
+	MsgFlightGetErr   = "VUE_CON_ERR_04804" // Error - Error técnico al consultar
+
+	// ========================================
+	// Editar (HU49) - VUE_EDI_*
+	// ========================================
+	MsgFlightUpdated     = "VUE_EDI_EXI_04901" // Éxito - Vuelo actualizado
+	MsgFlightUpdateError = "VUE_EDI_ERR_04904" // Error - Error técnico al editar
+
+	// ========================================
+	// Registrar (HU50) - VUE_REG_*
+	// ========================================
+	MsgFlightCreated   = "VUE_REG_EXI_05001" // Éxito - Vuelo registrado
+	MsgFlightSaveError = "VUE_REG_ERR_05004" // Error - Error técnico al registrar
+
+	// ========================================
+	// Listar - VUE_LIST_*
+	// ========================================
+	MsgFlightListOK    = "VUE_LIST_EXI_04800" // Éxito - Lista de vuelos obtenida
+	MsgFlightListError = "VUE_LIST_ERR_04802" // Error - Error al listar vuelos
+
+	// ========================================
+	// Validaciones - VUE_VAL_*
+	// ========================================
+	MsgFlightInvalidRoute = "VUE_VAL_ERR_04805" // Error - Ruta de aerolínea inválida
 )
