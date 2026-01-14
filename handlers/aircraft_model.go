@@ -9,6 +9,8 @@ type AircraftModelResponse struct {
 	ModelName        string `json:"model_name"`
 	AircraftTypeName string `json:"aircraft_type_name"`
 	EngineTypeName   string `json:"engine_type_name,omitempty"`
+	Family           string `json:"family"`
+	Manufacturer     string `json:"manufacturer,omitempty"`
 	Links            []Link `json:"_links,omitempty"`
 }
 
@@ -20,6 +22,8 @@ func FromDomainAircraftModel(model *domain.AircraftModel, encodedID string) Airc
 		ModelName:        model.ModelName,
 		AircraftTypeName: model.AircraftTypeName,
 		EngineTypeName:   model.EngineTypeName,
+		Family:           model.Family,
+		Manufacturer:     model.Manufacturer,
 	}
 }
 
@@ -50,6 +54,8 @@ func ToAircraftModelListResponse(models []domain.AircraftModel, encodeFunc func(
 			ModelName:        model.ModelName,
 			AircraftTypeName: model.AircraftTypeName,
 			EngineTypeName:   model.EngineTypeName,
+			Family:           model.Family,
+			Manufacturer:     model.Manufacturer,
 		}
 		// Add HATEOAS links to each model
 		if baseURL != "" {

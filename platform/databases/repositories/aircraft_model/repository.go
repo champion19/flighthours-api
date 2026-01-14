@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	QueryByID            = "SELECT id, model_name, aircraft_type_name, engine_type_name FROM aircraft_model WHERE id = ? LIMIT 1"
-	QueryGetAll          = "SELECT id, model_name, aircraft_type_name, engine_type_name FROM aircraft_model ORDER BY model_name"
-	QueryGetByEngineType = "SELECT id, model_name, aircraft_type_name, engine_type_name FROM aircraft_model WHERE engine_type_name = ? ORDER BY model_name"
+	QueryByID            = "SELECT id, model_name, aircraft_type_name, engine_type_name, family, manufacturer FROM aircraft_model WHERE id = ? LIMIT 1"
+	QueryGetAll          = "SELECT id, model_name, aircraft_type_name, engine_type_name, family, manufacturer FROM aircraft_model ORDER BY model_name"
+	QueryGetByEngineType = "SELECT id, model_name, aircraft_type_name, engine_type_name, family, manufacturer FROM aircraft_model WHERE engine_type_name = ? ORDER BY model_name"
 )
 
 var log logger.Logger = logger.NewSlogLogger()
@@ -59,12 +59,15 @@ func NewAircraftModelRepository(db *sql.DB) (*repository, error) {
 func (r *repository) GetAircraftModelByID(ctx context.Context, id string) (*domain.AircraftModel, error) {
 	var model domain.AircraftModel
 	var engineTypeName sql.NullString
+	var manufacturer sql.NullString
 
 	err := r.stmtGetByID.QueryRowContext(ctx, id).Scan(
 		&model.ID,
 		&model.ModelName,
 		&model.AircraftTypeName,
 		&engineTypeName,
+		&model.Family,
+		&manufacturer,
 	)
 
 	if err != nil {
@@ -76,6 +79,9 @@ func (r *repository) GetAircraftModelByID(ctx context.Context, id string) (*doma
 
 	if engineTypeName.Valid {
 		model.EngineTypeName = engineTypeName.String
+	}
+	if manufacturer.Valid {
+		model.Manufacturer = manufacturer.String
 	}
 
 	return &model, nil
@@ -102,18 +108,24 @@ func (r *repository) ListAircraftModels(ctx context.Context, filters map[string]
 	for rows.Next() {
 		var model domain.AircraftModel
 		var engineTypeName sql.NullString
+		var manufacturer sql.NullString
 
 		if err := rows.Scan(
 			&model.ID,
 			&model.ModelName,
 			&model.AircraftTypeName,
 			&engineTypeName,
+			&model.Family,
+			&manufacturer,
 		); err != nil {
 			return nil, err
 		}
 
 		if engineTypeName.Valid {
 			model.EngineTypeName = engineTypeName.String
+		}
+		if manufacturer.Valid {
+			model.Manufacturer = manufacturer.String
 		}
 
 		models = append(models, model)

@@ -443,6 +443,34 @@ var messageCodeToHTTPStatus = map[string]int{
 	// Validaciones
 	"RUT_AIR_VAL_ERR_04301": http.StatusBadRequest, // 400 - Ruta inválida
 	"RUT_AIR_VAL_ERR_04302": http.StatusBadRequest, // 400 - Aerolínea inválida
+
+	// ========================================
+	// Flight Module (VUE_*) - Vuelo
+	// ========================================
+	// Consultar (HU48)
+	"VUE_CON_EXI_04801": http.StatusOK,                  // 200 - Vuelo consultado exitosamente
+	"VUE_CON_ERR_04802": http.StatusBadRequest,          // 400 - Vuelo no seleccionado
+	"VUE_CON_ERR_04803": http.StatusNotFound,            // 404 - Vuelo no encontrado
+	"VUE_CON_ERR_04804": http.StatusInternalServerError, // 500 - Error técnico al consultar
+
+	// Editar (HU49)
+	"VUE_EDI_EXI_04901": http.StatusOK,                  // 200 - Vuelo actualizado exitosamente
+	"VUE_EDI_ERR_04902": http.StatusBadRequest,          // 400 - Vuelo no seleccionado
+	"VUE_EDI_ERR_04903": http.StatusBadRequest,          // 400 - Datos inválidos
+	"VUE_EDI_ERR_04904": http.StatusInternalServerError, // 500 - Error técnico al editar
+
+	// Registrar (HU50)
+	"VUE_REG_EXI_05001": http.StatusCreated,             // 201 - Vuelo registrado exitosamente
+	"VUE_REG_ERR_05002": http.StatusBadRequest,          // 400 - Campos requeridos incompletos
+	"VUE_REG_ERR_05003": http.StatusBadRequest,          // 400 - Formato inválido
+	"VUE_REG_ERR_05004": http.StatusInternalServerError, // 500 - Error técnico al registrar
+
+	// Listar
+	"VUE_LIST_EXI_04800": http.StatusOK,                  // 200 - Lista de vuelos obtenida
+	"VUE_LIST_ERR_04802": http.StatusInternalServerError, // 500 - Error al listar vuelos
+
+	// Validaciones
+	"VUE_VAL_ERR_04805": http.StatusBadRequest, // 400 - Ruta de aerolínea inválida
 }
 
 // GetHTTPStatus returns the HTTP status for a message code
