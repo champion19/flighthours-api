@@ -4,14 +4,15 @@ import (
 	"context"
 	"database/sql"
 )
+
 type SQLTX struct {
-	tx     *sql.Tx
+	Tx     *sql.Tx
 	closed bool
 }
 
 func NewSQLTx(tx *sql.Tx) *SQLTX {
 	return &SQLTX{
-		tx:     tx,
+		Tx:     tx,
 		closed: false,
 	}
 }
@@ -22,7 +23,7 @@ func (t *SQLTX) Commit() error {
 		panic("sqlTx: commit on closed transaction")
 	}
 	t.closed = true
-	return t.tx.Commit()
+	return t.Tx.Commit()
 }
 
 // Rollback rolls back the transaction
@@ -31,15 +32,15 @@ func (t *SQLTX) Rollback() error {
 		panic("sqlTx: rollback on closed transaction")
 	}
 	t.closed = true
-	return t.tx.Rollback()
+	return t.Tx.Rollback()
 }
 
 // ExecContext executes a query within the transaction
 func (t *SQLTX) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	return t.tx	.ExecContext(ctx, query, args...)
+	return t.Tx.ExecContext(ctx, query, args...)
 }
 
 // QueryRowContext queries a single row within the transaction
 func (t *SQLTX) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
-	return t.tx.QueryRowContext(ctx, query, args...)
+	return t.Tx.QueryRowContext(ctx, query, args...)
 }

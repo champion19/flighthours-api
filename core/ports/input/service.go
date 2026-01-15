@@ -148,3 +148,21 @@ type AirlineRouteService interface {
 	ActivateAirlineRoute(ctx context.Context, id string) error
 	DeactivateAirlineRoute(ctx context.Context, id string) error
 }
+
+// DailyLogbookDetailService defines the interface for daily logbook detail business operations
+// This is the CORE service for flight segment tracking
+type DailyLogbookDetailService interface {
+	BeginTx(ctx context.Context) (output.Tx, error)
+
+	// DailyLogbookDetail - queries
+	GetDailyLogbookDetailByID(ctx context.Context, id string) (*domain.DailyLogbookDetail, error)
+	ListDailyLogbookDetailsByLogbook(ctx context.Context, logbookID string) ([]domain.DailyLogbookDetail, error)
+
+	// DailyLogbookDetail - operations
+	CreateDailyLogbookDetail(ctx context.Context, detail domain.DailyLogbookDetail) error
+	UpdateDailyLogbookDetail(ctx context.Context, detail domain.DailyLogbookDetail) error
+	DeleteDailyLogbookDetail(ctx context.Context, id string) error
+
+	// DailyLogbookDetail - validations
+	ValidateTimeSequence(outTime, takeoffTime, landingTime, inTime string) error
+}

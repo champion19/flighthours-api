@@ -62,6 +62,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.AircraftModelInteractor,
 		dependencies.RouteInteractor,
 		dependencies.AirlineRouteInteractor,
+		dependencies.DailyLogbookDetailInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -252,6 +253,23 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// PATCH /airline-routes/:id/deactivate - Deactivate an airline route (HU41)
 		protected.PATCH("/airline-routes/:id/deactivate", handler.DeactivateAirlineRoute())
+
+		// ---- Daily Logbook Details Management (Protected - HU15-HU18) ----
+		// GET /daily-logbook-details/:id - Get a specific detail (HU15)
+		protected.GET("/daily-logbook-details/:id", handler.GetDailyLogbookDetail())
+
+		// PUT /daily-logbook-details/:id - Update a specific detail (HU17)
+		protected.PUT("/daily-logbook-details/:id", handler.UpdateDailyLogbookDetail())
+
+		// DELETE /daily-logbook-details/:id - Delete a specific detail (HU18)
+		protected.DELETE("/daily-logbook-details/:id", handler.DeleteDailyLogbookDetail())
+
+		// POST /daily-logbooks/:id/details - Add a new detail to logbook (HU16)
+		protected.POST("/daily-logbooks/:id/details", handler.CreateDailyLogbookDetail())
+
+		// GET /daily-logbooks/:id/details - List all details for a logbook
+		//el id debe ser el id del logbook , no el id del detail, se debe tener en cuenta que el employee_id es el id del employee que esta autenticado y que el detail es un registro de la tabla daily_logbook_details
+		protected.GET("/daily-logbooks/:id/details", handler.ListDailyLogbookDetails())
 	}
 
 	dependencies.Logger.Success(logger.LogRouteConfigured)

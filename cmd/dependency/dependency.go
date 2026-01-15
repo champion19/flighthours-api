@@ -18,6 +18,7 @@ import (
 	airlineRouteRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline_route"
 	airportRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airport"
 	dailyLogbookRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook"
+	dailyLogbookDetailRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook_detail"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
 	messageRepo "github.com/champion19/flighthours-api/platform/databases/repositories/message"
 	routeRepo "github.com/champion19/flighthours-api/platform/databases/repositories/route"
@@ -45,6 +46,7 @@ type Dependencies struct {
 	AircraftModelInteractor        *interactor.AircraftModelInteractor
 	RouteInteractor                *interactor.RouteInteractor
 	AirlineRouteInteractor         *interactor.AirlineRouteInteractor
+	DailyLogbookDetailInteractor   *interactor.DailyLogbookDetailInteractor
 	JWTValidator                   *jwt.JWKSValidator
 }
 
@@ -203,6 +205,17 @@ func Init() (*Dependencies, error) {
 	airlineRouteService := services.NewAirlineRouteService(airlineRouteRepository)
 	airlineRouteInteractor := interactor.NewAirlineRouteInteractor(airlineRouteService)
 
+	// Inicializar repositorio y servicio de detalles de bitácora diaria
+	dailyLogbookDetailRepository, err := dailyLogbookDetailRepo.NewDailyLogbookDetailRepository(db)
+	if err != nil {
+		log.Error(logger.LogDailyLogbookDetailRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogDailyLogbookDetailRepoInitOK)
+
+	dailyLogbookDetailService := services.NewDailyLogbookDetailService(dailyLogbookDetailRepository)
+	dailyLogbookDetailInteractor := interactor.NewDailyLogbookDetailInteractor(dailyLogbookDetailService, dailyLogbookService)
+
 	// JWKS Validator (JWT signature and expiration validation)
 	// This fetches Keycloak's public keys for local token validation
 	var jwtValidator *jwt.JWKSValidator
@@ -239,6 +252,7 @@ func Init() (*Dependencies, error) {
 		AircraftModelInteractor:        aircraftModelInteractor,
 		RouteInteractor:                routeInteractor,
 		AirlineRouteInteractor:         airlineRouteInteractor,
+		DailyLogbookDetailInteractor:   dailyLogbookDetailInteractor,
 		JWTValidator:                   jwtValidator,
 	}, nil
 }
