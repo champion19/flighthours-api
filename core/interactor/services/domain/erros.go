@@ -448,13 +448,17 @@ var (
 	ErrAirlineRouteInvalidAirline = errors.New("ERR_AIRLINE_ROUTE_INVALID_AIRLINE")
 )
 
-// Flight Management Errors (VUE_*)
+// Flight Management Errors (VUE_*) - Also used for DailyLogbookDetail
 var (
-	ErrFlightNotFound     = errors.New("ERR_FLIGHT_NOT_FOUND")
-	ErrFlightCannotSave   = errors.New("ERR_FLIGHT_CANNOT_SAVE")
-	ErrFlightCannotUpdate = errors.New("ERR_FLIGHT_CANNOT_UPDATE")
-	ErrFlightUnauthorized = errors.New("ERR_FLIGHT_UNAUTHORIZED")
-	ErrFlightInvalidRoute = errors.New("ERR_FLIGHT_INVALID_ROUTE")
+	ErrFlightNotFound            = errors.New("ERR_FLIGHT_NOT_FOUND")
+	ErrFlightCannotSave          = errors.New("ERR_FLIGHT_CANNOT_SAVE")
+	ErrFlightCannotUpdate        = errors.New("ERR_FLIGHT_CANNOT_UPDATE")
+	ErrFlightCannotDelete        = errors.New("ERR_FLIGHT_CANNOT_DELETE")
+	ErrFlightUnauthorized        = errors.New("ERR_FLIGHT_UNAUTHORIZED")
+	ErrFlightInvalidRoute        = errors.New("ERR_FLIGHT_INVALID_ROUTE")
+	ErrFlightInvalidLogbook      = errors.New("ERR_FLIGHT_INVALID_LOGBOOK")
+	ErrFlightInvalidAircraft     = errors.New("ERR_FLIGHT_INVALID_AIRCRAFT")
+	ErrFlightInvalidTimeSequence = errors.New("ERR_FLIGHT_INVALID_TIME_SEQUENCE")
 )
 
 // AirlineRoute Module (RUT_AIR_*) - Ruta Aerolinea
@@ -521,5 +525,19 @@ const (
 	// ========================================
 	// Validaciones - VUE_VAL_*
 	// ========================================
-	MsgFlightInvalidRoute = "VUE_VAL_ERR_04805" // Error - Ruta de aerolínea inválida
+	MsgFlightInvalidRoute        = "VUE_VAL_ERR_04805" // Error - Ruta de aerolínea inválida
+	MsgFlightInvalidLogbook      = "VUE_VAL_ERR_04806" // Error - Bitácora inválida
+	MsgFlightInvalidAircraft     = "VUE_VAL_ERR_04807" // Error - Matrícula de aeronave inválida
+	MsgFlightInvalidTimeSequence = "VUE_VAL_ERR_04808" // Error - Secuencia de tiempos inválida (out < takeoff < landing < in)
+
+	// ========================================
+	// Eliminar (HU18) - VUE_DEL_*
+	// ========================================
+	MsgFlightDeleted     = "VUE_DEL_EXI_01801" // Éxito - Vuelo eliminado exitosamente
+	MsgFlightDeleteError = "VUE_DEL_ERR_01804" // Error - Error técnico al eliminar
+
+	// ========================================
+	// Autorización - VUE_AUTH_*
+	// ========================================
+	MsgFlightUnauthorized = "VUE_AUTH_ERR_00001" // Error - No autorizado para este vuelo
 )

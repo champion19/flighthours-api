@@ -745,7 +745,35 @@ const (
 	LogFlightUpdate        = "Actualizando vuelo"
 	LogFlightUpdateOK      = "Vuelo actualizado exitosamente"
 	LogFlightUpdateError   = "Error actualizando vuelo"
+	LogFlightDelete        = "Eliminando vuelo"
+	LogFlightDeleteOK      = "Vuelo eliminado exitosamente"
+	LogFlightDeleteError   = "Error eliminando vuelo"
 	LogFlightRepoInit      = "Inicializando repositorio de vuelos"
 	LogFlightRepoInitOK    = "Repositorio de vuelos inicializado"
 	LogFlightRepoInitError = "Error inicializando repositorio de vuelos"
+)
+
+// ============================================
+// DAILY LOGBOOK DETAIL INTERACTOR
+// ============================================
+const (
+	LogDailyLogbookDetailGet           = "Obteniendo información de detalle de bitácora"
+	LogDailyLogbookDetailGetOK         = "Detalle de bitácora obtenido exitosamente"
+	LogDailyLogbookDetailGetError      = "Error obteniendo detalle de bitácora"
+	LogDailyLogbookDetailNotFound      = "Detalle de bitácora no encontrado"
+	LogDailyLogbookDetailList          = "Listando detalles de bitácora"
+	LogDailyLogbookDetailListOK        = "Detalles de bitácora listados exitosamente"
+	LogDailyLogbookDetailListError     = "Error listando detalles de bitácora"
+	LogDailyLogbookDetailCreate        = "Creando detalle de bitácora"
+	LogDailyLogbookDetailCreateOK      = "Detalle de bitácora creado exitosamente"
+	LogDailyLogbookDetailCreateError   = "Error creando detalle de bitácora"
+	LogDailyLogbookDetailUpdate        = "Actualizando detalle de bitácora"
+	LogDailyLogbookDetailUpdateOK      = "Detalle de bitácora actualizado exitosamente"
+	LogDailyLogbookDetailUpdateError   = "Error actualizando detalle de bitácora"
+	LogDailyLogbookDetailDelete        = "Eliminando detalle de bitácora"
+	LogDailyLogbookDetailDeleteOK      = "Detalle de bitácora eliminado exitosamente"
+	LogDailyLogbookDetailDeleteError   = "Error eliminando detalle de bitácora"
+	LogDailyLogbookDetailRepoInit      = "Inicializando repositorio de detalles de bitácora"
+	LogDailyLogbookDetailRepoInitOK    = "Repositorio de detalles de bitácora inicializado"
+	LogDailyLogbookDetailRepoInitError = "Error inicializando repositorio de detalles de bitácora"
 )

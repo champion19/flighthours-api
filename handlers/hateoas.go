@@ -754,3 +754,67 @@ func BuildAirlineRouteStatusLinks(baseURL string, airlineRouteID string, isActiv
 
 	return links
 }
+
+// ============================================================================
+// DAILY LOGBOOK DETAIL HATEOAS LINKS
+// ============================================================================
+
+// BuildDailyLogbookDetailLinks construye links HATEOAS para un detalle de bitácora
+// Retorna un mapa para usar directamente en el DTO response
+func BuildDailyLogbookDetailLinks(c *gin.Context, detailID string) map[string]string {
+	baseURL := GetBaseURL(c)
+	resourceURL := BuildResourceURL(baseURL, "daily-logbook-details", detailID)
+
+	return map[string]string{
+		"self":   resourceURL,
+		"update": resourceURL,
+		"delete": resourceURL,
+	}
+}
+
+// BuildDailyLogbookDetailLinksArray construye links HATEOAS como array
+func BuildDailyLogbookDetailLinksArray(baseURL string, detailID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "daily-logbook-details", detailID)
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "delete",
+			Method: "DELETE",
+		},
+	}
+}
+
+// BuildDailyLogbookDetailListLinks construye links para la lista de detalles de una bitácora
+func BuildDailyLogbookDetailListLinks(baseURL string, logbookID string) []Link {
+	logbookURL := BuildResourceURL(baseURL, "daily-logbooks", logbookID)
+	detailsURL := logbookURL + "/details"
+
+	return []Link{
+		{
+			Href:   detailsURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   detailsURL,
+			Rel:    "create",
+			Method: "POST",
+		},
+		{
+			Href:   logbookURL,
+			Rel:    "logbook",
+			Method: "GET",
+		},
+	}
+}

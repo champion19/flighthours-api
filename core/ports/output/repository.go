@@ -119,3 +119,18 @@ type AirlineRouteRepository interface {
 	// AirlineRoute operations - transactional
 	UpdateAirlineRouteStatus(ctx context.Context, tx Tx, id string, status bool) error
 }
+
+// DailyLogbookDetailRepository defines the interface for daily logbook detail data persistence
+// This is the CORE repository for flight segment tracking
+type DailyLogbookDetailRepository interface {
+	BeginTx(ctx context.Context) (Tx, error)
+
+	// DailyLogbookDetail operations - read
+	GetDailyLogbookDetailByID(ctx context.Context, id string) (*domain.DailyLogbookDetail, error)
+	ListDailyLogbookDetailsByLogbook(ctx context.Context, logbookID string) ([]domain.DailyLogbookDetail, error)
+
+	// DailyLogbookDetail operations - transactional
+	SaveDailyLogbookDetail(ctx context.Context, tx Tx, detail domain.DailyLogbookDetail) error
+	UpdateDailyLogbookDetail(ctx context.Context, tx Tx, detail domain.DailyLogbookDetail) error
+	DeleteDailyLogbookDetail(ctx context.Context, tx Tx, id string) error
+}
