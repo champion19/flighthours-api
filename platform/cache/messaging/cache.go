@@ -471,6 +471,18 @@ var messageCodeToHTTPStatus = map[string]int{
 
 	// Validaciones
 	"VUE_VAL_ERR_04805": http.StatusBadRequest, // 400 - Ruta de aerolínea inválida
+	"VUE_VAL_ERR_04806": http.StatusBadRequest, // 400 - Bitácora inválida
+	"VUE_VAL_ERR_04807": http.StatusBadRequest, // 400 - Matrícula de aeronave inválida
+	"VUE_VAL_ERR_04808": http.StatusBadRequest, // 400 - Secuencia de tiempos inválida
+
+	// Eliminar (HU18)
+	"VUE_DEL_EXI_01801": http.StatusOK,                  // 200 - Vuelo eliminado exitosamente
+	"VUE_DEL_ERR_01802": http.StatusBadRequest,          // 400 - Vuelo no seleccionado
+	"VUE_DEL_ERR_01803": http.StatusNotFound,            // 404 - Vuelo no existe o ya eliminado
+	"VUE_DEL_ERR_01804": http.StatusInternalServerError, // 500 - Error técnico al eliminar
+
+	// Autorización
+	"VUE_AUTH_ERR_00001": http.StatusForbidden, // 403 - No autorizado para este vuelo
 }
 
 // GetHTTPStatus returns the HTTP status for a message code
