@@ -5,7 +5,6 @@ import domain "github.com/champion19/flighthours-api/core/interactor/services/do
 // AircraftModelResponse - Response DTO for aircraft model data
 type AircraftModelResponse struct {
 	ID               string `json:"id"`
-	UUID             string `json:"uuid"`
 	ModelName        string `json:"model_name"`
 	AircraftTypeName string `json:"aircraft_type_name"`
 	EngineTypeName   string `json:"engine_type_name,omitempty"`
@@ -18,7 +17,6 @@ type AircraftModelResponse struct {
 func FromDomainAircraftModel(model *domain.AircraftModel, encodedID string) AircraftModelResponse {
 	return AircraftModelResponse{
 		ID:               encodedID,
-		UUID:             model.ID,
 		ModelName:        model.ModelName,
 		AircraftTypeName: model.AircraftTypeName,
 		EngineTypeName:   model.EngineTypeName,
@@ -50,7 +48,6 @@ func ToAircraftModelListResponse(models []domain.AircraftModel, encodeFunc func(
 		}
 		modelResp := AircraftModelResponse{
 			ID:               encodedID,
-			UUID:             model.ID,
 			ModelName:        model.ModelName,
 			AircraftTypeName: model.AircraftTypeName,
 			EngineTypeName:   model.EngineTypeName,

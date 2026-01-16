@@ -26,7 +26,6 @@ func (m *MessageRequest) Sanitize() {
 // MessageResponse represents the response payload for a message
 type MessageResponse struct {
 	ID       string             `json:"id"`
-	UUID     string             `json:"uuid"`
 	Code     string             `json:"code"`
 	Type     domain.MessageType `json:"type"`
 	Category string             `json:"category"`
@@ -47,7 +46,6 @@ type MessageListResponse struct {
 // MessageCreatedResponse represents the response for message creation
 type MessageCreatedResponse struct {
 	ID    string `json:"id"`
-	UUID  string `json:"uuid"`
 	Links []Link `json:"_links"`
 }
 
@@ -84,7 +82,6 @@ func (m MessageRequest) ToDomain() domain.Message {
 func ToMessageResponse(m *domain.Message, encodedID string) MessageResponse {
 	return MessageResponse{
 		ID:       encodedID,
-		UUID:     m.ID,
 		Code:     m.Code,
 		Type:     m.Type,
 		Category: m.Category,

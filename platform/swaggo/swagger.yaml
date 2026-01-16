@@ -434,7 +434,7 @@ paths:
       description: Returns airline information by ID (accepts both UUID and obfuscated
         ID)
       parameters:
-      - description: Airline ID (UUID or obfuscated)
+      - description: Airline ID (obfuscated ID)
         in: path
         name: id
         required: true
@@ -472,7 +472,7 @@ paths:
       description: Sets airline status to active (accepts both UUID and obfuscated
         ID)
       parameters:
-      - description: Airline ID (UUID or obfuscated)
+      - description: Airline ID (obfuscated ID)
         in: path
         name: id
         required: true
@@ -510,7 +510,7 @@ paths:
       description: Sets airline status to inactive (accepts both UUID and obfuscated
         ID)
       parameters:
-      - description: Airline ID (UUID or obfuscated)
+      - description: Airline ID (obfuscated ID)
         in: path
         name: id
         required: true
@@ -573,7 +573,7 @@ paths:
       description: Returns airport information by ID (accepts both UUID and obfuscated
         ID)
       parameters:
-      - description: Airport ID (UUID or obfuscated)
+      - description: Airport ID (obfuscated ID)
         in: path
         name: id
         required: true
@@ -611,7 +611,7 @@ paths:
       description: Sets airport status to active (accepts both UUID and obfuscated
         ID)
       parameters:
-      - description: Airport ID (UUID or obfuscated)
+      - description: Airport ID (obfuscated ID)
         in: path
         name: id
         required: true
@@ -649,7 +649,7 @@ paths:
       description: Sets airport status to inactive (accepts both UUID and obfuscated
         ID)
       parameters:
-      - description: Airport ID (UUID or obfuscated)
+      - description: Airport ID (obfuscated ID)
         in: path
         name: id
         required: true

@@ -777,3 +777,35 @@ const (
 	LogDailyLogbookDetailRepoInitOK    = "Repositorio de detalles de bitácora inicializado"
 	LogDailyLogbookDetailRepoInitError = "Error inicializando repositorio de detalles de bitácora"
 )
+
+// ============================================
+// ENGINE INTERACTOR
+// ============================================
+const (
+	LogEngineGet           = "Obteniendo información de motor"
+	LogEngineGetOK         = "Motor obtenido exitosamente"
+	LogEngineGetError      = "Error obteniendo motor"
+	LogEngineNotFound      = "Motor no encontrado"
+	LogEngineList          = "Listando motores"
+	LogEngineListOK        = "Motores listados exitosamente"
+	LogEngineListError     = "Error listando motores"
+	LogEngineRepoInit      = "Inicializando repositorio de motores"
+	LogEngineRepoInitOK    = "Repositorio de motores inicializado"
+	LogEngineRepoInitError = "Error inicializando repositorio de motores"
+)
+
+// ============================================
+// MANUFACTURER INTERACTOR
+// ============================================
+const (
+	LogManufacturerGet           = "Obteniendo información de fabricante"
+	LogManufacturerGetOK         = "Fabricante obtenido exitosamente"
+	LogManufacturerGetError      = "Error obteniendo fabricante"
+	LogManufacturerNotFound      = "Fabricante no encontrado"
+	LogManufacturerList          = "Listando fabricantes"
+	LogManufacturerListOK        = "Fabricantes listados exitosamente"
+	LogManufacturerListError     = "Error listando fabricantes"
+	LogManufacturerRepoInit      = "Inicializando repositorio de fabricantes"
+	LogManufacturerRepoInitOK    = "Repositorio de fabricantes inicializado"
+	LogManufacturerRepoInitError = "Error inicializando repositorio de fabricantes"
+)

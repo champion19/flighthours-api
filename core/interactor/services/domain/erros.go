@@ -126,6 +126,16 @@ var (
 	ErrAircraftModelNotFound = errors.New("ERR_AIRCRAFT_MODEL_NOT_FOUND")
 )
 
+// Engine Management Errors (MOT_*)
+var (
+	ErrEngineNotFound = errors.New("ERR_ENGINE_NOT_FOUND")
+)
+
+// Manufacturer Management Errors (FAB_*)
+var (
+	ErrManufacturerNotFound = errors.New("ERR_MANUFACTURER_NOT_FOUND")
+)
+
 // ============================================
 // MESSAGE CODES - Constants for use in code
 // ============================================
@@ -356,6 +366,38 @@ const (
 	// ========================================
 	MsgAircraftModelListOK    = "MOD_AM_LIST_EXI_04301" // Éxito - Lista de modelos/tipos obtenida
 	MsgAircraftModelListError = "MOD_AM_LIST_ERR_04302" // Error - Error al listar modelos/tipos
+)
+
+// Engine Module (MOT_*) - Motor
+const (
+	// ========================================
+	// Consultar (HU37) - MOT_CON_*
+	// ========================================
+	MsgEngineGetOK    = "MOT_CON_EXI_03701" // Éxito - Motor consultado exitosamente
+	MsgEngineNotFound = "MOT_CON_ERR_03702" // Error - Motor no encontrado
+	MsgEngineGetErr   = "MOT_CON_ERR_03703" // Error - Error técnico al consultar
+
+	// ========================================
+	// Listar - MOT_LIST_*
+	// ========================================
+	MsgEngineListOK    = "MOT_LIST_EXI_03704" // Éxito - Lista de motores obtenida
+	MsgEngineListError = "MOT_LIST_ERR_03705" // Error - Error al listar motores
+)
+
+// Manufacturer Module (FAB_*) - Fabricante
+const (
+	// ========================================
+	// Consultar (HU31) - FAB_CON_*
+	// ========================================
+	MsgManufacturerGetOK    = "FAB_CON_EXI_03101" // Éxito - Fabricante consultado exitosamente
+	MsgManufacturerNotFound = "FAB_CON_ERR_03102" // Error - Fabricante no encontrado
+	MsgManufacturerGetErr   = "FAB_CON_ERR_03103" // Error - Error técnico al consultar
+
+	// ========================================
+	// Listar - FAB_LIST_*
+	// ========================================
+	MsgManufacturerListOK    = "FAB_LIST_EXI_03104" // Éxito - Lista de fabricantes obtenida
+	MsgManufacturerListError = "FAB_LIST_ERR_03105" // Error - Error al listar fabricantes
 )
 
 // Route Management Errors (RUT_*)

@@ -5,7 +5,6 @@ import domain "github.com/champion19/flighthours-api/core/interactor/services/do
 // RouteResponse - Response DTO for route data
 type RouteResponse struct {
 	ID                     string `json:"id"`
-	UUID                   string `json:"uuid"`
 	OriginAirportID        string `json:"origin_airport_id"`
 	OriginIataCode         string `json:"origin_iata_code"`
 	OriginAirportName      string `json:"origin_airport_name"`
@@ -20,15 +19,14 @@ type RouteResponse struct {
 	Links                  []Link `json:"_links,omitempty"`
 }
 
-// FromDomainRoute converts domain.Route to RouteResponse with encoded ID
-func FromDomainRoute(route *domain.Route, encodedID string) RouteResponse {
+// FromDomainRoute converts domain.Route to RouteResponse with encoded IDs
+func FromDomainRoute(route *domain.Route, encodedID, encodedOriginAirportID, encodedDestAirportID string) RouteResponse {
 	return RouteResponse{
 		ID:                     encodedID,
-		UUID:                   route.ID,
-		OriginAirportID:        route.OriginAirportID,
+		OriginAirportID:        encodedOriginAirportID,
 		OriginIataCode:         route.OriginIataCode,
 		OriginAirportName:      route.OriginAirportName,
-		DestinationAirportID:   route.DestinationAirportID,
+		DestinationAirportID:   encodedDestAirportID,
 		DestinationIataCode:    route.DestinationIataCode,
 		DestinationAirportName: route.DestinationAirportName,
 		OriginCountry:          route.OriginCountry,
@@ -57,16 +55,22 @@ func ToRouteListResponse(routes []domain.Route, encodeFunc func(string) (string,
 	for _, route := range routes {
 		encodedID, err := encodeFunc(route.ID)
 		if err != nil {
-			// If encoding fails, use the original UUID
 			encodedID = route.ID
+		}
+		encodedOriginAirportID, err := encodeFunc(route.OriginAirportID)
+		if err != nil {
+			encodedOriginAirportID = route.OriginAirportID
+		}
+		encodedDestAirportID, err := encodeFunc(route.DestinationAirportID)
+		if err != nil {
+			encodedDestAirportID = route.DestinationAirportID
 		}
 		routeResp := RouteResponse{
 			ID:                     encodedID,
-			UUID:                   route.ID,
-			OriginAirportID:        route.OriginAirportID,
+			OriginAirportID:        encodedOriginAirportID,
 			OriginIataCode:         route.OriginIataCode,
 			OriginAirportName:      route.OriginAirportName,
-			DestinationAirportID:   route.DestinationAirportID,
+			DestinationAirportID:   encodedDestAirportID,
 			DestinationIataCode:    route.DestinationIataCode,
 			DestinationAirportName: route.DestinationAirportName,
 			OriginCountry:          route.OriginCountry,

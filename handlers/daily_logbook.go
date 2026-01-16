@@ -9,7 +9,6 @@ import (
 // DailyLogbookResponse - Response DTO for daily logbook data
 type DailyLogbookResponse struct {
 	ID         string `json:"id"`
-	UUID       string `json:"uuid"`
 	LogDate    string `json:"log_date"`
 	EmployeeID string `json:"employee_id"`
 	BookPage   *int   `json:"book_page,omitempty"`
@@ -17,17 +16,16 @@ type DailyLogbookResponse struct {
 	Links      []Link `json:"_links,omitempty"`
 }
 
-// FromDomainDailyLogbook converts domain.DailyLogbook to DailyLogbookResponse with encoded ID
-func FromDomainDailyLogbook(logbook *domain.DailyLogbook, encodedID string) DailyLogbookResponse {
+// FromDomainDailyLogbook converts domain.DailyLogbook to DailyLogbookResponse with encoded IDs
+func FromDomainDailyLogbook(logbook *domain.DailyLogbook, encodedID, encodedEmployeeID string) DailyLogbookResponse {
 	status := "inactive"
 	if logbook.Status {
 		status = "active"
 	}
 	return DailyLogbookResponse{
 		ID:         encodedID,
-		UUID:       logbook.ID,
 		LogDate:    logbook.LogDate.Format("2006-01-02"),
-		EmployeeID: logbook.EmployeeID,
+		EmployeeID: encodedEmployeeID,
 		BookPage:   logbook.BookPage,
 		Status:     status,
 	}
@@ -122,7 +120,11 @@ func ToDailyLogbookListResponse(logbooks []domain.DailyLogbook, encodeFunc func(
 			// If encoding fails, use the original UUID
 			encodedID = logbook.ID
 		}
-		logbookResp := FromDomainDailyLogbook(&logbook, encodedID)
+		encodedEmployeeID, err := encodeFunc(logbook.EmployeeID)
+		if err != nil {
+			encodedEmployeeID = logbook.EmployeeID
+		}
+		logbookResp := FromDomainDailyLogbook(&logbook, encodedID, encodedEmployeeID)
 		// Add HATEOAS links to each logbook
 		if baseURL != "" {
 			logbookResp.Links = BuildDailyLogbookLinks(baseURL, encodedID)

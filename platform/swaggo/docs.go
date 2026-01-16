@@ -75,7 +75,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Airline ID (UUID or obfuscated)",
+                        "description": "Airline ID (obfuscated ID)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -129,7 +129,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Airline ID (UUID or obfuscated)",
+                        "description": "Airline ID (obfuscated ID)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -183,7 +183,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Airline ID (UUID or obfuscated)",
+                        "description": "Airline ID (obfuscated ID)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -275,7 +275,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Airport ID (UUID or obfuscated)",
+                        "description": "Airport ID (obfuscated ID)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -329,7 +329,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Airport ID (UUID or obfuscated)",
+                        "description": "Airport ID (obfuscated ID)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -383,7 +383,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Airport ID (UUID or obfuscated)",
+                        "description": "Airport ID (obfuscated ID)",
                         "name": "id",
                         "in": "path",
                         "required": true

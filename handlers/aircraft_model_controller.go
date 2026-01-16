@@ -13,7 +13,7 @@ import (
 // @Tags         Aircraft Models
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Aircraft Model ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Aircraft Model ID (obfuscated ID)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
@@ -33,32 +33,11 @@ func (h *handler) GetAircraftModelByID() gin.HandlerFunc {
 
 		log.Info(logger.LogAircraftModelGet, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var modelUUID string
-		var responseID string
-
-		// Detect if it's a valid UUID or obfuscated ID
-		if isValidUUID(inputID) {
-			// It's a direct UUID
-			modelUUID = inputID
-			// Encode UUID for response (maintain consistency)
-			encodedID, err := h.EncodeID(inputID)
-			if err != nil {
-				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-				responseID = inputID
-			} else {
-				responseID = encodedID
-			}
-			log.Debug(logger.LogAircraftModelGet, "detected_format", "UUID", "uuid", modelUUID)
-		} else {
-			// It's an obfuscated ID, decode it
-			uuid, err := h.DecodeID(inputID)
-			if err != nil {
-				h.HandleIDDecodingError(c, inputID, err)
-				return
-			}
-			modelUUID = uuid
-			responseID = inputID
-			log.Debug(logger.LogAircraftModelGet, "detected_format", "encoded", "decoded_uuid", modelUUID)
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		modelUUID, responseID := h.resolveID(inputID)
+		if modelUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
 		}
 
 		// Get aircraft model from interactor
