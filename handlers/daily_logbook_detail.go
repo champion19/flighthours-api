@@ -93,7 +93,6 @@ func (r *UpdateDailyLogbookDetailRequest) Sanitize() {
 // DailyLogbookDetailResponse represents the response for a detail
 type DailyLogbookDetailResponse struct {
 	ID                           string            `json:"id"`
-	UUID                         string            `json:"uuid"`
 	DailyLogbookID               string            `json:"daily_logbook_id"`
 	FlightRealDate               string            `json:"flight_real_date"`
 	FlightNumber                 string            `json:"flight_number"`
@@ -187,7 +186,6 @@ func ToDomainDailyLogbookDetailUpdate(id string, req UpdateDailyLogbookDetailReq
 func FromDomainDailyLogbookDetail(d *domain.DailyLogbookDetail, encodedID, encodedLogbookID, encodedRouteID, encodedAircraftID string) DailyLogbookDetailResponse {
 	response := DailyLogbookDetailResponse{
 		ID:                           encodedID,
-		UUID:                         d.ID,
 		DailyLogbookID:               encodedLogbookID,
 		FlightRealDate:               d.FlightRealDate,
 		FlightNumber:                 d.FlightNumber,

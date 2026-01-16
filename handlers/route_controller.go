@@ -13,7 +13,7 @@ import (
 // @Tags         Routes
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Route ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Route ID (obfuscated ID)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
@@ -33,32 +33,11 @@ func (h *handler) GetRouteByID() gin.HandlerFunc {
 
 		log.Info(logger.LogRouteGet, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var routeUUID string
-		var responseID string
-
-		// Detect if it's a valid UUID or obfuscated ID
-		if isValidUUID(inputID) {
-			// It's a direct UUID
-			routeUUID = inputID
-			// Encode UUID for response (maintain consistency)
-			encodedID, err := h.EncodeID(inputID)
-			if err != nil {
-				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-				responseID = inputID
-			} else {
-				responseID = encodedID
-			}
-			log.Debug(logger.LogRouteGet, "detected_format", "UUID", "uuid", routeUUID)
-		} else {
-			// It's an obfuscated ID, decode it
-			uuid, err := h.DecodeID(inputID)
-			if err != nil {
-				h.HandleIDDecodingError(c, inputID, err)
-				return
-			}
-			routeUUID = uuid
-			responseID = inputID
-			log.Debug(logger.LogRouteGet, "detected_format", "encoded", "decoded_uuid", routeUUID)
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		routeUUID, responseID := h.resolveID(inputID)
+		if routeUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
 		}
 
 		// Get route from interactor
@@ -73,7 +52,11 @@ func (h *handler) GetRouteByID() gin.HandlerFunc {
 			return
 		}
 
-		response := FromDomainRoute(route, responseID)
+		// Encode airport IDs for response
+		encodedOriginAirportID, _ := h.EncodeID(route.OriginAirportID)
+		encodedDestAirportID, _ := h.EncodeID(route.DestinationAirportID)
+
+		response := FromDomainRoute(route, responseID, encodedOriginAirportID, encodedDestAirportID)
 
 		// Build HATEOAS links
 		baseURL := GetBaseURL(c)

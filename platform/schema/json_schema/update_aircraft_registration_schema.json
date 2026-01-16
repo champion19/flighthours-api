@@ -13,13 +13,13 @@
     },
     "aircraft_model_id": {
       "type": "string",
-      "description": "Aircraft model ID (UUID or obfuscated HashID)",
+      "description": "Aircraft model ID (obfuscated ID)",
       "minLength": 1,
       "maxLength": 50
     },
     "airline_id": {
       "type": "string",
-      "description": "Airline ID (UUID or obfuscated HashID)",
+      "description": "Airline ID (obfuscated ID)",
       "minLength": 1,
       "maxLength": 50
     }

@@ -13,7 +13,7 @@
     },
     "airline": {
       "type": "string",
-      "description": "Airline ID (UUID or obfuscated ID)",
+      "description": "Airline ID (obfuscated ID)",
       "maxLength": 50,
       "minLength": 1,
       "pattern": "^[a-zA-Z0-9-]+$"

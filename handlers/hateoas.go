@@ -818,3 +818,75 @@ func BuildDailyLogbookDetailListLinks(baseURL string, logbookID string) []Link {
 		},
 	}
 }
+
+// ============================================================================
+// ENGINE HATEOAS LINKS
+// ============================================================================
+
+// BuildEngineLinks construye links HATEOAS para un motor específico
+func BuildEngineLinks(baseURL string, engineID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "engines", engineID)
+	collectionURL := BuildCollectionURL(baseURL, "engines")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildEngineListLinks construye links para la lista de motores
+func BuildEngineListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "engines")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+}
+
+// ============================================================================
+// MANUFACTURER HATEOAS LINKS
+// ============================================================================
+
+// BuildManufacturerLinks construye links HATEOAS para un fabricante específico
+func BuildManufacturerLinks(baseURL string, manufacturerID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "manufacturers", manufacturerID)
+	collectionURL := BuildCollectionURL(baseURL, "manufacturers")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildManufacturerListLinks construye links para la lista de fabricantes
+func BuildManufacturerListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "manufacturers")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+}

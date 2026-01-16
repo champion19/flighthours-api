@@ -108,6 +108,35 @@ var errorToMessageCode = map[error]string{
 	domain.ErrAirlineRouteInvalidRoute:   domain.MsgAirlineRouteInvalidRoute,
 	domain.ErrAirlineRouteInvalidAirline: domain.MsgAirlineRouteInvalidAirline,
 
+	// Flight/DailyLogbookDetail errors (VUE_*)
+	domain.ErrFlightNotFound:            domain.MsgFlightNotFound,
+	domain.ErrFlightCannotSave:          domain.MsgFlightSaveError,
+	domain.ErrFlightCannotUpdate:        domain.MsgFlightUpdateError,
+	domain.ErrFlightCannotDelete:        domain.MsgFlightDeleteError,
+	domain.ErrFlightUnauthorized:        domain.MsgFlightUnauthorized,
+	domain.ErrFlightInvalidRoute:        domain.MsgFlightInvalidRoute,
+	domain.ErrFlightInvalidLogbook:      domain.MsgFlightInvalidLogbook,
+	domain.ErrFlightInvalidAircraft:     domain.MsgFlightInvalidAircraft,
+	domain.ErrFlightInvalidTimeSequence: domain.MsgFlightInvalidTimeSequence,
+
+	// Engine errors (MOT_*)
+	domain.ErrEngineNotFound: domain.MsgEngineNotFound,
+
+	// Manufacturer errors (FAB_*)
+	domain.ErrManufacturerNotFound: domain.MsgManufacturerNotFound,
+
+	// AircraftModel errors (MOD_AM_*)
+	domain.ErrAircraftModelNotFound: domain.MsgAircraftModelNotFound,
+
+	// Route errors (RUT_*)
+	domain.ErrRouteNotFound: domain.MsgRouteNotFound,
+
+	// Airline errors (MOD_AIR_*)
+	domain.ErrAirlineNotFound: domain.MsgAirlineNotFound,
+
+	// Airport errors (MOD_APT_*)
+	domain.ErrAirportNotFound: domain.MsgAirportNotFound,
+
 	// General errors
 	domain.ErrInternalServer: domain.MsgServerError,
 }

@@ -166,3 +166,17 @@ type DailyLogbookDetailService interface {
 	// DailyLogbookDetail - validations
 	ValidateTimeSequence(outTime, takeoffTime, landingTime, inTime string) error
 }
+
+// EngineService defines the interface for engine business operations
+type EngineService interface {
+	// Engine - queries only (read-only catalog module)
+	GetEngineByID(ctx context.Context, id string) (*domain.Engine, error)
+	ListEngines(ctx context.Context) ([]domain.Engine, error)
+}
+
+// ManufacturerService defines the interface for manufacturer business operations
+type ManufacturerService interface {
+	// Manufacturer - queries only (read-only catalog module)
+	GetManufacturerByID(ctx context.Context, id string) (*domain.Manufacturer, error)
+	ListManufacturers(ctx context.Context) ([]domain.Manufacturer, error)
+}

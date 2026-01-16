@@ -409,6 +409,26 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_AM_LIST_ERR_04302": http.StatusInternalServerError, // 500 - Error al listar modelos/tipos
 
 	// ========================================
+	// Engine Module (MOT_*) - Motor (HU37)
+	// ========================================
+	"MOT_CON_EXI_03701": http.StatusOK,                  // 200 - Motor consultado exitosamente
+	"MOT_CON_ERR_03702": http.StatusNotFound,            // 404 - Motor no encontrado
+	"MOT_CON_ERR_03703": http.StatusInternalServerError, // 500 - Error técnico al consultar
+
+	"MOT_LIST_EXI_03704": http.StatusOK,                  // 200 - Lista de motores obtenida
+	"MOT_LIST_ERR_03705": http.StatusInternalServerError, // 500 - Error al listar motores
+
+	// ========================================
+	// Manufacturer Module (FAB_*) - Fabricante (HU31)
+	// ========================================
+	"FAB_CON_EXI_03101": http.StatusOK,                  // 200 - Fabricante consultado exitosamente
+	"FAB_CON_ERR_03102": http.StatusNotFound,            // 404 - Fabricante no encontrado
+	"FAB_CON_ERR_03103": http.StatusInternalServerError, // 500 - Error técnico al consultar
+
+	"FAB_LIST_EXI_03104": http.StatusOK,                  // 200 - Lista de fabricantes obtenida
+	"FAB_LIST_ERR_03105": http.StatusInternalServerError, // 500 - Error al listar fabricantes
+
+	// ========================================
 	// Route Module (RUT_*) - Ruta
 	// ========================================
 	// Consultar (HU39)

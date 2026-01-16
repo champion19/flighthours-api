@@ -8,7 +8,6 @@ import (
 // AircraftRegistrationResponse - Response DTO for aircraft registration data
 type AircraftRegistrationResponse struct {
 	ID              string `json:"id"`
-	UUID            string `json:"uuid"`
 	LicensePlate    string `json:"license_plate"` // Numero de Matrícula
 	ModelName       string `json:"model_name"`    // Modelo (denormalized)
 	AirlineName     string `json:"airline_name"`  // Aerolínea (denormalized)
@@ -17,16 +16,15 @@ type AircraftRegistrationResponse struct {
 	Links           []Link `json:"_links,omitempty"`
 }
 
-// FromDomainAircraftRegistration converts domain.AircraftRegistration to AircraftRegistrationResponse with encoded ID
-func FromDomainAircraftRegistration(reg *domain.AircraftRegistration, encodedID string) AircraftRegistrationResponse {
+// FromDomainAircraftRegistration converts domain.AircraftRegistration to AircraftRegistrationResponse with encoded IDs
+func FromDomainAircraftRegistration(reg *domain.AircraftRegistration, encodedID, encodedModelID, encodedAirlineID string) AircraftRegistrationResponse {
 	return AircraftRegistrationResponse{
 		ID:              encodedID,
-		UUID:            reg.ID,
 		LicensePlate:    reg.LicensePlate,
 		ModelName:       reg.ModelName,
 		AirlineName:     reg.AirlineName,
-		AircraftModelID: reg.AircraftModelID,
-		AirlineID:       reg.AirlineID,
+		AircraftModelID: encodedModelID,
+		AirlineID:       encodedAirlineID,
 	}
 }
 
@@ -96,17 +94,23 @@ func ToAircraftRegistrationListResponse(registrations []domain.AircraftRegistrat
 	for _, reg := range registrations {
 		encodedID, err := encodeFunc(reg.ID)
 		if err != nil {
-			// If encoding fails, use the original UUID
 			encodedID = reg.ID
+		}
+		encodedModelID, err := encodeFunc(reg.AircraftModelID)
+		if err != nil {
+			encodedModelID = reg.AircraftModelID
+		}
+		encodedAirlineID, err := encodeFunc(reg.AirlineID)
+		if err != nil {
+			encodedAirlineID = reg.AirlineID
 		}
 		regResp := AircraftRegistrationResponse{
 			ID:              encodedID,
-			UUID:            reg.ID,
 			LicensePlate:    reg.LicensePlate,
 			ModelName:       reg.ModelName,
 			AirlineName:     reg.AirlineName,
-			AircraftModelID: reg.AircraftModelID,
-			AirlineID:       reg.AirlineID,
+			AircraftModelID: encodedModelID,
+			AirlineID:       encodedAirlineID,
 		}
 		// Add HATEOAS links to each registration
 		if baseURL != "" {

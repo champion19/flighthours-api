@@ -63,6 +63,8 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.RouteInteractor,
 		dependencies.AirlineRouteInteractor,
 		dependencies.DailyLogbookDetailInteractor,
+		dependencies.EngineInteractor,
+		dependencies.ManufacturerInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -148,6 +150,20 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// GET /airline-routes/:id - Get airline route by ID (HU40)
 		public.GET("/airline-routes/:id", handler.GetAirlineRoute())
+
+		// ---- Engines (Public - Read Only) - HU37 ----
+		// GET /engines - List all engine types
+		public.GET("/engines", handler.ListEngines())
+
+		// GET /engines/:id - Get engine by ID
+		public.GET("/engines/:id", handler.GetEngineByID())
+
+		// ---- Manufacturers (Public - Read Only) - HU31 ----
+		// GET /manufacturers - List all manufacturers
+		public.GET("/manufacturers", handler.ListManufacturers())
+
+		// GET /manufacturers/:id - Get manufacturer by ID
+		public.GET("/manufacturers/:id", handler.GetManufacturerByID())
 	}
 
 	// ===========================================

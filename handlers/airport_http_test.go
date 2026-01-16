@@ -104,7 +104,7 @@ func TestHTTP_GetAirportByID(t *testing.T) {
 
 	newRouter := func(svc input.AirportService) *gin.Engine {
 		airportInteractor := interactor.NewAirportInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, nil, airportInteractor, nil, nil, nil, nil, nil, nil)
+		h := New(nil, nil, enc, resp, nil, nil, nil, airportInteractor, nil, nil, nil, nil, nil, nil, nil, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -113,8 +113,14 @@ func TestHTTP_GetAirportByID(t *testing.T) {
 		return r
 	}
 
-	t.Run("success with UUID", func(t *testing.T) {
+	t.Run("success with obfuscated ID", func(t *testing.T) {
 		airportUUID := "550e8400-e29b-41d4-a716-446655440000"
+		// Encode UUID to obfuscated ID
+		encodedID, err := enc.Encode(airportUUID)
+		if err != nil {
+			t.Fatalf("failed to encode ID: %v", err)
+		}
+
 		expectedAirport := &domain.Airport{
 			ID:       airportUUID,
 			Name:     "El Dorado International",
@@ -135,7 +141,7 @@ func TestHTTP_GetAirportByID(t *testing.T) {
 
 		router := newRouter(svc)
 
-		req := httptest.NewRequest(http.MethodGet, "/airports/"+airportUUID, nil)
+		req := httptest.NewRequest(http.MethodGet, "/airports/"+encodedID, nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -155,6 +161,9 @@ func TestHTTP_GetAirportByID(t *testing.T) {
 	})
 
 	t.Run("airport not found", func(t *testing.T) {
+		airportUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airportUUID)
+
 		svc := &fakeAirportService{
 			getByIDFn: func(ctx context.Context, id string) (*domain.Airport, error) {
 				return nil, domain.ErrAirportNotFound
@@ -163,7 +172,7 @@ func TestHTTP_GetAirportByID(t *testing.T) {
 
 		router := newRouter(svc)
 
-		req := httptest.NewRequest(http.MethodGet, "/airports/550e8400-e29b-41d4-a716-446655440000", nil)
+		req := httptest.NewRequest(http.MethodGet, "/airports/"+encodedID, nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -208,7 +217,7 @@ func TestHTTP_ActivateAirport(t *testing.T) {
 
 	newRouter := func(svc input.AirportService) *gin.Engine {
 		airportInteractor := interactor.NewAirportInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, nil, airportInteractor, nil, nil, nil, nil, nil, nil)
+		h := New(nil, nil, enc, resp, nil, nil, nil, airportInteractor, nil, nil, nil, nil, nil, nil, nil, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -219,6 +228,7 @@ func TestHTTP_ActivateAirport(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		airportUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airportUUID)
 		activateCalled := false
 
 		svc := &fakeAirportService{
@@ -233,7 +243,7 @@ func TestHTTP_ActivateAirport(t *testing.T) {
 
 		router := newRouter(svc)
 
-		req := httptest.NewRequest(http.MethodPatch, "/airports/"+airportUUID+"/activate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airports/"+encodedID+"/activate", nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -257,6 +267,9 @@ func TestHTTP_ActivateAirport(t *testing.T) {
 	})
 
 	t.Run("airport not found", func(t *testing.T) {
+		airportUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airportUUID)
+
 		svc := &fakeAirportService{
 			getByIDFn: func(ctx context.Context, id string) (*domain.Airport, error) {
 				return &domain.Airport{ID: id}, nil
@@ -268,7 +281,7 @@ func TestHTTP_ActivateAirport(t *testing.T) {
 
 		router := newRouter(svc)
 
-		req := httptest.NewRequest(http.MethodPatch, "/airports/550e8400-e29b-41d4-a716-446655440000/activate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airports/"+encodedID+"/activate", nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -298,7 +311,7 @@ func TestHTTP_DeactivateAirport(t *testing.T) {
 
 	newRouter := func(svc input.AirportService) *gin.Engine {
 		airportInteractor := interactor.NewAirportInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, nil, airportInteractor, nil, nil, nil, nil, nil, nil)
+		h := New(nil, nil, enc, resp, nil, nil, nil, airportInteractor, nil, nil, nil, nil, nil, nil, nil, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -309,6 +322,7 @@ func TestHTTP_DeactivateAirport(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		airportUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airportUUID)
 		deactivateCalled := false
 
 		svc := &fakeAirportService{
@@ -323,7 +337,7 @@ func TestHTTP_DeactivateAirport(t *testing.T) {
 
 		router := newRouter(svc)
 
-		req := httptest.NewRequest(http.MethodPatch, "/airports/"+airportUUID+"/deactivate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airports/"+encodedID+"/deactivate", nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -347,6 +361,9 @@ func TestHTTP_DeactivateAirport(t *testing.T) {
 	})
 
 	t.Run("airport not found", func(t *testing.T) {
+		airportUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airportUUID)
+
 		svc := &fakeAirportService{
 			getByIDFn: func(ctx context.Context, id string) (*domain.Airport, error) {
 				return &domain.Airport{ID: id}, nil
@@ -358,7 +375,7 @@ func TestHTTP_DeactivateAirport(t *testing.T) {
 
 		router := newRouter(svc)
 
-		req := httptest.NewRequest(http.MethodPatch, "/airports/550e8400-e29b-41d4-a716-446655440000/deactivate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airports/"+encodedID+"/deactivate", nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -374,6 +391,9 @@ func TestHTTP_DeactivateAirport(t *testing.T) {
 	})
 
 	t.Run("service error", func(t *testing.T) {
+		airportUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airportUUID)
+
 		svc := &fakeAirportService{
 			getByIDFn: func(ctx context.Context, id string) (*domain.Airport, error) {
 				return &domain.Airport{ID: id}, nil
@@ -385,7 +405,7 @@ func TestHTTP_DeactivateAirport(t *testing.T) {
 
 		router := newRouter(svc)
 
-		req := httptest.NewRequest(http.MethodPatch, "/airports/550e8400-e29b-41d4-a716-446655440000/deactivate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airports/"+encodedID+"/deactivate", nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)

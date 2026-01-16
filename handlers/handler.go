@@ -26,6 +26,8 @@ type handler struct {
 	RouteInteractor                *interactor.RouteInteractor
 	AirlineRouteInteractor         *interactor.AirlineRouteInteractor
 	DailyLogbookDetailInteractor   *interactor.DailyLogbookDetailInteractor
+	EngineInteractor               *interactor.EngineInteractor
+	ManufacturerInteractor         *interactor.ManufacturerInteractor
 }
 
 func New(
@@ -42,7 +44,9 @@ func New(
 	aircraftModelInteractor *interactor.AircraftModelInteractor,
 	routeInteractor *interactor.RouteInteractor,
 	airlineRouteInteractor *interactor.AirlineRouteInteractor,
-	dailyLogbookDetailInteractor *interactor.DailyLogbookDetailInteractor) *handler {
+	dailyLogbookDetailInteractor *interactor.DailyLogbookDetailInteractor,
+	engineInteractor *interactor.EngineInteractor,
+	manufacturerInteractor *interactor.ManufacturerInteractor) *handler {
 	return &handler{
 		EmployeeService:                service,
 		Interactor:                     interactor,
@@ -58,6 +62,8 @@ func New(
 		RouteInteractor:                routeInteractor,
 		AirlineRouteInteractor:         airlineRouteInteractor,
 		DailyLogbookDetailInteractor:   dailyLogbookDetailInteractor,
+		EngineInteractor:               engineInteractor,
+		ManufacturerInteractor:         manufacturerInteractor,
 	}
 }
 
@@ -105,54 +111,21 @@ func (h *handler) HandleIDDecodingError(c *gin.Context, encodedID string, err er
 	c.Error(domain.ErrInvalidID)
 }
 
-// resolveID accepts both raw UUID and obfuscated ID formats
+// resolveID accepts ONLY obfuscated ID format
 // Returns (uuid, responseID) where:
 // - uuid: the decoded UUID for internal use
-// - responseID: the ID to use in the response (maintains consistency with input format)
-// If the ID cannot be resolved, returns empty strings
+// - responseID: the obfuscated ID to use in the response
+// If the ID cannot be decoded, returns empty strings
 func (h *handler) resolveID(inputID string) (string, string) {
 	if inputID == "" {
 		return "", ""
 	}
 
-	// Check if it's a valid UUID
-	if isValidUUID(inputID) {
-		// It's a direct UUID - encode it for consistent response format
-		encodedID, err := h.EncodeID(inputID)
-		if err != nil {
-			Logger.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-			return inputID, inputID // Use raw UUID if encoding fails
-		}
-		return inputID, encodedID
-	}
-
-	// It's an obfuscated ID - decode it
+	// Decode obfuscated ID to UUID
 	uuid, err := h.DecodeID(inputID)
 	if err != nil {
 		Logger.Warn(logger.LogMessageIDDecodeError, "encoded_id", inputID, "error", err)
 		return "", "" // Return empty if decoding fails
 	}
 	return uuid, inputID // Return decoded UUID and keep original obfuscated ID for response
-}
-
-// isValidUUID verifica si un string es un UUID válido
-func isValidUUID(str string) bool {
-	// UUID tiene formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 caracteres con guiones)
-	if len(str) != 36 {
-		return false
-	}
-	// Verificar posiciones de los guiones
-	if str[8] != '-' || str[13] != '-' || str[18] != '-' || str[23] != '-' {
-		return false
-	}
-	// Verificar que los demás caracteres sean hexadecimales
-	for i, c := range str {
-		if i == 8 || i == 13 || i == 18 || i == 23 {
-			continue // Saltar guiones
-		}
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-			return false
-		}
-	}
-	return true
 }
