@@ -5,7 +5,6 @@ import domain "github.com/champion19/flighthours-api/core/interactor/services/do
 // AirlineRouteResponse - Response DTO for airline route data
 type AirlineRouteResponse struct {
 	ID                     string `json:"id"`
-	UUID                   string `json:"uuid"`
 	RouteID                string `json:"route_id"`
 	AirlineID              string `json:"airline_id"`
 	Status                 bool   `json:"status"`
@@ -21,13 +20,12 @@ type AirlineRouteResponse struct {
 	Links                  []Link `json:"_links,omitempty"`
 }
 
-// FromDomainAirlineRoute converts domain.AirlineRoute to AirlineRouteResponse with encoded ID
-func FromDomainAirlineRoute(ar *domain.AirlineRoute, encodedID string) AirlineRouteResponse {
+// FromDomainAirlineRoute converts domain.AirlineRoute to AirlineRouteResponse with encoded IDs
+func FromDomainAirlineRoute(ar *domain.AirlineRoute, encodedID, encodedRouteID, encodedAirlineID string) AirlineRouteResponse {
 	return AirlineRouteResponse{
 		ID:                     encodedID,
-		UUID:                   ar.ID,
-		RouteID:                ar.RouteID,
-		AirlineID:              ar.AirlineID,
+		RouteID:                encodedRouteID,
+		AirlineID:              encodedAirlineID,
 		Status:                 ar.Status,
 		AirlineCode:            ar.AirlineCode,
 		AirlineName:            ar.AirlineName,
@@ -59,14 +57,20 @@ func ToAirlineRouteListResponse(airlineRoutes []domain.AirlineRoute, encodeFunc 
 	for _, ar := range airlineRoutes {
 		encodedID, err := encodeFunc(ar.ID)
 		if err != nil {
-			// If encoding fails, use the original UUID
 			encodedID = ar.ID
+		}
+		encodedRouteID, err := encodeFunc(ar.RouteID)
+		if err != nil {
+			encodedRouteID = ar.RouteID
+		}
+		encodedAirlineID, err := encodeFunc(ar.AirlineID)
+		if err != nil {
+			encodedAirlineID = ar.AirlineID
 		}
 		arResp := AirlineRouteResponse{
 			ID:                     encodedID,
-			UUID:                   ar.ID,
-			RouteID:                ar.RouteID,
-			AirlineID:              ar.AirlineID,
+			RouteID:                encodedRouteID,
+			AirlineID:              encodedAirlineID,
 			Status:                 ar.Status,
 			AirlineCode:            ar.AirlineCode,
 			AirlineName:            ar.AirlineName,

@@ -15,7 +15,7 @@ import (
 // @Tags         Aircraft Registrations
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Aircraft Registration ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Aircraft Registration ID (obfuscated ID)"
 // @Success      200  {object}  AircraftRegistrationResponse
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
@@ -48,8 +48,12 @@ func (h *handler) GetAircraftRegistrationByID() gin.HandlerFunc {
 			return
 		}
 
+		// Encode FK IDs for response
+		encodedModelID, _ := h.EncodeID(registration.AircraftModelID)
+		encodedAirlineID, _ := h.EncodeID(registration.AirlineID)
+
 		baseURL := GetBaseURL(c)
-		response := FromDomainAircraftRegistration(registration, responseID)
+		response := FromDomainAircraftRegistration(registration, responseID, encodedModelID, encodedAirlineID)
 		response.Links = BuildAircraftRegistrationLinks(baseURL, responseID)
 
 		log.Success(logger.LogAircraftRegistrationGetOK, registration.ToLogger())
@@ -164,8 +168,12 @@ func (h *handler) CreateAircraftRegistration() gin.HandlerFunc {
 			return
 		}
 
+		// Encode FK IDs for response
+		encodedModelID, _ := h.EncodeID(createdRegistration.AircraftModelID)
+		encodedAirlineID, _ := h.EncodeID(createdRegistration.AirlineID)
+
 		baseURL := GetBaseURL(c)
-		response := FromDomainAircraftRegistration(createdRegistration, encodedID)
+		response := FromDomainAircraftRegistration(createdRegistration, encodedID, encodedModelID, encodedAirlineID)
 		response.Links = BuildAircraftRegistrationCreatedLinks(baseURL, encodedID)
 
 		SetLocationHeader(c, baseURL, "aircraft-registrations", encodedID)
@@ -180,7 +188,7 @@ func (h *handler) CreateAircraftRegistration() gin.HandlerFunc {
 // @Tags         Aircraft Registrations
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Aircraft Registration ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Aircraft Registration ID (obfuscated ID)"
 // @Param        request body UpdateAircraftRegistrationRequest true "Aircraft Registration data"
 // @Success      200  {object}  AircraftRegistrationResponse
 // @Failure      400  {object}  map[string]interface{}
@@ -249,8 +257,12 @@ func (h *handler) UpdateAircraftRegistration() gin.HandlerFunc {
 			updatedRegistration = &registration
 		}
 
+		// Encode FK IDs for response
+		encodedModelID, _ := h.EncodeID(updatedRegistration.AircraftModelID)
+		encodedAirlineID, _ := h.EncodeID(updatedRegistration.AirlineID)
+
 		baseURL := GetBaseURL(c)
-		response := FromDomainAircraftRegistration(updatedRegistration, responseID)
+		response := FromDomainAircraftRegistration(updatedRegistration, responseID, encodedModelID, encodedAirlineID)
 		response.Links = BuildAircraftRegistrationLinks(baseURL, responseID)
 
 		log.Success(logger.LogAircraftRegistrationUpdateOK, updatedRegistration.ToLogger())

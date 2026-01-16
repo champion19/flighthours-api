@@ -30,8 +30,12 @@ func (h *handler) GetAirlineRoute() gin.HandlerFunc {
 			return
 		}
 
+		// Encode FK IDs for response
+		encodedRouteID, _ := h.EncodeID(airlineRoute.RouteID)
+		encodedAirlineID, _ := h.EncodeID(airlineRoute.AirlineID)
+
 		// Build response
-		response := FromDomainAirlineRoute(airlineRoute, responseID)
+		response := FromDomainAirlineRoute(airlineRoute, responseID, encodedRouteID, encodedAirlineID)
 		baseURL := GetBaseURL(c)
 		response.Links = BuildAirlineRouteLinks(baseURL, responseID, airlineRoute.Status)
 

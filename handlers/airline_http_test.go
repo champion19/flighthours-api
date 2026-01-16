@@ -104,7 +104,7 @@ func TestHTTP_GetAirlineByID(t *testing.T) {
 
 	newRouter := func(svc input.AirlineService) *gin.Engine {
 		airlineInteractor := interactor.NewAirlineInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil, nil, nil, nil, nil, nil, nil)
+		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -113,8 +113,9 @@ func TestHTTP_GetAirlineByID(t *testing.T) {
 		return r
 	}
 
-	t.Run("success with UUID", func(t *testing.T) {
+	t.Run("success with obfuscated ID", func(t *testing.T) {
 		airlineUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airlineUUID)
 		expectedAirline := &domain.Airline{
 			ID:          airlineUUID,
 			AirlineName: "Test Airlines",
@@ -132,7 +133,7 @@ func TestHTTP_GetAirlineByID(t *testing.T) {
 		}
 
 		r := newRouter(svc)
-		req := httptest.NewRequest(http.MethodGet, "/airlines/"+airlineUUID, nil)
+		req := httptest.NewRequest(http.MethodGet, "/airlines/"+encodedID, nil)
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
@@ -182,6 +183,9 @@ func TestHTTP_GetAirlineByID(t *testing.T) {
 	})
 
 	t.Run("airline not found => 404", func(t *testing.T) {
+		airlineUUID := "550e8400-e29b-41d4-a716-446655440002"
+		encodedID, _ := enc.Encode(airlineUUID)
+
 		svc := &fakeAirlineService{
 			getByIDFn: func(context.Context, string) (*domain.Airline, error) {
 				return nil, domain.ErrAirlineNotFound
@@ -189,7 +193,7 @@ func TestHTTP_GetAirlineByID(t *testing.T) {
 		}
 
 		r := newRouter(svc)
-		req := httptest.NewRequest(http.MethodGet, "/airlines/550e8400-e29b-41d4-a716-446655440002", nil)
+		req := httptest.NewRequest(http.MethodGet, "/airlines/"+encodedID, nil)
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
@@ -229,7 +233,7 @@ func TestHTTP_ActivateAirline(t *testing.T) {
 
 	newRouter := func(svc input.AirlineService) *gin.Engine {
 		airlineInteractor := interactor.NewAirlineInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil, nil, nil, nil, nil, nil, nil)
+		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -240,6 +244,7 @@ func TestHTTP_ActivateAirline(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		airlineUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airlineUUID)
 		activateCalled := false
 
 		svc := &fakeAirlineService{
@@ -253,7 +258,7 @@ func TestHTTP_ActivateAirline(t *testing.T) {
 		}
 
 		r := newRouter(svc)
-		req := httptest.NewRequest(http.MethodPatch, "/airlines/"+airlineUUID+"/activate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airlines/"+encodedID+"/activate", nil)
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
@@ -274,6 +279,9 @@ func TestHTTP_ActivateAirline(t *testing.T) {
 	})
 
 	t.Run("airline not found => 404", func(t *testing.T) {
+		airlineUUID := "550e8400-e29b-41d4-a716-446655440002"
+		encodedID, _ := enc.Encode(airlineUUID)
+
 		svc := &fakeAirlineService{
 			getByIDFn: func(context.Context, string) (*domain.Airline, error) {
 				return nil, domain.ErrAirlineNotFound
@@ -284,7 +292,7 @@ func TestHTTP_ActivateAirline(t *testing.T) {
 		}
 
 		r := newRouter(svc)
-		req := httptest.NewRequest(http.MethodPatch, "/airlines/550e8400-e29b-41d4-a716-446655440002/activate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airlines/"+encodedID+"/activate", nil)
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
@@ -308,7 +316,7 @@ func TestHTTP_DeactivateAirline(t *testing.T) {
 
 	newRouter := func(svc input.AirlineService) *gin.Engine {
 		airlineInteractor := interactor.NewAirlineInteractor(svc, noopLogger{})
-		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil, nil, nil, nil, nil, nil, nil)
+		h := New(nil, nil, enc, resp, nil, nil, airlineInteractor, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 		r := gin.New()
 		r.Use(middleware.RequestID())
@@ -319,6 +327,7 @@ func TestHTTP_DeactivateAirline(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		airlineUUID := "550e8400-e29b-41d4-a716-446655440000"
+		encodedID, _ := enc.Encode(airlineUUID)
 		deactivateCalled := false
 
 		svc := &fakeAirlineService{
@@ -332,7 +341,7 @@ func TestHTTP_DeactivateAirline(t *testing.T) {
 		}
 
 		r := newRouter(svc)
-		req := httptest.NewRequest(http.MethodPatch, "/airlines/"+airlineUUID+"/deactivate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airlines/"+encodedID+"/deactivate", nil)
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)
@@ -353,6 +362,9 @@ func TestHTTP_DeactivateAirline(t *testing.T) {
 	})
 
 	t.Run("airline not found => 404", func(t *testing.T) {
+		airlineUUID := "550e8400-e29b-41d4-a716-446655440002"
+		encodedID, _ := enc.Encode(airlineUUID)
+
 		svc := &fakeAirlineService{
 			getByIDFn: func(context.Context, string) (*domain.Airline, error) {
 				return nil, domain.ErrAirlineNotFound
@@ -363,7 +375,7 @@ func TestHTTP_DeactivateAirline(t *testing.T) {
 		}
 
 		r := newRouter(svc)
-		req := httptest.NewRequest(http.MethodPatch, "/airlines/550e8400-e29b-41d4-a716-446655440002/deactivate", nil)
+		req := httptest.NewRequest(http.MethodPatch, "/airlines/"+encodedID+"/deactivate", nil)
 		w := httptest.NewRecorder()
 
 		r.ServeHTTP(w, req)

@@ -20,6 +20,8 @@ import (
 	dailyLogbookRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook"
 	dailyLogbookDetailRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook_detail"
 	repo "github.com/champion19/flighthours-api/platform/databases/repositories/employee"
+	engineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/engine"
+	manufacturerRepo "github.com/champion19/flighthours-api/platform/databases/repositories/manufacturer"
 	messageRepo "github.com/champion19/flighthours-api/platform/databases/repositories/message"
 	routeRepo "github.com/champion19/flighthours-api/platform/databases/repositories/route"
 	"github.com/champion19/flighthours-api/platform/identity_provider/keycloak"
@@ -47,6 +49,8 @@ type Dependencies struct {
 	RouteInteractor                *interactor.RouteInteractor
 	AirlineRouteInteractor         *interactor.AirlineRouteInteractor
 	DailyLogbookDetailInteractor   *interactor.DailyLogbookDetailInteractor
+	EngineInteractor               *interactor.EngineInteractor
+	ManufacturerInteractor         *interactor.ManufacturerInteractor
 	JWTValidator                   *jwt.JWKSValidator
 }
 
@@ -216,6 +220,28 @@ func Init() (*Dependencies, error) {
 	dailyLogbookDetailService := services.NewDailyLogbookDetailService(dailyLogbookDetailRepository)
 	dailyLogbookDetailInteractor := interactor.NewDailyLogbookDetailInteractor(dailyLogbookDetailService, dailyLogbookService)
 
+	// Inicializar repositorio y servicio de motores (Engine)
+	engineRepository, err := engineRepo.NewEngineRepository(db)
+	if err != nil {
+		log.Error(logger.LogEngineRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogEngineRepoInitOK)
+
+	engineService := services.NewEngineService(engineRepository, log)
+	engineInteractor := interactor.NewEngineInteractor(engineService, log)
+
+	// Inicializar repositorio y servicio de fabricantes (Manufacturer)
+	manufacturerRepository, err := manufacturerRepo.NewManufacturerRepository(db)
+	if err != nil {
+		log.Error(logger.LogManufacturerRepoInitError, "error", err)
+		return nil, err
+	}
+	log.Success(logger.LogManufacturerRepoInitOK)
+
+	manufacturerService := services.NewManufacturerService(manufacturerRepository, log)
+	manufacturerInteractor := interactor.NewManufacturerInteractor(manufacturerService, log)
+
 	// JWKS Validator (JWT signature and expiration validation)
 	// This fetches Keycloak's public keys for local token validation
 	var jwtValidator *jwt.JWKSValidator
@@ -253,6 +279,8 @@ func Init() (*Dependencies, error) {
 		RouteInteractor:                routeInteractor,
 		AirlineRouteInteractor:         airlineRouteInteractor,
 		DailyLogbookDetailInteractor:   dailyLogbookDetailInteractor,
+		EngineInteractor:               engineInteractor,
+		ManufacturerInteractor:         manufacturerInteractor,
 		JWTValidator:                   jwtValidator,
 	}, nil
 }

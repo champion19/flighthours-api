@@ -58,7 +58,7 @@ func (h *handler) ListDailyLogbooks() gin.HandlerFunc {
 // @Tags         DailyLogbooks
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Daily Logbook ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Daily Logbook ID (obfuscated ID)"
 // @Success      200  {object}  DailyLogbookResponse
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      401  {object}  map[string]interface{}
@@ -102,8 +102,11 @@ func (h *handler) GetDailyLogbookByID() gin.HandlerFunc {
 			return
 		}
 
+		// Encode employee ID for response
+		encodedEmployeeID, _ := h.EncodeID(employee.ID)
+
 		baseURL := GetBaseURL(c)
-		response := FromDomainDailyLogbook(logbook, responseID)
+		response := FromDomainDailyLogbook(logbook, responseID, encodedEmployeeID)
 		response.Links = BuildDailyLogbookLinks(baseURL, responseID)
 
 		c.JSON(http.StatusOK, response)
@@ -161,8 +164,11 @@ func (h *handler) CreateDailyLogbook() gin.HandlerFunc {
 			return
 		}
 
+		// Encode employee ID for response
+		encodedEmployeeID, _ := h.EncodeID(employee.ID)
+
 		baseURL := GetBaseURL(c)
-		response := FromDomainDailyLogbook(logbook, encodedID)
+		response := FromDomainDailyLogbook(logbook, encodedID, encodedEmployeeID)
 		response.Links = BuildDailyLogbookCreatedLinks(baseURL, encodedID)
 
 		SetLocationHeader(c, baseURL, "daily-logbooks", encodedID)
@@ -176,7 +182,7 @@ func (h *handler) CreateDailyLogbook() gin.HandlerFunc {
 // @Tags         DailyLogbooks
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Daily Logbook ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Daily Logbook ID (obfuscated ID)"
 // @Param        request body UpdateDailyLogbookRequest true "Updated daily logbook data"
 // @Success      200  {object}  DailyLogbookResponse
 // @Failure      400  {object}  map[string]interface{}
@@ -245,8 +251,11 @@ func (h *handler) UpdateDailyLogbook() gin.HandlerFunc {
 			return
 		}
 
+		// Encode employee ID for response
+		encodedEmployeeID, _ := h.EncodeID(employee.ID)
+
 		baseURL := GetBaseURL(c)
-		response := FromDomainDailyLogbook(logbook, responseID)
+		response := FromDomainDailyLogbook(logbook, responseID, encodedEmployeeID)
 		response.Links = BuildDailyLogbookLinks(baseURL, responseID)
 
 		c.JSON(http.StatusOK, response)
@@ -259,7 +268,7 @@ func (h *handler) UpdateDailyLogbook() gin.HandlerFunc {
 // @Tags         DailyLogbooks
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Daily Logbook ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Daily Logbook ID (obfuscated ID)"
 // @Success      200  {object}  DailyLogbookDeleteResponse
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      401  {object}  map[string]interface{}
@@ -326,7 +335,7 @@ func (h *handler) DeleteDailyLogbook() gin.HandlerFunc {
 // @Tags         DailyLogbooks
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Daily Logbook ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Daily Logbook ID (obfuscated ID)"
 // @Success      200  {object}  DailyLogbookStatusResponse
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      401  {object}  map[string]interface{}
@@ -394,7 +403,7 @@ func (h *handler) ActivateDailyLogbook() gin.HandlerFunc {
 // @Tags         DailyLogbooks
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Daily Logbook ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Daily Logbook ID (obfuscated ID)"
 // @Success      200  {object}  DailyLogbookStatusResponse
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      401  {object}  map[string]interface{}

@@ -74,7 +74,6 @@ func (h handler) CreateMessage() func(c *gin.Context) {
 
 		response := MessageCreatedResponse{
 			ID:    encodedID,
-			UUID:  result.ID,
 			Links: links,
 		}
 
@@ -111,15 +110,14 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
 
-		// Get encoded ID from URL parameter and decode to UUID
-		encodedID := c.Param("id")
-		uuid, err := h.IDEncoder.Decode(encodedID)
-		if err != nil {
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		inputID := c.Param("id")
+		uuid, responseID := h.resolveID(inputID)
+		if uuid == "" {
 			log.Error(logger.LogMessageInvalidID,
-				"encoded_id", encodedID,
-				"error", err,
+				"input_id", inputID,
 				"client_ip", c.ClientIP())
-			c.Error(domain.ErrInvalidID)
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
 			return
 		}
 
@@ -154,7 +152,7 @@ func (h handler) UpdateMessage() func(c *gin.Context) {
 
 		// Build HATEOAS links
 		baseURL := GetBaseURL(c)
-		links := BuildMessageUpdatedLinks(baseURL, encodedID)
+		links := BuildMessageUpdatedLinks(baseURL, responseID)
 
 		response := MessageUpdatedResponse{
 			Links: links,
@@ -190,21 +188,20 @@ func (h handler) DeleteMessage() func(c *gin.Context) {
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
 
-		// Get encoded ID from URL parameter and decode to UUID
-		encodedID := c.Param("id")
-		uuid, err := h.IDEncoder.Decode(encodedID)
-		if err != nil {
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		inputID := c.Param("id")
+		uuid, _ := h.resolveID(inputID)
+		if uuid == "" {
 			log.Error(logger.LogMessageInvalidID,
-				"encoded_id", encodedID,
-				"error", err,
+				"input_id", inputID,
 				"client_ip", c.ClientIP())
-			c.Error(domain.ErrInvalidID)
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
 			return
 		}
 
 		log.Info(logger.LogMessageDeleteProcessing, "id", uuid)
 
-		err = h.MessageInteractor.DeleteMessage(c, uuid)
+		err := h.MessageInteractor.DeleteMessage(c, uuid)
 		if err != nil {
 			log.Error(logger.LogMessageDeleteError,
 				"id", uuid,
@@ -243,15 +240,14 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 			"path", c.Request.URL.Path,
 			"client_ip", c.ClientIP())
 
-		// Get encoded ID from URL parameter and decode to UUID
-		encodedID := c.Param("id")
-		uuid, err := h.IDEncoder.Decode(encodedID)
-		if err != nil {
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		inputID := c.Param("id")
+		uuid, responseID := h.resolveID(inputID)
+		if uuid == "" {
 			log.Error(logger.LogMessageInvalidID,
-				"encoded_id", encodedID,
-				"error", err,
+				"input_id", inputID,
 				"client_ip", c.ClientIP())
-			c.Error(domain.ErrInvalidID)
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
 			return
 		}
 
@@ -265,17 +261,10 @@ func (h handler) GetMessageByID() func(c *gin.Context) {
 			return
 		}
 
-		// Encode UUID for response
-		encodedIDForResponse, err := h.IDEncoder.Encode(message.ID)
-		if err != nil {
-			h.HandleIDEncodingError(c, message.ID, err)
-			return
-		}
-
 		// Build HATEOAS links
 		baseURL := GetBaseURL(c)
-		response := ToMessageResponse(message, encodedIDForResponse)
-		response.Links = BuildMessageLinks(baseURL, encodedIDForResponse)
+		response := ToMessageResponse(message, responseID)
+		response.Links = BuildMessageLinks(baseURL, responseID)
 
 		log.Debug(logger.LogMessageGetOK,
 			"id", uuid,

@@ -13,7 +13,7 @@ import (
 // @Tags         Airports
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Airport ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Airport ID (obfuscated ID)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
@@ -33,32 +33,11 @@ func (h *handler) GetAirportByID() gin.HandlerFunc {
 
 		log.Info(logger.LogAirportGet, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var airportUUID string
-		var responseID string
-
-		// Detect if it's a valid UUID or obfuscated ID
-		if isValidUUID(inputID) {
-			// It's a direct UUID
-			airportUUID = inputID
-			// Encode UUID for response (maintain consistency)
-			encodedID, err := h.EncodeID(inputID)
-			if err != nil {
-				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-				responseID = inputID
-			} else {
-				responseID = encodedID
-			}
-			log.Debug(logger.LogAirportGet, "detected_format", "UUID", "uuid", airportUUID)
-		} else {
-			// It's an obfuscated ID, decode it
-			uuid, err := h.DecodeID(inputID)
-			if err != nil {
-				h.HandleIDDecodingError(c, inputID, err)
-				return
-			}
-			airportUUID = uuid
-			responseID = inputID
-			log.Debug(logger.LogAirportGet, "detected_format", "encoded", "decoded_uuid", airportUUID)
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		airportUUID, responseID := h.resolveID(inputID)
+		if airportUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
 		}
 
 		// Get airport from interactor
@@ -90,7 +69,7 @@ func (h *handler) GetAirportByID() gin.HandlerFunc {
 // @Tags         Airports
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Airport ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Airport ID (obfuscated ID)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
@@ -110,27 +89,11 @@ func (h *handler) ActivateAirport() gin.HandlerFunc {
 
 		log.Info(logger.LogAirportActivate, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var airportUUID string
-		var responseID string
-
-		// Detect if it's a valid UUID or obfuscated ID
-		if isValidUUID(inputID) {
-			airportUUID = inputID
-			encodedID, err := h.EncodeID(inputID)
-			if err != nil {
-				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-				responseID = inputID
-			} else {
-				responseID = encodedID
-			}
-		} else {
-			uuid, err := h.DecodeID(inputID)
-			if err != nil {
-				h.HandleIDDecodingError(c, inputID, err)
-				return
-			}
-			airportUUID = uuid
-			responseID = inputID
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		airportUUID, responseID := h.resolveID(inputID)
+		if airportUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
 		}
 
 		// Activate airport via interactor
@@ -165,7 +128,7 @@ func (h *handler) ActivateAirport() gin.HandlerFunc {
 // @Tags         Airports
 // @Accept       json
 // @Produce      json
-// @Param        id   path      string  true  "Airport ID (UUID or obfuscated)"
+// @Param        id   path      string  true  "Airport ID (obfuscated ID)"
 // @Success      200  {object}  map[string]interface{}
 // @Failure      400  {object}  map[string]interface{}
 // @Failure      404  {object}  map[string]interface{}
@@ -185,27 +148,11 @@ func (h *handler) DeactivateAirport() gin.HandlerFunc {
 
 		log.Info(logger.LogAirportDeactivate, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var airportUUID string
-		var responseID string
-
-		// Detect if it's a valid UUID or obfuscated ID
-		if isValidUUID(inputID) {
-			airportUUID = inputID
-			encodedID, err := h.EncodeID(inputID)
-			if err != nil {
-				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-				responseID = inputID
-			} else {
-				responseID = encodedID
-			}
-		} else {
-			uuid, err := h.DecodeID(inputID)
-			if err != nil {
-				h.HandleIDDecodingError(c, inputID, err)
-				return
-			}
-			airportUUID = uuid
-			responseID = inputID
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		airportUUID, responseID := h.resolveID(inputID)
+		if airportUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
 		}
 
 		// Deactivate airport via interactor

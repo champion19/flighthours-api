@@ -134,3 +134,17 @@ type DailyLogbookDetailRepository interface {
 	UpdateDailyLogbookDetail(ctx context.Context, tx Tx, detail domain.DailyLogbookDetail) error
 	DeleteDailyLogbookDetail(ctx context.Context, tx Tx, id string) error
 }
+
+// EngineRepository defines the interface for engine type data persistence
+type EngineRepository interface {
+	// Engine operations - read only (catalog table)
+	GetEngineByID(ctx context.Context, id string) (*domain.Engine, error)
+	ListEngines(ctx context.Context) ([]domain.Engine, error)
+}
+
+// ManufacturerRepository defines the interface for manufacturer data persistence
+type ManufacturerRepository interface {
+	// Manufacturer operations - read only (catalog table)
+	GetManufacturerByID(ctx context.Context, id string) (*domain.Manufacturer, error)
+	ListManufacturers(ctx context.Context) ([]domain.Manufacturer, error)
+}

@@ -371,33 +371,11 @@ func (h handler) GetEmployeeByID() gin.HandlerFunc {
 
 		log.Info(logger.LogEmployeeGetByID, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var employeeUUID string
-		var responseID string
-
-		// Detectar si es un UUID válido o un ID ofuscado
-		if isValidUUID(inputID) {
-			// Es un UUID directo, usarlo tal cual
-			employeeUUID = inputID
-			// Codificar el UUID para la respuesta (mantener consistencia)
-			encodedID, err := h.EncodeID(inputID)
-			if err != nil {
-				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-				// Si no se puede codificar, usar el UUID en la respuesta
-				responseID = inputID
-			} else {
-				responseID = encodedID
-			}
-			log.Debug(logger.LogEmployeeGetByID, "detected_format", "UUID", "uuid", employeeUUID)
-		} else {
-			// Es un ID ofuscado, decodificarlo
-			uuid, err := h.DecodeID(inputID)
-			if err != nil {
-				h.HandleIDDecodingError(c, inputID, err)
-				return
-			}
-			employeeUUID = uuid
-			responseID = inputID // Mantener el ID ofuscado original
-			log.Debug(logger.LogEmployeeGetByID, "detected_format", "encoded", "decoded_uuid", employeeUUID)
+		// Decode obfuscated ID to UUID
+		employeeUUID, responseID := h.resolveID(inputID)
+		if employeeUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
 		}
 
 		// Obtener el empleado del servicio
@@ -462,27 +440,11 @@ func (h handler) UpdateEmployee() gin.HandlerFunc {
 
 		log.Info(logger.LogEmployeeUpdateRequest, "input_id", inputID, "client_ip", c.ClientIP())
 
-		// Step 2: Decode ID (obfuscated or UUID)
-		var employeeUUID string
-		var responseID string
-
-		if isValidUUID(inputID) {
-			employeeUUID = inputID
-			encodedID, err := h.EncodeID(inputID)
-			if err != nil {
-				log.Warn(logger.LogIDEncodeError, "uuid", inputID, "error", err)
-				responseID = inputID
-			} else {
-				responseID = encodedID
-			}
-		} else {
-			uuid, err := h.DecodeID(inputID)
-			if err != nil {
-				h.HandleIDDecodingError(c, inputID, err)
-				return
-			}
-			employeeUUID = uuid
-			responseID = inputID
+		// Step 2: Decode obfuscated ID
+		employeeUUID, responseID := h.resolveID(inputID)
+		if employeeUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
 		}
 
 		// Step 3: Parse request body
@@ -515,20 +477,16 @@ func (h handler) UpdateEmployee() gin.HandlerFunc {
 			return
 		}
 
-		// Step 5: Decode airline ID if it's obfuscated
-		// The airline field can come as: empty, UUID, or obfuscated ID
+		// Step 5: Decode airline ID (only obfuscated IDs accepted)
 		if req.Airline != "" {
-			if !isValidUUID(req.Airline) {
-				// It's an obfuscated ID, decode it to UUID
-				decodedAirlineID, err := h.DecodeID(req.Airline)
-				if err != nil {
-					log.Error(logger.LogMessageIDDecodeError, "airline_id", req.Airline, "error", err, "client_ip", c.ClientIP())
-					h.Response.Error(c, domain.MsgInvalidForeignKey)
-					return
-				}
-				req.Airline = decodedAirlineID
-				log.Debug(logger.LogEmployeeUpdateRequest, "decoded_airline", decodedAirlineID, "original", req.Airline)
+			decodedAirlineID, err := h.DecodeID(req.Airline)
+			if err != nil {
+				log.Error(logger.LogMessageIDDecodeError, "airline_id", req.Airline, "error", err, "client_ip", c.ClientIP())
+				h.Response.Error(c, domain.MsgInvalidForeignKey)
+				return
 			}
+			req.Airline = decodedAirlineID
+			log.Debug(logger.LogEmployeeUpdateRequest, "decoded_airline", decodedAirlineID)
 		}
 
 		// Step 6: Build updated employee data (preserving email, password, keycloak_user_id)
@@ -680,20 +638,11 @@ func (h handler) DeleteEmployee() gin.HandlerFunc {
 
 		log.Info(logger.LogEmployeeDeleting, "input_id", inputID, "client_ip", c.ClientIP())
 
-		var employeeUUID string
-
-		// Detect if it's a valid UUID or an obfuscated ID
-		if isValidUUID(inputID) {
-			employeeUUID = inputID
-		} else {
-			// Try to decode obfuscated ID
-			decodedID, err := h.IDEncoder.Decode(inputID)
-			if err != nil {
-				log.Error(logger.LogMessageIDDecodeError, "input_id", inputID, "error", err, "client_ip", c.ClientIP())
-				h.Response.Error(c, domain.MsgValIDInvalid)
-				return
-			}
-			employeeUUID = decodedID
+		// Decode obfuscated ID to UUID
+		employeeUUID, err := h.DecodeID(inputID)
+		if err != nil {
+			h.HandleIDDecodingError(c, inputID, err)
+			return
 		}
 
 		log.Debug(logger.LogEmployeeDeletingDB, "employee_id", employeeUUID, "original_id", inputID, "client_ip", c.ClientIP())
@@ -801,20 +750,16 @@ func (h handler) UpdateMe() gin.HandlerFunc {
 		// Sanitize input data
 		req.Sanitize()
 
-		// Decode airline ID if it's obfuscated
-		// The airline field can come as: empty, UUID, or obfuscated ID
+		// Decode airline ID (only obfuscated IDs accepted)
 		if req.Airline != "" {
-			if !isValidUUID(req.Airline) {
-				// It's an obfuscated ID, decode it to UUID
-				decodedAirlineID, err := h.DecodeID(req.Airline)
-				if err != nil {
-					log.Error(logger.LogMessageIDDecodeError, "airline_id", req.Airline, "error", err, "client_ip", c.ClientIP())
-					h.Response.Error(c, domain.MsgInvalidForeignKey)
-					return
-				}
-				req.Airline = decodedAirlineID
-				log.Debug(logger.LogEmployeeUpdateRequest, "decoded_airline", decodedAirlineID, "original", req.Airline)
+			decodedAirlineID, err := h.DecodeID(req.Airline)
+			if err != nil {
+				log.Error(logger.LogMessageIDDecodeError, "airline_id", req.Airline, "error", err, "client_ip", c.ClientIP())
+				h.Response.Error(c, domain.MsgInvalidForeignKey)
+				return
 			}
+			req.Airline = decodedAirlineID
+			log.Debug(logger.LogEmployeeUpdateRequest, "decoded_airline", decodedAirlineID)
 		}
 
 		// Build updated employee data (preserving email, password, keycloak_user_id)
