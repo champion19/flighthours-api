@@ -56,3 +56,20 @@ func (i *AircraftModelInteractor) ListAircraftModels(ctx context.Context, filter
 	log.Success(logger.LogAircraftModelListOK, "count", len(models))
 	return models, nil
 }
+
+// GetAircraftModelsByFamily retrieves all aircraft models for a specific family (HU32)
+func (i *AircraftModelInteractor) GetAircraftModelsByFamily(ctx context.Context, family string) ([]domain.AircraftModel, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAircraftModelList, "family", family)
+
+	models, err := i.service.GetAircraftModelsByFamily(ctx, family)
+	if err != nil {
+		log.Error(logger.LogAircraftModelListError, "family", family, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAircraftModelListOK, "family", family, "count", len(models))
+	return models, nil
+}

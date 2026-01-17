@@ -127,6 +127,8 @@ type AircraftModelService interface {
 	// AircraftModel - queries only (read-only module)
 	GetAircraftModelByID(ctx context.Context, id string) (*domain.AircraftModel, error)
 	ListAircraftModels(ctx context.Context, filters map[string]interface{}) ([]domain.AircraftModel, error)
+	// GetAircraftModelsByFamily retrieves all aircraft models for a specific family (HU32)
+	GetAircraftModelsByFamily(ctx context.Context, family string) ([]domain.AircraftModel, error)
 }
 
 // RouteService defines the interface for route business operations

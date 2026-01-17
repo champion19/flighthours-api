@@ -108,3 +108,52 @@ func (h *handler) ListAircraftModels() gin.HandlerFunc {
 		h.Response.DataOnly(c, response)
 	}
 }
+
+// GetAircraftModelsByFamily godoc
+// @Summary      Get aircraft models by family
+// @Description  Returns all aircraft models belonging to a specific family (HU32)
+// @Tags         Aircraft Families
+// @Produce      json
+// @Param        family   path      string  true  "Aircraft Family (e.g., A320, B737)"
+// @Success      200  {object}  AircraftModelListResponse
+// @Failure      400  {object}  map[string]interface{}
+// @Failure      404  {object}  map[string]interface{}
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /aircraft-families/{family} [get]
+func (h *handler) GetAircraftModelsByFamily() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		familyID := c.Param("family")
+		if familyID == "" {
+			log.Error(logger.LogAircraftFamilyGetError, "error", "empty family parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogAircraftFamilyGet, "family", familyID, "client_ip", c.ClientIP())
+
+		// Get aircraft models by family from interactor
+		models, err := h.AircraftModelInteractor.GetAircraftModelsByFamily(c.Request.Context(), familyID)
+		if err != nil {
+			log.Error(logger.LogAircraftFamilyGetError, "family", familyID, "error", err, "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgAircraftFamilyGetErr)
+			return
+		}
+
+		// If no models found for this family, return 404
+		if len(models) == 0 {
+			log.Warn(logger.LogAircraftFamilyNotFound, "family", familyID, "message", "no models found", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgAircraftFamilyNotFound)
+			return
+		}
+
+		// Convert to response with encoded IDs and HATEOAS links
+		baseURL := GetBaseURL(c)
+		response := ToAircraftModelListResponse(models, h.EncodeID, baseURL)
+
+		log.Success(logger.LogAircraftFamilyGetOK, "family", familyID, "count", len(models), "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgAircraftFamilyGetOK, response)
+	}
+}

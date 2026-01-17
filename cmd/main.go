@@ -41,7 +41,7 @@ func main() {
 
 	// Configurar CORS para permitir requests desde Swagger UI
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3001", "http://localhost:8081", "http://localhost:8080"},
+		AllowOrigins:     []string{"http://localhost:3001", "http://localhost:8081", "http://localhost:8080", "http://localhost:8087"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
