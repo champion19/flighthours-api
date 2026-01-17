@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	QueryByID            = "SELECT id, model_name, aircraft_type_name, engine_type_name, family, manufacturer FROM aircraft_model WHERE id = ? LIMIT 1"
-	QueryGetAll          = "SELECT id, model_name, aircraft_type_name, engine_type_name, family, manufacturer FROM aircraft_model ORDER BY model_name"
-	QueryGetByEngineType = "SELECT id, model_name, aircraft_type_name, engine_type_name, family, manufacturer FROM aircraft_model WHERE engine_type_name = ? ORDER BY model_name"
+	QueryByID            = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE am.id = ? LIMIT 1"
+	QueryGetAll          = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id ORDER BY am.model_name"
+	QueryGetByEngineType = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE e.name = ? ORDER BY am.model_name"
+	QueryGetByFamily     = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE am.family = ? ORDER BY am.model_name"
 )
 
 var log logger.Logger = logger.NewSlogLogger()
@@ -20,6 +21,7 @@ type repository struct {
 	stmtGetByID         *sql.Stmt
 	stmtGetAll          *sql.Stmt
 	stmtGetByEngineType *sql.Stmt
+	stmtGetByFamily     *sql.Stmt
 	db                  *sql.DB
 }
 
@@ -47,11 +49,18 @@ func NewAircraftModelRepository(db *sql.DB) (*repository, error) {
 		return nil, err
 	}
 
+	stmtGetByFamily, err := db.Prepare(QueryGetByFamily)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
 	return &repository{
 		db:                  db,
 		stmtGetByID:         stmtGetByID,
 		stmtGetAll:          stmtGetAll,
 		stmtGetByEngineType: stmtGetByEngineType,
+		stmtGetByFamily:     stmtGetByFamily,
 	}, nil
 }
 
@@ -99,6 +108,48 @@ func (r *repository) ListAircraftModels(ctx context.Context, filters map[string]
 		rows, err = r.stmtGetAll.QueryContext(ctx)
 	}
 
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var models []domain.AircraftModel
+	for rows.Next() {
+		var model domain.AircraftModel
+		var engineTypeName sql.NullString
+		var manufacturer sql.NullString
+
+		if err := rows.Scan(
+			&model.ID,
+			&model.ModelName,
+			&model.AircraftTypeName,
+			&engineTypeName,
+			&model.Family,
+			&manufacturer,
+		); err != nil {
+			return nil, err
+		}
+
+		if engineTypeName.Valid {
+			model.EngineTypeName = engineTypeName.String
+		}
+		if manufacturer.Valid {
+			model.Manufacturer = manufacturer.String
+		}
+
+		models = append(models, model)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models, nil
+}
+
+// GetAircraftModelsByFamily retrieves all aircraft models for a specific family (HU32)
+func (r *repository) GetAircraftModelsByFamily(ctx context.Context, family string) ([]domain.AircraftModel, error) {
+	rows, err := r.stmtGetByFamily.QueryContext(ctx, family)
 	if err != nil {
 		return nil, err
 	}
