@@ -691,6 +691,16 @@ const (
 )
 
 // ============================================
+// AIRCRAFT FAMILY (HU32)
+// ============================================
+const (
+	LogAircraftFamilyGet      = "Obteniendo información de familia de aeronave"
+	LogAircraftFamilyGetOK    = "Familia de aeronave obtenida exitosamente"
+	LogAircraftFamilyGetError = "Error obteniendo familia de aeronave"
+	LogAircraftFamilyNotFound = "Familia de aeronave no encontrada"
+)
+
+// ============================================
 // ROUTE INTERACTOR
 // ============================================
 const (

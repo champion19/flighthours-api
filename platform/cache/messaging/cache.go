@@ -409,6 +409,13 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_AM_LIST_ERR_04302": http.StatusInternalServerError, // 500 - Error al listar modelos/tipos
 
 	// ========================================
+	// Aircraft Family Module (FAM_*) - Familia de Aeronave (HU32)
+	// ========================================
+	"FAM_CON_EXI_03201": http.StatusOK,                  // 200 - Familia de aeronaves consultada exitosamente
+	"FAM_CON_ERR_03202": http.StatusNotFound,            // 404 - Familia de aeronaves no encontrada
+	"FAM_CON_ERR_03203": http.StatusInternalServerError, // 500 - Error técnico al consultar familia
+
+	// ========================================
 	// Engine Module (MOT_*) - Motor (HU37)
 	// ========================================
 	"MOT_CON_EXI_03701": http.StatusOK,                  // 200 - Motor consultado exitosamente

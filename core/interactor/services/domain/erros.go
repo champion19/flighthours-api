@@ -368,6 +368,16 @@ const (
 	MsgAircraftModelListError = "MOD_AM_LIST_ERR_04302" // Error - Error al listar modelos/tipos
 )
 
+// Aircraft Family Module (FAM_*) - Familia de Aeronave (HU32)
+const (
+	// ========================================
+	// Consultar (HU32) - FAM_CON_*
+	// ========================================
+	MsgAircraftFamilyGetOK    = "FAM_CON_EXI_03201" // Éxito - Familia de aeronaves consultada
+	MsgAircraftFamilyNotFound = "FAM_CON_ERR_03202" // Error - Familia de aeronaves no encontrada
+	MsgAircraftFamilyGetErr   = "FAM_CON_ERR_03203" // Error - Error técnico al consultar familia
+)
+
 // Engine Module (MOT_*) - Motor
 const (
 	// ========================================

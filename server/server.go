@@ -135,6 +135,11 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// GET /aircraft-models/:id - Get aircraft model by ID (HU36)
 		public.GET("/aircraft-models/:id", handler.GetAircraftModelByID())
 
+		// ---- Aircraft Families (Public - Read Only) - HU32 ----
+		// GET /aircraft-families/:family - Get all models belonging to a family
+		// Example: GET /aircraft-families/A320 returns A320, A321, A319 models
+		public.GET("/aircraft-families/:family", handler.GetAircraftModelsByFamily())
+
 		// ---- Routes (Public - Read Only) ----
 		// GET /routes - List all routes (HU39)
 		// Query params: ?airport_type=Nacional, ?origin_country=Colombia
