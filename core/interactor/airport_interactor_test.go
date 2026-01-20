@@ -17,6 +17,8 @@ type fakeAirportService struct {
 	deactivateFn   func(ctx context.Context, id string) error
 	beginTxFn      func(ctx context.Context) (output.Tx, error)
 	listAirportsFn func(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
+	getByCityFn    func(ctx context.Context, city string) ([]domain.Airport, error)
+	getByCountryFn func(ctx context.Context, country string) ([]domain.Airport, error)
 }
 
 var _ input.AirportService = (*fakeAirportService)(nil)
@@ -59,6 +61,22 @@ func (f *fakeAirportService) DeactivateAirport(ctx context.Context, id string) e
 func (f *fakeAirportService) ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error) {
 	if f.listAirportsFn != nil {
 		return f.listAirportsFn(ctx, filters)
+	}
+	return nil, errors.New("not implemented")
+}
+
+// GetAirportsByCity mock
+func (f *fakeAirportService) GetAirportsByCity(ctx context.Context, city string) ([]domain.Airport, error) {
+	if f.getByCityFn != nil {
+		return f.getByCityFn(ctx, city)
+	}
+	return nil, errors.New("not implemented")
+}
+
+// GetAirportsByCountry mock
+func (f *fakeAirportService) GetAirportsByCountry(ctx context.Context, country string) ([]domain.Airport, error) {
+	if f.getByCountryFn != nil {
+		return f.getByCountryFn(ctx, country)
 	}
 	return nil, errors.New("not implemented")
 }

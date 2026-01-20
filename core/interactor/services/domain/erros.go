@@ -317,10 +317,30 @@ const (
 	MsgAirportDeactivateOK = "MOD_APT_DEACTIVATE_EXI_00003"
 )
 
+// City Module (CIU_*) - Ciudad ( - Virtual Entity pattern)
+const (
+	// ========================================
+	// Consultar - CIU_CON_*
+	// ========================================
+	MsgCityGetOK    = "CIU_CON_EXI_01301" // Éxito - Ciudad consultada (aeropuertos en la ciudad)
+	MsgCityNotFound = "CIU_CON_ERR_01302" // Error - Ciudad no encontrada (sin aeropuertos)
+	MsgCityGetErr   = "CIU_CON_ERR_01303" // Error - Error técnico al consultar
+)
+
+// Country Module (PAI_*) - País - Virtual Entity pattern
+const (
+	// ========================================
+	// Consultar  - PAI_CON_*
+	// ========================================
+	MsgCountryGetOK    = "PAI_CON_EXI_03801" // Éxito - País consultado (aeropuertos en el país)
+	MsgCountryNotFound = "PAI_CON_ERR_03802" // Error - País no encontrado (sin aeropuertos)
+	MsgCountryGetErr   = "PAI_CON_ERR_03803" // Error - Error técnico al consultar
+)
+
 // Aircraft Registration Module (MAT_*) - Matrícula
 const (
 	// ========================================
-	// Consultar (HU33) - MAT_CON_*
+	// Consultar - MAT_CON_*
 	// ========================================
 	MsgAircraftRegistrationGetOK    = "MAT_CON_EXI_03301" // Éxito - Matrícula consultada
 	MsgAircraftRegistrationNotFound = "MAT_CON_ERR_03302" // Error - Matrícula no encontrada

@@ -231,3 +231,99 @@ func (h *handler) ListAirports() gin.HandlerFunc {
 		h.Response.DataOnly(c, response)
 	}
 }
+
+// GetAirportsByCity godoc
+// @Summary      Get airports by city (HU13 - Virtual Entity pattern)
+// @Description  Returns all airports located in a specific city. No new tables needed - queries airport.city field.
+// @Tags         Cities
+// @Accept       json
+// @Produce      json
+// @Param        city_name   path      string  true  "City name (e.g., Bogota, Medellin)"
+// @Success      200  {object}  AirportListResponse
+// @Failure      404  {object}  map[string]interface{}
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /cities/{city_name} [get]
+func (h *handler) GetAirportsByCity() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		cityName := c.Param("city_name")
+		if cityName == "" {
+			log.Error(logger.LogAirportListError, "error", "empty city_name parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogAirportList, "city_name", cityName, "client_ip", c.ClientIP())
+
+		airports, err := h.AirportInteractor.GetAirportsByCity(c.Request.Context(), cityName)
+		if err != nil {
+			log.Error(logger.LogAirportListError, "city_name", cityName, "error", err, "client_ip", c.ClientIP())
+			// If no rows found, city doesn't exist (no airports in that city)
+			h.Response.Error(c, domain.MsgCityNotFound)
+			return
+		}
+
+		// Convert to response with encoded IDs and HATEOAS links
+		baseURL := GetBaseURL(c)
+		response := ToAirportListResponse(airports, h.EncodeID, baseURL)
+
+		// Add city-specific links
+		response.Links = append(response.Links, Link{
+			Rel:  "airports",
+			Href: baseURL + "/airports",
+		})
+
+		log.Success(logger.LogAirportListOK, "city_name", cityName, "count", len(airports), "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgCityGetOK, response)
+	}
+}
+
+// GetAirportsByCountry godoc
+// @Summary      Get airports by country (HU38 - Virtual Entity pattern)
+// @Description  Returns all airports located in a specific country. No new tables needed - queries airport.country field.
+// @Tags         Countries
+// @Accept       json
+// @Produce      json
+// @Param        country_name   path      string  true  "Country name (e.g., Colombia, Peru)"
+// @Success      200  {object}  AirportListResponse
+// @Failure      404  {object}  map[string]interface{}
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /countries/{country_name} [get]
+func (h *handler) GetAirportsByCountry() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		countryName := c.Param("country_name")
+		if countryName == "" {
+			log.Error(logger.LogAirportListError, "error", "empty country_name parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogAirportList, "country_name", countryName, "client_ip", c.ClientIP())
+
+		airports, err := h.AirportInteractor.GetAirportsByCountry(c.Request.Context(), countryName)
+		if err != nil {
+			log.Error(logger.LogAirportListError, "country_name", countryName, "error", err, "client_ip", c.ClientIP())
+			// If no rows found, country doesn't exist (no airports in that country)
+			h.Response.Error(c, domain.MsgCountryNotFound)
+			return
+		}
+
+		// Convert to response with encoded IDs and HATEOAS links
+		baseURL := GetBaseURL(c)
+		response := ToAirportListResponse(airports, h.EncodeID, baseURL)
+
+		// Add country-specific links
+		response.Links = append(response.Links, Link{
+			Rel:  "airports",
+			Href: baseURL + "/airports",
+		})
+
+		log.Success(logger.LogAirportListOK, "country_name", countryName, "count", len(airports), "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgCountryGetOK, response)
+	}
+}

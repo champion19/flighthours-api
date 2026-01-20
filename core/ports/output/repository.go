@@ -61,6 +61,10 @@ type AirportRepository interface {
 	// Airport operations - read
 	GetAirportByID(ctx context.Context, id string) (*domain.Airport, error)
 	ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
+	// HU13 - Get airports by city (Virtual Entity pattern)
+	GetAirportsByCity(ctx context.Context, city string) ([]domain.Airport, error)
+	// HU38 - Get airports by country (Virtual Entity pattern)
+	GetAirportsByCountry(ctx context.Context, country string) ([]domain.Airport, error)
 
 	// Airport operations - transactional
 	UpdateAirportStatus(ctx context.Context, tx Tx, id string, status bool) error

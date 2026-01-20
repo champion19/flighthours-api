@@ -819,3 +819,23 @@ const (
 	LogManufacturerRepoInitOK    = "Repositorio de fabricantes inicializado"
 	LogManufacturerRepoInitError = "Error inicializando repositorio de fabricantes"
 )
+
+// ============================================
+// CITY INTERACTOR (- Virtual Entity pattern)
+// ============================================
+const (
+	LogCityGet      = "Obteniendo aeropuertos por ciudad"
+	LogCityGetOK    = "Aeropuertos por ciudad obtenidos exitosamente"
+	LogCityGetError = "Error obteniendo aeropuertos por ciudad"
+	LogCityNotFound = "Ciudad no encontrada (sin aeropuertos)"
+)
+
+// ============================================
+// COUNTRY INTERACTOR (- Virtual Entity pattern)
+// ============================================
+const (
+	LogCountryGet      = "Obteniendo aeropuertos por país"
+	LogCountryGetOK    = "Aeropuertos por país obtenidos exitosamente"
+	LogCountryGetError = "Error obteniendo aeropuertos por país"
+	LogCountryNotFound = "País no encontrado (sin aeropuertos)"
+)

@@ -326,6 +326,20 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_APT_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error deactivating airport
 
 	// ========================================
+	// City Module (CIU_*) - Ciudad (HU13 - Virtual Entity pattern)
+	// ========================================
+	"CIU_CON_EXI_01301": http.StatusOK,                  // 200 - City airports retrieved successfully
+	"CIU_CON_ERR_01302": http.StatusNotFound,            // 404 - City not found (no airports in this city)
+	"CIU_CON_ERR_01303": http.StatusInternalServerError, // 500 - Technical error querying city
+
+	// ========================================
+	// Country Module (PAI_*) - País (HU38 - Virtual Entity pattern)
+	// ========================================
+	"PAI_CON_EXI_03801": http.StatusOK,                  // 200 - Country airports retrieved successfully
+	"PAI_CON_ERR_03802": http.StatusNotFound,            // 404 - Country not found (no airports in this country)
+	"PAI_CON_ERR_03803": http.StatusInternalServerError, // 500 - Technical error querying country
+
+	// ========================================
 	// DailyLogbook Module (BIT_*) - Bitácora Diaria
 	// ========================================
 	// Consultar (HU7)

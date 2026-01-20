@@ -102,3 +102,37 @@ func (i *AirportInteractor) ListAirports(ctx context.Context, filters map[string
 	log.Success(logger.LogAirportListOK, "count", len(airports))
 	return airports, nil
 }
+
+// GetAirportsByCity retrieves all airports for a specific city (HU13 - Virtual Entity pattern)
+func (i *AirportInteractor) GetAirportsByCity(ctx context.Context, city string) ([]domain.Airport, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportList, "city", city)
+
+	airports, err := i.service.GetAirportsByCity(ctx, city)
+	if err != nil {
+		log.Error(logger.LogAirportListError, "city", city, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAirportListOK, "city", city, "count", len(airports))
+	return airports, nil
+}
+
+// GetAirportsByCountry retrieves all airports for a specific country (HU38 - Virtual Entity pattern)
+func (i *AirportInteractor) GetAirportsByCountry(ctx context.Context, country string) ([]domain.Airport, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportList, "country", country)
+
+	airports, err := i.service.GetAirportsByCountry(ctx, country)
+	if err != nil {
+		log.Error(logger.LogAirportListError, "country", country, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAirportListOK, "country", country, "count", len(airports))
+	return airports, nil
+}

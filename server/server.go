@@ -169,6 +169,18 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 
 		// GET /manufacturers/:id - Get manufacturer by ID
 		public.GET("/manufacturers/:id", handler.GetManufacturerByID())
+
+		// ---- Cities (Public - Read Only) Virtual Entity Pattern ----
+		// GET /cities/:city_name - Get all airports in a city
+		// Example: GET /cities/Bogota returns all airports in Bogota
+		// Note: No new tables needed - queries airport.city field directly
+		public.GET("/cities/:city_name", handler.GetAirportsByCity())
+
+		// ---- Countries (Public - Read Only) Virtual Entity Pattern ----
+		// GET /countries/:country_name - Get all airports in a country
+		// Example: GET /countries/Colombia returns all airports in Colombia
+		// Note: No new tables needed - queries airport.country field directly
+		public.GET("/countries/:country_name", handler.GetAirportsByCountry())
 	}
 
 	// ===========================================
