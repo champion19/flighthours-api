@@ -141,11 +141,11 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		public.GET("/aircraft-families/:family", handler.GetAircraftModelsByFamily())
 
 		// ---- Routes (Public - Read Only) ----
-		// GET /routes - List all routes (HU39)
+		// GET /routes - List all routes (HU36)
 		// Query params: ?airport_type=Nacional, ?origin_country=Colombia
 		public.GET("/routes", handler.ListRoutes())
 
-		// GET /routes/:id - Get route by ID (HU39)
+		// GET /routes/:id - Get route by ID (HU36)
 		public.GET("/routes/:id", handler.GetRouteByID())
 
 		// ---- Airline Routes (Public - Read Only) ----
@@ -153,22 +153,46 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// Query params: ?airline_code=AV, ?status=true
 		public.GET("/airline-routes", handler.ListAirlineRoutes())
 
-		// GET /airline-routes/:id - Get airline route by ID (HU40)
+		// GET /airline-routes/:id - Get airline route by ID (HU37)
 		public.GET("/airline-routes/:id", handler.GetAirlineRoute())
 
-		// ---- Engines (Public - Read Only) - HU37 ----
+		// ---- Engines (Public - Read Only) - HU35 ----
 		// GET /engines - List all engine types
 		public.GET("/engines", handler.ListEngines())
 
 		// GET /engines/:id - Get engine by ID
 		public.GET("/engines/:id", handler.GetEngineByID())
 
-		// ---- Manufacturers (Public - Read Only) - HU31 ----
+		// ---- Manufacturers (Public - Read Only) - HU29 ----
 		// GET /manufacturers - List all manufacturers
 		public.GET("/manufacturers", handler.ListManufacturers())
 
 		// GET /manufacturers/:id - Get manufacturer by ID
 		public.GET("/manufacturers/:id", handler.GetManufacturerByID())
+
+		// ---- Cities (Public - Read Only) ----
+		// GET /cities/:city_name - Get all airports in a city
+		// Example: GET /cities/Bogota returns all airports in Bogota
+		// Note: No new tables needed - queries airport.city field directly
+		public.GET("/cities/:city_name", handler.GetAirportsByCity())
+
+		// ---- Countries (Public - Read Only) ----
+		// GET /countries/:country_name - Get all airports in a country
+		// Example: GET /countries/Colombia returns all airports in Colombia
+		// Note: No new tables needed - queries airport.country field directly
+		public.GET("/countries/:country_name", handler.GetAirportsByCountry())
+
+		// ---- Airport Types (Public - Read Only) ----
+		// GET /airport-types/:airport_type - Get all airports of a specific type
+		// Example: GET /airport-types/INTERNACIONAL returns all international airports
+		// Note: No new tables needed - queries airport.airport_type field directly
+		public.GET("/airport-types/:airport_type", handler.GetAirportsByType())
+
+		// ---- Crew Member Types (Public - Read Only) ----
+		// GET /crew-member-types/:role - Get all employees of a specific role
+		// Example: GET /crew-member-types/PILOTO returns all pilots
+		// Note: No new tables needed - queries employee.role field directly
+		public.GET("/crew-member-types/:role", handler.GetEmployeesByRole())
 	}
 
 	// ===========================================

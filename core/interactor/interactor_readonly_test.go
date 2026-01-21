@@ -87,6 +87,11 @@ func (f *fakeServiceForReadOnly) GetEmployeeByKeycloakID(context.Context, string
 	return nil, errors.New("not implemented")
 }
 
+// GetEmployeesByRole mock for HU47 - Virtual Entity pattern
+func (f *fakeServiceForReadOnly) GetEmployeesByRole(context.Context, string) ([]domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
+
 var _ input.Service = (*fakeServiceForReadOnly)(nil)
 
 func TestInteractor_Locate(t *testing.T) {

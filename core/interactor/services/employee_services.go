@@ -685,3 +685,16 @@ func (s service) DeleteEmployee(ctx context.Context, employeeID string, keycloak
 	s.logger.Success(logger.LogEmployeeDeleteComplete, "employee_id", employeeID)
 	return nil
 }
+
+// GetEmployeesByRole retrieves all employees for a specific role
+// This implements the "Crew Member Types" feature - no new table needed, we query employees by role field
+func (s service) GetEmployeesByRole(ctx context.Context, role string) ([]domain.Employee, error) {
+	s.logger.Debug(logger.LogCrewMemberTypeGet, "role", role)
+	employees, err := s.repository.GetEmployeesByRole(ctx, role)
+	if err != nil {
+		s.logger.Error(logger.LogCrewMemberTypeGetError, "role", role, "error", err)
+		return nil, err
+	}
+	s.logger.Debug(logger.LogCrewMemberTypeGetOK, "role", role, "count", len(employees))
+	return employees, nil
+}

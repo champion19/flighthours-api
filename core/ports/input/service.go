@@ -19,6 +19,8 @@ type Service interface {
 	GetEmployeeByKeycloakID(ctx context.Context, keycloakUserID string) (*domain.Employee, error)
 	LocateEmployee(ctx context.Context, id string) (*dto.RegisterEmployee, error)
 	CheckAndCleanInconsistentState(ctx context.Context, email string) error
+	// HU47 - Get employees by role (Virtual Entity pattern)
+	GetEmployeesByRole(ctx context.Context, role string) ([]domain.Employee, error)
 
 	//employee- operaciones transaccionales de BD
 	SaveEmployeeToDB(ctx context.Context, tx output.Tx, employee domain.Employee) error
@@ -86,6 +88,12 @@ type AirportService interface {
 	// Airport - queries
 	GetAirportByID(ctx context.Context, id string) (*domain.Airport, error)
 	ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
+	// HU13 - Get airports by city (Virtual Entity pattern)
+	GetAirportsByCity(ctx context.Context, city string) ([]domain.Airport, error)
+	// HU38 - Get airports by country (Virtual Entity pattern)
+	GetAirportsByCountry(ctx context.Context, country string) ([]domain.Airport, error)
+	// HU46 - Get airports by type (Virtual Entity pattern)
+	GetAirportsByType(ctx context.Context, airportType string) ([]domain.Airport, error)
 
 	// Airport - operations
 	UpdateAirportStatus(ctx context.Context, id string, status bool) error
