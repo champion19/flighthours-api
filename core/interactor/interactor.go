@@ -396,3 +396,21 @@ func (i *Interactor) DeleteEmployee(ctx context.Context, employeeID string) erro
 	log.Success(logger.LogEmployeeDeleteComplete, "employee_id", employeeID, "email", employee.Email)
 	return nil
 }
+
+// GetEmployeesByRole retrieves all employees for a specific role (HU47 - Virtual Entity pattern)
+// This implements the "Crew Member Types" feature - returns employees filtered by role field
+func (i *Interactor) GetEmployeesByRole(ctx context.Context, role string) ([]domain.Employee, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogCrewMemberTypeGet, "role", role)
+
+	employees, err := i.service.GetEmployeesByRole(ctx, role)
+	if err != nil {
+		log.Error(logger.LogCrewMemberTypeGetError, "role", role, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogCrewMemberTypeGetOK, "role", role, "count", len(employees))
+	return employees, nil
+}

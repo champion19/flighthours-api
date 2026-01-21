@@ -53,6 +53,11 @@ func (f fakeRepo) GetEmployeeByKeycloakID(context.Context, string) (*domain.Empl
 	return nil, errors.New("not implemented")
 }
 
+// GetEmployeesByRole mock 
+func (f fakeRepo) GetEmployeesByRole(context.Context, string) ([]domain.Employee, error) {
+	return nil, errors.New("not implemented")
+}
+
 type fakeKeycloak struct {
 	getUserByEmailFn func(ctx context.Context, email string) (*gocloak.User, error)
 	createUserFn     func(ctx context.Context, employee *domain.Employee) (string, error)

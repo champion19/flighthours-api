@@ -277,3 +277,37 @@ func (e EmployeeRequest) ToDomain() (domain.Employee, error) {
 		Role:                 e.Role,
 	}, nil
 }
+
+// EmployeeListResponse - Response structure for listing employees ( Crew Member Types)
+type EmployeeListResponse struct {
+	Employees []EmployeeResponse `json:"employees"`
+	Count     int                `json:"count"`
+	Links     []Link             `json:"_links,omitempty"`
+}
+
+// ToEmployeeListResponse converts a slice of domain employees to EmployeeListResponse
+// with HATEOAS links for each employee
+func ToEmployeeListResponse(employees []domain.Employee, encodeID func(string) (string, error), baseURL string) EmployeeListResponse {
+	response := EmployeeListResponse{
+		Employees: make([]EmployeeResponse, 0, len(employees)),
+		Count:     len(employees),
+	}
+
+	for _, emp := range employees {
+		encodedID, err := encodeID(emp.ID)
+		if err != nil {
+			encodedID = emp.ID // Use raw ID if encoding fails
+		}
+
+		empResponse := FromDomain(&emp, encodedID)
+		empResponse.Links = BuildEmployeeLinks(baseURL, encodedID)
+		response.Employees = append(response.Employees, empResponse)
+	}
+
+	// Add collection-level links
+	response.Links = []Link{
+		{Rel: "self", Href: baseURL + "/crew-member-types"},
+	}
+
+	return response
+}

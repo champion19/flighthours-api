@@ -326,6 +326,34 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_APT_DEACTIVATE_ERR_00003": http.StatusUnprocessableEntity, // 422 - Error deactivating airport
 
 	// ========================================
+	// City Module (CIU_*) - Ciudad (HU13 - Virtual Entity pattern)
+	// ========================================
+	"CIU_CON_EXI_01301": http.StatusOK,                  // 200 - City airports retrieved successfully
+	"CIU_CON_ERR_01302": http.StatusNotFound,            // 404 - City not found (no airports in this city)
+	"CIU_CON_ERR_01303": http.StatusInternalServerError, // 500 - Technical error querying city
+
+	// ========================================
+	// Country Module (PAI_*) - País (HU38 - Virtual Entity pattern)
+	// ========================================
+	"PAI_CON_EXI_03801": http.StatusOK,                  // 200 - Country airports retrieved successfully
+	"PAI_CON_ERR_03802": http.StatusNotFound,            // 404 - Country not found (no airports in this country)
+	"PAI_CON_ERR_03803": http.StatusInternalServerError, // 500 - Technical error querying country
+
+	// ========================================
+	// Airport Type Module (TAE_*) - Tipo Aeropuerto
+	// ========================================
+	"TAE_CON_EXI_04601": http.StatusOK,                  // 200 - Airport type retrieved successfully (airports of this type)
+	"TAE_CON_ERR_04602": http.StatusNotFound,            // 404 - Airport type not found (no airports of this type)
+	"TAE_CON_ERR_04603": http.StatusInternalServerError, // 500 - Technical error querying airport type
+
+	// ========================================
+	// Crew Member Type Module (TIN_*) - Tipo Integrante 
+	// ========================================
+	"TIN_CON_EXI_04701": http.StatusOK,                  // 200 - Crew member type retrieved successfully (employees of this role)
+	"TIN_CON_ERR_04702": http.StatusNotFound,            // 404 - Crew member type not found (no employees of this role)
+	"TIN_CON_ERR_04703": http.StatusInternalServerError, // 500 - Technical error querying crew member type
+
+	// ========================================
 	// DailyLogbook Module (BIT_*) - Bitácora Diaria
 	// ========================================
 	// Consultar (HU7)

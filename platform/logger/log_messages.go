@@ -819,3 +819,43 @@ const (
 	LogManufacturerRepoInitOK    = "Repositorio de fabricantes inicializado"
 	LogManufacturerRepoInitError = "Error inicializando repositorio de fabricantes"
 )
+
+// ============================================
+// CITY INTERACTOR (- Virtual Entity pattern)
+// ============================================
+const (
+	LogCityGet      = "Obteniendo aeropuertos por ciudad"
+	LogCityGetOK    = "Aeropuertos por ciudad obtenidos exitosamente"
+	LogCityGetError = "Error obteniendo aeropuertos por ciudad"
+	LogCityNotFound = "Ciudad no encontrada (sin aeropuertos)"
+)
+
+// ============================================
+// COUNTRY INTERACTOR (- Virtual Entity pattern)
+// ============================================
+const (
+	LogCountryGet      = "Obteniendo aeropuertos por país"
+	LogCountryGetOK    = "Aeropuertos por país obtenidos exitosamente"
+	LogCountryGetError = "Error obteniendo aeropuertos por país"
+	LogCountryNotFound = "País no encontrado (sin aeropuertos)"
+)
+
+// ============================================
+// AIRPORT TYPE INTERACTOR (HU46 - Virtual Entity pattern)
+// ============================================
+const (
+	LogAirportTypeGet      = "Obteniendo aeropuertos por tipo"
+	LogAirportTypeGetOK    = "Aeropuertos por tipo obtenidos exitosamente"
+	LogAirportTypeGetError = "Error obteniendo aeropuertos por tipo"
+	LogAirportTypeNotFound = "Tipo de aeropuerto no encontrado (sin aeropuertos)"
+)
+
+// ============================================
+// CREW MEMBER TYPE INTERACTOR (HU47 - Virtual Entity pattern)
+// ============================================
+const (
+	LogCrewMemberTypeGet      = "Obteniendo empleados por tipo de rol"
+	LogCrewMemberTypeGetOK    = "Empleados por tipo de rol obtenidos exitosamente"
+	LogCrewMemberTypeGetError = "Error obteniendo empleados por tipo de rol"
+	LogCrewMemberTypeNotFound = "Tipo de integrante no encontrado (sin empleados)"
+)
