@@ -890,3 +890,120 @@ func BuildManufacturerListLinks(baseURL string) []Link {
 		},
 	}
 }
+
+// ============================================================================
+// AIRLINE EMPLOYEE HATEOAS LINKS (Release 15)
+// ============================================================================
+
+// BuildAirlineEmployeeLinks construye links HATEOAS para un empleado aerolínea específico
+func BuildAirlineEmployeeLinks(baseURL string, employeeID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airline-employees", employeeID)
+	collectionURL := BuildCollectionURL(baseURL, "airline-employees")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		},
+		{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "collection",
+			Method: "GET",
+		},
+	}
+}
+
+// BuildAirlineEmployeeListLinks construye links para la lista de empleados aerolínea
+func BuildAirlineEmployeeListLinks(baseURL string) []Link {
+	collectionURL := BuildCollectionURL(baseURL, "airline-employees")
+
+	return []Link{
+		{
+			Href:   collectionURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "create",
+			Method: "POST",
+		},
+	}
+}
+
+// BuildAirlineEmployeeStatusLinks construye links para respuesta de cambio de status
+func BuildAirlineEmployeeStatusLinks(baseURL string, employeeID string, isActive bool) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airline-employees", employeeID)
+	collectionURL := BuildCollectionURL(baseURL, "airline-employees")
+
+	links := []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+
+	// Si está activo, mostrar link para desactivar y viceversa
+	if isActive {
+		links = append(links, Link{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		})
+	} else {
+		links = append(links, Link{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		})
+	}
+
+	links = append(links, Link{
+		Href:   collectionURL,
+		Rel:    "collection",
+		Method: "GET",
+	})
+
+	return links
+}
+
+// BuildAirlineEmployeeCreatedLinks construye links para un empleado aerolínea recién creado
+func BuildAirlineEmployeeCreatedLinks(baseURL string, employeeID string) []Link {
+	resourceURL := BuildResourceURL(baseURL, "airline-employees", employeeID)
+	collectionURL := BuildCollectionURL(baseURL, "airline-employees")
+
+	return []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+		{
+			Href:   resourceURL,
+			Rel:    "update",
+			Method: "PUT",
+		},
+		{
+			Href:   collectionURL,
+			Rel:    "list",
+			Method: "GET",
+		},
+	}
+}

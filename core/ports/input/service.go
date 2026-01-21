@@ -190,3 +190,19 @@ type ManufacturerService interface {
 	GetManufacturerByID(ctx context.Context, id string) (*domain.Manufacturer, error)
 	ListManufacturers(ctx context.Context) ([]domain.Manufacturer, error)
 }
+
+// AirlineEmployeeService defines the interface for airline employee business operations (Release 15)
+// This is a specialized module for employees assigned to airlines
+type AirlineEmployeeService interface {
+	BeginTx(ctx context.Context) (output.Tx, error)
+
+	// AirlineEmployee - queries (HU26)
+	GetAirlineEmployeeByID(ctx context.Context, id string) (*domain.AirlineEmployee, error)
+	ListAirlineEmployees(ctx context.Context, filters map[string]interface{}) ([]domain.AirlineEmployee, error)
+
+	// AirlineEmployee - operations (HU27, HU28, HU29, HU30)
+	CreateAirlineEmployee(ctx context.Context, employee domain.AirlineEmployee) error
+	UpdateAirlineEmployee(ctx context.Context, employee domain.AirlineEmployee) error
+	ActivateAirlineEmployee(ctx context.Context, id string) error
+	DeactivateAirlineEmployee(ctx context.Context, id string) error
+}

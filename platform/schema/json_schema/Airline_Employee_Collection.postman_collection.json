@@ -1,0 +1,272 @@
+{
+  "info": {
+    "name": "FlightHours API - Airline Employee",
+    "description": "Release 15 - CRUD Empleado Aerolínea (HU26-HU30)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8081/flighthours/api/v1"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "employee_id",
+      "value": ""
+    },
+    {
+      "key": "airline_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Login (Get Token)",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"tu.email@ejemplo.com\",\n  \"password\": \"tuPassword123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.data && jsonData.data.access_token) {",
+              "    pm.collectionVariables.set('access_token', jsonData.data.access_token);",
+              "    console.log('Token saved!');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. GET Airlines (para obtener airline_id)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/airlines",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airlines"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.airlines && jsonData.airlines.length > 0) {",
+              "    pm.collectionVariables.set('airline_id', jsonData.airlines[0].id);",
+              "    console.log('First airline_id saved: ' + jsonData.airlines[0].id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. GET Airline Employees - List All",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/airline-employees",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airline-employees"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. GET Airline Employees - Filter by Airline",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/airline-employees?airline_id={{airline_id}}&active=true",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airline-employees"
+          ],
+          "query": [
+            {
+              "key": "airline_id",
+              "value": "{{airline_id}}"
+            },
+            {
+              "key": "active",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. POST Airline Employee - Create (HU28)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Carlos García\",\n  \"airline_id\": \"{{airline_id}}\",\n  \"email\": \"carlos.garcia@avianca.com\",\n  \"identification_number\": \"9876543210\",\n  \"bp\": \"CP002\",\n  \"start_date\": \"2024-01-01\",\n  \"end_date\": \"2029-12-31\",\n  \"active\": true,\n  \"role\": \"COPILOTO\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/airline-employees",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airline-employees"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.data && jsonData.data.id) {",
+              "    pm.collectionVariables.set('employee_id', jsonData.data.id);",
+              "    console.log('New employee_id saved: ' + jsonData.data.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. GET Airline Employee - By ID (HU26)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/airline-employees/{{employee_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airline-employees",
+            "{{employee_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. PUT Airline Employee - Update (HU27)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Carlos García ACTUALIZADO\",\n  \"airline_id\": \"{{airline_id}}\",\n  \"email\": \"carlos.garcia@avianca.com\",\n  \"identification_number\": \"9876543210\",\n  \"bp\": \"CP003\",\n  \"start_date\": \"2024-01-01\",\n  \"end_date\": \"2030-12-31\",\n  \"active\": true,\n  \"role\": \"PILOTO\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/airline-employees/{{employee_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airline-employees",
+            "{{employee_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. PATCH Airline Employee - Deactivate (HU30)",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/airline-employees/{{employee_id}}/deactivate",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airline-employees",
+            "{{employee_id}}",
+            "deactivate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "9. PATCH Airline Employee - Activate (HU29)",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/airline-employees/{{employee_id}}/activate",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "airline-employees",
+            "{{employee_id}}",
+            "activate"
+          ]
+        }
+      }
+    }
+  ]
+}
