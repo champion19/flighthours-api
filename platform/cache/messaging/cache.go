@@ -340,6 +340,20 @@ var messageCodeToHTTPStatus = map[string]int{
 	"PAI_CON_ERR_03803": http.StatusInternalServerError, // 500 - Technical error querying country
 
 	// ========================================
+	// Airport Type Module (TAE_*) - Tipo Aeropuerto
+	// ========================================
+	"TAE_CON_EXI_04601": http.StatusOK,                  // 200 - Airport type retrieved successfully (airports of this type)
+	"TAE_CON_ERR_04602": http.StatusNotFound,            // 404 - Airport type not found (no airports of this type)
+	"TAE_CON_ERR_04603": http.StatusInternalServerError, // 500 - Technical error querying airport type
+
+	// ========================================
+	// Crew Member Type Module (TIN_*) - Tipo Integrante 
+	// ========================================
+	"TIN_CON_EXI_04701": http.StatusOK,                  // 200 - Crew member type retrieved successfully (employees of this role)
+	"TIN_CON_ERR_04702": http.StatusNotFound,            // 404 - Crew member type not found (no employees of this role)
+	"TIN_CON_ERR_04703": http.StatusInternalServerError, // 500 - Technical error querying crew member type
+
+	// ========================================
 	// DailyLogbook Module (BIT_*) - Bitácora Diaria
 	// ========================================
 	// Consultar (HU7)

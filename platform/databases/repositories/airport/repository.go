@@ -18,6 +18,8 @@ const (
 	QueryGetByCity = "SELECT id, name, city, country, iata_code, status, airport_type FROM airport WHERE city = ? ORDER BY name"
 	// HU38 - Get airports by country (Virtual Entity pattern - no new table needed)
 	QueryGetByCountry = "SELECT id, name, city, country, iata_code, status, airport_type FROM airport WHERE country = ? ORDER BY name"
+	// HU46 - Get airports by type (Virtual Entity pattern - no new table needed)
+	QueryGetByType = "SELECT id, name, city, country, iata_code, status, airport_type FROM airport WHERE airport_type = ? ORDER BY name"
 )
 
 var log logger.Logger = logger.NewSlogLogger()
@@ -29,6 +31,7 @@ type repository struct {
 	stmtGetByStatus  *sql.Stmt
 	stmtGetByCity    *sql.Stmt
 	stmtGetByCountry *sql.Stmt
+	stmtGetByType    *sql.Stmt
 	db               *sql.DB
 }
 
@@ -76,6 +79,13 @@ func NewAirportRepository(db *sql.DB) (*repository, error) {
 		return nil, err
 	}
 
+	// HU46 - Prepare statement for airport type lookup
+	stmtGetByType, err := db.Prepare(QueryGetByType)
+	if err != nil {
+		log.Error(logger.LogAirportRepoInitError, "error preparing airport type statement", err)
+		return nil, err
+	}
+
 	return &repository{
 		db:               db,
 		stmtGetByID:      stmtGetByID,
@@ -84,6 +94,7 @@ func NewAirportRepository(db *sql.DB) (*repository, error) {
 		stmtGetByStatus:  stmtGetByStatus,
 		stmtGetByCity:    stmtGetByCity,
 		stmtGetByCountry: stmtGetByCountry,
+		stmtGetByType:    stmtGetByType,
 	}, nil
 }
 

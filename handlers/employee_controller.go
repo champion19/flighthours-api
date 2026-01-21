@@ -869,3 +869,51 @@ func (h handler) DeleteMe() gin.HandlerFunc {
 		h.Response.Success(c, domain.MsgUserDeleted)
 	}
 }
+
+// GetEmployeesByRole godoc
+// @Summary      Get employees by role 
+// @Description  Returns all employees of a specific role. No new tables needed - queries employee.role field.
+// @Tags         Crew Member Types
+// @Accept       json
+// @Produce      json
+// @Param        role   path      string  true  "Employee role (e.g., PILOTO, COPILOTO, AUXILIAR)"
+// @Success      200  {object}  EmployeeListResponse
+// @Failure      404  {object}  map[string]interface{}
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /crew-member-types/{role} [get]
+func (h *handler) GetEmployeesByRole() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		role := c.Param("role")
+		if role == "" {
+			log.Error(logger.LogCrewMemberTypeGetError, "error", "empty role parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogCrewMemberTypeGet, "role", role, "client_ip", c.ClientIP())
+
+		employees, err := h.Interactor.GetEmployeesByRole(c.Request.Context(), role)
+		if err != nil {
+			log.Error(logger.LogCrewMemberTypeGetError, "role", role, "error", err, "client_ip", c.ClientIP())
+			// If no rows found, role doesn't exist (no employees of that role)
+			h.Response.Error(c, domain.MsgCrewMemberTypeNotFound)
+			return
+		}
+
+		// Convert employees to response with encoded IDs
+		baseURL := GetBaseURL(c)
+		response := ToEmployeeListResponse(employees, h.EncodeID, baseURL)
+
+		// Add crew member type-specific links
+		response.Links = append(response.Links, Link{
+			Rel:  "employees",
+			Href: baseURL + "/employees",
+		})
+
+		log.Success(logger.LogCrewMemberTypeGetOK, "role", role, "count", len(employees), "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgCrewMemberTypeGetOK, response)
+	}
+}

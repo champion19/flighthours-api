@@ -327,3 +327,51 @@ func (h *handler) GetAirportsByCountry() gin.HandlerFunc {
 		h.Response.SuccessWithData(c, domain.MsgCountryGetOK, response)
 	}
 }
+
+// GetAirportsByType godoc
+// @Summary      Get airports by type 
+// @Description  Returns all airports of a specific type. No new tables needed - queries airport.airport_type field.
+// @Tags         Airport Types
+// @Accept       json
+// @Produce      json
+// @Param        airport_type   path      string  true  "Airport type (e.g., INTERNACIONAL, NACIONAL)"
+// @Success      200  {object}  AirportListResponse
+// @Failure      404  {object}  map[string]interface{}
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /airport-types/{airport_type} [get]
+func (h *handler) GetAirportsByType() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		airportType := c.Param("airport_type")
+		if airportType == "" {
+			log.Error(logger.LogAirportTypeGetError, "error", "empty airport_type parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogAirportTypeGet, "airport_type", airportType, "client_ip", c.ClientIP())
+
+		airports, err := h.AirportInteractor.GetAirportsByType(c.Request.Context(), airportType)
+		if err != nil {
+			log.Error(logger.LogAirportTypeGetError, "airport_type", airportType, "error", err, "client_ip", c.ClientIP())
+			// If no rows found, airport type doesn't exist (no airports of that type)
+			h.Response.Error(c, domain.MsgAirportTypeNotFound)
+			return
+		}
+
+		// Convert to response with encoded IDs and HATEOAS links
+		baseURL := GetBaseURL(c)
+		response := ToAirportListResponse(airports, h.EncodeID, baseURL)
+
+		// Add airport type-specific links
+		response.Links = append(response.Links, Link{
+			Rel:  "airports",
+			Href: baseURL + "/airports",
+		})
+
+		log.Success(logger.LogAirportTypeGetOK, "airport_type", airportType, "count", len(airports), "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgAirportTypeGetOK, response)
+	}
+}

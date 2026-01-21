@@ -32,6 +32,7 @@ type fakeAirportRepo struct {
 	listAirportsFn func(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
 	getByCityFn    func(ctx context.Context, city string) ([]domain.Airport, error)
 	getByCountryFn func(ctx context.Context, country string) ([]domain.Airport, error)
+	getByTypeFn    func(ctx context.Context, airportType string) ([]domain.Airport, error)
 }
 
 func (f fakeAirportRepo) BeginTx(ctx context.Context) (output.Tx, error) {
@@ -62,7 +63,7 @@ func (f fakeAirportRepo) ListAirports(ctx context.Context, filters map[string]in
 	return nil, errors.New("not implemented")
 }
 
-// GetAirportsByCity mock for HU13
+// GetAirportsByCity mock
 func (f fakeAirportRepo) GetAirportsByCity(ctx context.Context, city string) ([]domain.Airport, error) {
 	if f.getByCityFn != nil {
 		return f.getByCityFn(ctx, city)
@@ -70,10 +71,18 @@ func (f fakeAirportRepo) GetAirportsByCity(ctx context.Context, city string) ([]
 	return nil, errors.New("not implemented")
 }
 
-// GetAirportsByCountry mock for HU38
+// GetAirportsByCountry mock
 func (f fakeAirportRepo) GetAirportsByCountry(ctx context.Context, country string) ([]domain.Airport, error) {
 	if f.getByCountryFn != nil {
 		return f.getByCountryFn(ctx, country)
+	}
+	return nil, errors.New("not implemented")
+}
+
+// GetAirportsByType mock
+func (f fakeAirportRepo) GetAirportsByType(ctx context.Context, airportType string) ([]domain.Airport, error) {
+	if f.getByTypeFn != nil {
+		return f.getByTypeFn(ctx, airportType)
 	}
 	return nil, errors.New("not implemented")
 }

@@ -136,3 +136,20 @@ func (i *AirportInteractor) GetAirportsByCountry(ctx context.Context, country st
 	log.Success(logger.LogAirportListOK, "country", country, "count", len(airports))
 	return airports, nil
 }
+
+// GetAirportsByType retrieves all airports for a specific airport type (HU46 - Virtual Entity pattern)
+func (i *AirportInteractor) GetAirportsByType(ctx context.Context, airportType string) ([]domain.Airport, error) {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAirportTypeGet, "airport_type", airportType)
+
+	airports, err := i.service.GetAirportsByType(ctx, airportType)
+	if err != nil {
+		log.Error(logger.LogAirportTypeGetError, "airport_type", airportType, "error", err)
+		return nil, err
+	}
+
+	log.Success(logger.LogAirportTypeGetOK, "airport_type", airportType, "count", len(airports))
+	return airports, nil
+}

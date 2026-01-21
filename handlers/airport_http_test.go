@@ -28,6 +28,7 @@ type fakeAirportService struct {
 	listAirportsFn func(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
 	getByCityFn    func(ctx context.Context, city string) ([]domain.Airport, error)
 	getByCountryFn func(ctx context.Context, country string) ([]domain.Airport, error)
+	getByTypeFn    func(ctx context.Context, airportType string) ([]domain.Airport, error)
 }
 
 var _ input.AirportService = (*fakeAirportService)(nil)
@@ -86,6 +87,14 @@ func (f *fakeAirportService) GetAirportsByCity(ctx context.Context, city string)
 func (f *fakeAirportService) GetAirportsByCountry(ctx context.Context, country string) ([]domain.Airport, error) {
 	if f.getByCountryFn != nil {
 		return f.getByCountryFn(ctx, country)
+	}
+	return nil, errors.New("not implemented")
+}
+
+// GetAirportsByType mock for HU46
+func (f *fakeAirportService) GetAirportsByType(ctx context.Context, airportType string) ([]domain.Airport, error) {
+	if f.getByTypeFn != nil {
+		return f.getByTypeFn(ctx, airportType)
 	}
 	return nil, errors.New("not implemented")
 }

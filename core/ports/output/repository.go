@@ -24,6 +24,8 @@ type Repository interface {
 	GetEmployeeByEmail(ctx context.Context, email string) (*domain.Employee, error)
 	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
 	GetEmployeeByKeycloakID(ctx context.Context, keycloakUserID string) (*domain.Employee, error)
+	// HU47 - Get employees by role (Virtual Entity pattern)
+	GetEmployeesByRole(ctx context.Context, role string) ([]domain.Employee, error)
 }
 
 type MessageRepository interface {
@@ -61,10 +63,12 @@ type AirportRepository interface {
 	// Airport operations - read
 	GetAirportByID(ctx context.Context, id string) (*domain.Airport, error)
 	ListAirports(ctx context.Context, filters map[string]interface{}) ([]domain.Airport, error)
-	// HU13 - Get airports by city (Virtual Entity pattern)
+	// GetAirportsByCity retrieves all airports for a specific city
 	GetAirportsByCity(ctx context.Context, city string) ([]domain.Airport, error)
-	// HU38 - Get airports by country (Virtual Entity pattern)
+	// GetAirportsByCountry retrieves all airports for a specific country
 	GetAirportsByCountry(ctx context.Context, country string) ([]domain.Airport, error)
+	// GetAirportsByType retrieves all airports for a specific type
+	GetAirportsByType(ctx context.Context, airportType string) ([]domain.Airport, error)
 
 	// Airport operations - transactional
 	UpdateAirportStatus(ctx context.Context, tx Tx, id string, status bool) error

@@ -47,6 +47,11 @@ func (s *AirportService) GetAirportsByCountry(ctx context.Context, country strin
 	return s.repo.GetAirportsByCountry(ctx, country)
 }
 
+// GetAirportsByType retrieves all airports for a specific airport type (HU46 - Virtual Entity pattern)
+func (s *AirportService) GetAirportsByType(ctx context.Context, airportType string) ([]domain.Airport, error) {
+	return s.repo.GetAirportsByType(ctx, airportType)
+}
+
 // UpdateAirportStatus updates the status of an airport with transaction handling
 func (s *AirportService) UpdateAirportStatus(ctx context.Context, id string, status bool) error {
 	tx, err := s.repo.BeginTx(ctx)
