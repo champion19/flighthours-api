@@ -65,6 +65,7 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		dependencies.DailyLogbookDetailInteractor,
 		dependencies.EngineInteractor,
 		dependencies.ManufacturerInteractor,
+		dependencies.AirlineEmployeeInteractor,
 	)
 
 	validators, err := schema.NewValidator(&schema.DefaultFileReader{})
@@ -315,6 +316,26 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// GET /daily-logbooks/:id/details - List all details for a logbook
 		//el id debe ser el id del logbook , no el id del detail, se debe tener en cuenta que el employee_id es el id del employee que esta autenticado y que el detail es un registro de la tabla daily_logbook_details
 		protected.GET("/daily-logbooks/:id/details", handler.ListDailyLogbookDetails())
+
+		// ---- Airline Employees Management (Protected) ----
+		// GET /airline-employees - List all airline employees (employees with airline assigned)
+		// Query params: ?airline_id=xxx (filter by airline), ?active=true/false (filter by status)
+		protected.GET("/airline-employees", handler.ListAirlineEmployees())
+
+		// GET /airline-employees/:id - Get airline employee by ID (HU26)
+		protected.GET("/airline-employees/:id", handler.GetAirlineEmployeeByID())
+
+		// POST /airline-employees - Create a new airline employee (HU28)
+		protected.POST("/airline-employees", handler.CreateAirlineEmployee())
+
+		// PUT /airline-employees/:id - Update an existing airline employee (HU27)
+		protected.PUT("/airline-employees/:id", handler.UpdateAirlineEmployee())
+
+		// PATCH /airline-employees/:id/activate - Activate an airline employee (HU29)
+		protected.PATCH("/airline-employees/:id/activate", handler.ActivateAirlineEmployee())
+
+		// PATCH /airline-employees/:id/deactivate - Deactivate an airline employee (HU30)
+		protected.PATCH("/airline-employees/:id/deactivate", handler.DeactivateAirlineEmployee())
 	}
 
 	dependencies.Logger.Success(logger.LogRouteConfigured)

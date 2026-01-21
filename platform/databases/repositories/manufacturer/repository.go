@@ -1,10 +1,8 @@
 package manufacturer
 
 import (
-	"context"
 	"database/sql"
 
-	"github.com/champion19/flighthours-api/core/interactor/services/domain"
 	"github.com/champion19/flighthours-api/platform/logger"
 )
 
@@ -44,52 +42,4 @@ func NewManufacturerRepository(db *sql.DB) (*repository, error) {
 		stmtGetByID: stmtGetByID,
 		stmtGetAll:  stmtGetAll,
 	}, nil
-}
-
-// GetManufacturerByID retrieves a manufacturer by ID
-func (r *repository) GetManufacturerByID(ctx context.Context, id string) (*domain.Manufacturer, error) {
-	var manufacturer domain.Manufacturer
-
-	err := r.stmtGetByID.QueryRowContext(ctx, id).Scan(
-		&manufacturer.ID,
-		&manufacturer.Name,
-	)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, domain.ErrManufacturerNotFound
-		}
-		return nil, err
-	}
-
-	return &manufacturer, nil
-}
-
-// ListManufacturers retrieves all manufacturers
-func (r *repository) ListManufacturers(ctx context.Context) ([]domain.Manufacturer, error) {
-	rows, err := r.stmtGetAll.QueryContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var manufacturers []domain.Manufacturer
-	for rows.Next() {
-		var manufacturer domain.Manufacturer
-
-		if err := rows.Scan(
-			&manufacturer.ID,
-			&manufacturer.Name,
-		); err != nil {
-			return nil, err
-		}
-
-		manufacturers = append(manufacturers, manufacturer)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return manufacturers, nil
 }

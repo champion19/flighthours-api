@@ -859,3 +859,31 @@ const (
 	LogCrewMemberTypeGetError = "Error obteniendo empleados por tipo de rol"
 	LogCrewMemberTypeNotFound = "Tipo de integrante no encontrado (sin empleados)"
 )
+
+// ============================================
+// AIRLINE EMPLOYEE INTERACTOR (Release 15)
+// ============================================
+const (
+	LogAirlineEmployeeGet             = "Obteniendo información de empleado aerolínea"
+	LogAirlineEmployeeGetOK           = "Empleado aerolínea obtenido exitosamente"
+	LogAirlineEmployeeGetError        = "Error obteniendo empleado aerolínea"
+	LogAirlineEmployeeNotFound        = "Empleado aerolínea no encontrado"
+	LogAirlineEmployeeList            = "Listando empleados aerolínea"
+	LogAirlineEmployeeListOK          = "Empleados aerolínea listados exitosamente"
+	LogAirlineEmployeeListError       = "Error listando empleados aerolínea"
+	LogAirlineEmployeeCreate          = "Creando empleado aerolínea"
+	LogAirlineEmployeeCreateOK        = "Empleado aerolínea creado exitosamente"
+	LogAirlineEmployeeCreateError     = "Error creando empleado aerolínea"
+	LogAirlineEmployeeUpdate          = "Actualizando empleado aerolínea"
+	LogAirlineEmployeeUpdateOK        = "Empleado aerolínea actualizado exitosamente"
+	LogAirlineEmployeeUpdateError     = "Error actualizando empleado aerolínea"
+	LogAirlineEmployeeActivate        = "Activando empleado aerolínea"
+	LogAirlineEmployeeActivateOK      = "Empleado aerolínea activado exitosamente"
+	LogAirlineEmployeeActivateError   = "Error activando empleado aerolínea"
+	LogAirlineEmployeeDeactivate      = "Desactivando empleado aerolínea"
+	LogAirlineEmployeeDeactivateOK    = "Empleado aerolínea desactivado exitosamente"
+	LogAirlineEmployeeDeactivateError = "Error desactivando empleado aerolínea"
+	LogAirlineEmployeeRepoInit        = "Inicializando repositorio de empleados aerolínea"
+	LogAirlineEmployeeRepoInitOK      = "Repositorio de empleados aerolínea inicializado"
+	LogAirlineEmployeeRepoInitError   = "Error inicializando repositorio de empleados aerolínea"
+)

@@ -158,3 +158,18 @@ type ManufacturerRepository interface {
 	GetManufacturerByID(ctx context.Context, id string) (*domain.Manufacturer, error)
 	ListManufacturers(ctx context.Context) ([]domain.Manufacturer, error)
 }
+
+// AirlineEmployeeRepository defines the interface for airline employee data persistence (Release 15)
+// This is a specialized view of employees where airline IS NOT NULL
+type AirlineEmployeeRepository interface {
+	BeginTx(ctx context.Context) (Tx, error)
+
+	// AirlineEmployee operations - read (HU26)
+	GetAirlineEmployeeByID(ctx context.Context, id string) (*domain.AirlineEmployee, error)
+	ListAirlineEmployees(ctx context.Context, filters map[string]interface{}) ([]domain.AirlineEmployee, error)
+
+	// AirlineEmployee operations - transactional
+	SaveAirlineEmployee(ctx context.Context, tx Tx, employee domain.AirlineEmployee) error   // HU28
+	UpdateAirlineEmployee(ctx context.Context, tx Tx, employee domain.AirlineEmployee) error // HU27
+	UpdateAirlineEmployeeStatus(ctx context.Context, tx Tx, id string, status bool) error    // HU29, HU30
+}
