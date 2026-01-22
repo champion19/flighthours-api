@@ -347,7 +347,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	"TAE_CON_ERR_04603": http.StatusInternalServerError, // 500 - Technical error querying airport type
 
 	// ========================================
-	// Crew Member Type Module (TIN_*) - Tipo Integrante 
+	// Crew Member Type Module (TIN_*) - Tipo Integrante
 	// ========================================
 	"TIN_CON_EXI_04701": http.StatusOK,                  // 200 - Crew member type retrieved successfully (employees of this role)
 	"TIN_CON_ERR_04702": http.StatusNotFound,            // 404 - Crew member type not found (no employees of this role)
@@ -538,6 +538,38 @@ var messageCodeToHTTPStatus = map[string]int{
 
 	// Autorización
 	"VUE_AUTH_ERR_00001": http.StatusForbidden, // 403 - No autorizado para este vuelo
+
+	// ========================================
+	// Airline Employee Module (EMP_AIR_*) - Empleado Aerolínea 
+	// ========================================
+	// Consultar (HU26)
+	"EMP_AIR_CON_EXI_02601": http.StatusOK,                  // 200 - Airline employee retrieved successfully
+	"EMP_AIR_CON_ERR_02602": http.StatusNotFound,            // 404 - Airline employee not found
+	"EMP_AIR_CON_ERR_02603": http.StatusInternalServerError, // 500 - Technical error querying
+
+	// Editar (HU27)
+	"EMP_AIR_EDI_EXI_02701": http.StatusOK,                  // 200 - Airline employee updated successfully
+	"EMP_AIR_EDI_ERR_02702": http.StatusInternalServerError, // 500 - Technical error updating
+
+	// Agregar (HU28)
+	"EMP_AIR_AGR_EXI_02801": http.StatusCreated,             // 201 - Airline employee created successfully
+	"EMP_AIR_AGR_ERR_02802": http.StatusInternalServerError, // 500 - Technical error creating
+	"EMP_AIR_AGR_ERR_02803": http.StatusConflict,            // 409 - Duplicate airline employee
+
+	// Activar (HU29)
+	"EMP_AIR_ACT_EXI_02901": http.StatusOK,                  // 200 - Airline employee activated successfully
+	"EMP_AIR_ACT_ERR_02902": http.StatusInternalServerError, // 500 - Technical error activating
+
+	// Inactivar (HU30)
+	"EMP_AIR_INA_EXI_03001": http.StatusOK,                  // 200 - Airline employee deactivated successfully
+	"EMP_AIR_INA_ERR_03002": http.StatusInternalServerError, // 500 - Technical error deactivating
+
+	// Listar
+	"EMP_AIR_LIST_EXI_02601": http.StatusOK,                  // 200 - Airline employee list retrieved successfully
+	"EMP_AIR_LIST_ERR_02602": http.StatusInternalServerError, // 500 - Error listing airline employees
+
+	// Validaciones
+	"EMP_AIR_VAL_ERR_02604": http.StatusBadRequest, // 400 - Invalid airline
 }
 
 // GetHTTPStatus returns the HTTP status for a message code

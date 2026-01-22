@@ -146,6 +146,14 @@ var (
 	ErrCrewMemberTypeNotFound = errors.New("ERR_CREW_MEMBER_TYPE_NOT_FOUND")
 )
 
+// Airline Employee Management Errors (EMP_AIR_*) - Release 15
+var (
+	ErrAirlineEmployeeNotFound       = errors.New("ERR_AIRLINE_EMPLOYEE_NOT_FOUND")
+	ErrAirlineEmployeeCannotSave     = errors.New("ERR_AIRLINE_EMPLOYEE_CANNOT_SAVE")
+	ErrAirlineEmployeeCannotUpdate   = errors.New("ERR_AIRLINE_EMPLOYEE_CANNOT_UPDATE")
+	ErrAirlineEmployeeInvalidAirline = errors.New("ERR_AIRLINE_EMPLOYEE_INVALID_AIRLINE")
+)
+
 // ============================================
 // MESSAGE CODES - Constants for use in code
 // ============================================
@@ -642,4 +650,50 @@ const (
 	// Autorización - VUE_AUTH_*
 	// ========================================
 	MsgFlightUnauthorized = "VUE_AUTH_ERR_00001" // Error - No autorizado para este vuelo
+)
+
+// Airline Employee Module (EMP_AIR_*) - Empleado Aerolínea (Release 15)
+const (
+	// ========================================
+	// Consultar (HU26) - EMP_AIR_CON_*
+	// ========================================
+	MsgAirlineEmployeeGetOK    = "EMP_AIR_CON_EXI_02601" // Éxito - Empleado aerolínea consultado
+	MsgAirlineEmployeeNotFound = "EMP_AIR_CON_ERR_02602" // Error - Empleado aerolínea no encontrado
+	MsgAirlineEmployeeGetErr   = "EMP_AIR_CON_ERR_02603" // Error - Error técnico al consultar
+
+	// ========================================
+	// Editar (HU27) - EMP_AIR_EDI_*
+	// ========================================
+	MsgAirlineEmployeeUpdated     = "EMP_AIR_EDI_EXI_02701" // Éxito - Empleado aerolínea actualizado
+	MsgAirlineEmployeeUpdateError = "EMP_AIR_EDI_ERR_02702" // Error - Error técnico al editar
+
+	// ========================================
+	// Agregar (HU28) - EMP_AIR_AGR_*
+	// ========================================
+	MsgAirlineEmployeeCreated   = "EMP_AIR_AGR_EXI_02801" // Éxito - Empleado aerolínea creado
+	MsgAirlineEmployeeSaveError = "EMP_AIR_AGR_ERR_02802" // Error - Error técnico al crear
+	MsgAirlineEmployeeDuplicate = "EMP_AIR_AGR_ERR_02803" // Error - Empleado duplicado
+
+	// ========================================
+	// Activar (HU29) - EMP_AIR_ACT_*
+	// ========================================
+	MsgAirlineEmployeeActivateOK  = "EMP_AIR_ACT_EXI_02901" // Éxito - Empleado aerolínea activado
+	MsgAirlineEmployeeActivateErr = "EMP_AIR_ACT_ERR_02902" // Error - Error técnico al activar
+
+	// ========================================
+	// Inactivar (HU30) - EMP_AIR_INA_*
+	// ========================================
+	MsgAirlineEmployeeDeactivateOK  = "EMP_AIR_INA_EXI_03001" // Éxito - Empleado aerolínea inactivado
+	MsgAirlineEmployeeDeactivateErr = "EMP_AIR_INA_ERR_03002" // Error - Error técnico al inactivar
+
+	// ========================================
+	// Listar - EMP_AIR_LIST_*
+	// ========================================
+	MsgAirlineEmployeeListOK    = "EMP_AIR_LIST_EXI_02601" // Éxito - Lista de empleados aerolínea obtenida
+	MsgAirlineEmployeeListError = "EMP_AIR_LIST_ERR_02602" // Error - Error al listar empleados aerolínea
+
+	// ========================================
+	// Validaciones - EMP_AIR_VAL_*
+	// ========================================
+	MsgAirlineEmployeeInvalidAirline = "EMP_AIR_VAL_ERR_02604" // Error - Aerolínea inválida
 )

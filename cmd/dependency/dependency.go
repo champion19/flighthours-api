@@ -15,6 +15,7 @@ import (
 	aircraftModelRepo "github.com/champion19/flighthours-api/platform/databases/repositories/aircraft_model"
 	aircraftRegistrationRepo "github.com/champion19/flighthours-api/platform/databases/repositories/aircraft_registration"
 	airlineRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline"
+	airlineEmployeeRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline_employee"
 	airlineRouteRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airline_route"
 	airportRepo "github.com/champion19/flighthours-api/platform/databases/repositories/airport"
 	dailyLogbookRepo "github.com/champion19/flighthours-api/platform/databases/repositories/daily_logbook"
@@ -51,6 +52,7 @@ type Dependencies struct {
 	DailyLogbookDetailInteractor   *interactor.DailyLogbookDetailInteractor
 	EngineInteractor               *interactor.EngineInteractor
 	ManufacturerInteractor         *interactor.ManufacturerInteractor
+	AirlineEmployeeInteractor      *interactor.AirlineEmployeeInteractor // Release 15
 	JWTValidator                   *jwt.JWKSValidator
 }
 
@@ -242,6 +244,17 @@ func Init() (*Dependencies, error) {
 	manufacturerService := services.NewManufacturerService(manufacturerRepository, log)
 	manufacturerInteractor := interactor.NewManufacturerInteractor(manufacturerService, log)
 
+	// Inicializar repositorio y servicio de empleados aerolínea (Release 15)
+	airlineEmployeeRepository, err := airlineEmployeeRepo.NewAirlineEmployeeRepository(db)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error", err, "repository", "airline_employee")
+		return nil, err
+	}
+	log.Success(logger.LogDatabaseAvailable, "repository", "airline_employee")
+
+	airlineEmployeeService := services.NewAirlineEmployeeService(airlineEmployeeRepository, log)
+	airlineEmployeeInteractor := interactor.NewAirlineEmployeeInteractor(airlineEmployeeService, log)
+
 	// JWKS Validator (JWT signature and expiration validation)
 	// This fetches Keycloak's public keys for local token validation
 	var jwtValidator *jwt.JWKSValidator
@@ -281,6 +294,7 @@ func Init() (*Dependencies, error) {
 		DailyLogbookDetailInteractor:   dailyLogbookDetailInteractor,
 		EngineInteractor:               engineInteractor,
 		ManufacturerInteractor:         manufacturerInteractor,
+		AirlineEmployeeInteractor:      airlineEmployeeInteractor,
 		JWTValidator:                   jwtValidator,
 	}, nil
 }
