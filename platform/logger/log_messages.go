@@ -678,16 +678,22 @@ const (
 // AIRCRAFT MODEL INTERACTOR
 // ============================================
 const (
-	LogAircraftModelGet           = "Obteniendo información de modelo de aeronave"
-	LogAircraftModelGetOK         = "Modelo de aeronave obtenido exitosamente"
-	LogAircraftModelGetError      = "Error obteniendo modelo de aeronave"
-	LogAircraftModelNotFound      = "Modelo de aeronave no encontrado"
-	LogAircraftModelList          = "Listando modelos de aeronave"
-	LogAircraftModelListOK        = "Modelos de aeronave listados exitosamente"
-	LogAircraftModelListError     = "Error listando modelos de aeronave"
-	LogAircraftModelRepoInit      = "Inicializando repositorio de modelos de aeronave"
-	LogAircraftModelRepoInitOK    = "Repositorio de modelos de aeronave inicializado"
-	LogAircraftModelRepoInitError = "Error inicializando repositorio de modelos de aeronave"
+	LogAircraftModelGet             = "Obteniendo información de modelo de aeronave"
+	LogAircraftModelGetOK           = "Modelo de aeronave obtenido exitosamente"
+	LogAircraftModelGetError        = "Error obteniendo modelo de aeronave"
+	LogAircraftModelNotFound        = "Modelo de aeronave no encontrado"
+	LogAircraftModelList            = "Listando modelos de aeronave"
+	LogAircraftModelListOK          = "Modelos de aeronave listados exitosamente"
+	LogAircraftModelListError       = "Error listando modelos de aeronave"
+	LogAircraftModelRepoInit        = "Inicializando repositorio de modelos de aeronave"
+	LogAircraftModelRepoInitOK      = "Repositorio de modelos de aeronave inicializado"
+	LogAircraftModelRepoInitError   = "Error inicializando repositorio de modelos de aeronave"
+	LogAircraftModelActivate        = "Activando modelo de aeronave"
+	LogAircraftModelActivateOK      = "Modelo de aeronave activado exitosamente"
+	LogAircraftModelActivateError   = "Error activando modelo de aeronave"
+	LogAircraftModelDeactivate      = "Desactivando modelo de aeronave"
+	LogAircraftModelDeactivateOK    = "Modelo de aeronave desactivado exitosamente"
+	LogAircraftModelDeactivateError = "Error desactivando modelo de aeronave"
 )
 
 // ============================================

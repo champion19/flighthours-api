@@ -424,6 +424,18 @@ const (
 	// ========================================
 	MsgAircraftModelListOK    = "MOD_AM_LIST_EXI_04301" // Éxito - Lista de modelos/tipos obtenida
 	MsgAircraftModelListError = "MOD_AM_LIST_ERR_04302" // Error - Error al listar modelos/tipos
+
+	// ========================================
+	// Inactivar (HU41) - MOD_AM_INA_*
+	// ========================================
+	MsgAircraftModelDeactivateOK  = "MOD_AM_INA_EXI_04101" // Éxito - Modelo de aeronave inactivado
+	MsgAircraftModelDeactivateErr = "MOD_AM_INA_ERR_04102" // Error - Error técnico al inactivar
+
+	// ========================================
+	// Activar (HU42) - MOD_AM_ACT_*
+	// ========================================
+	MsgAircraftModelActivateOK  = "MOD_AM_ACT_EXI_04201" // Éxito - Modelo de aeronave activado
+	MsgAircraftModelActivateErr = "MOD_AM_ACT_ERR_04202" // Error - Error técnico al activar
 )
 
 // Aircraft Family Module (FAM_*) - Familia de Aeronave (HU32)

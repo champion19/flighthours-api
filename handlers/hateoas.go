@@ -608,6 +608,16 @@ func BuildAircraftModelLinks(baseURL string, modelID string) []Link {
 			Method: "GET",
 		},
 		{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		},
+		{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		},
+		{
 			Href:   collectionURL,
 			Rel:    "collection",
 			Method: "GET",
@@ -626,6 +636,43 @@ func BuildAircraftModelListLinks(baseURL string) []Link {
 			Method: "GET",
 		},
 	}
+}
+
+// BuildAircraftModelStatusLinks construye links para respuesta de cambio de status (HU41, HU42)
+func BuildAircraftModelStatusLinks(baseURL string, modelID string, isActive bool) []Link {
+	resourceURL := BuildResourceURL(baseURL, "aircraft-models", modelID)
+	collectionURL := BuildCollectionURL(baseURL, "aircraft-models")
+
+	links := []Link{
+		{
+			Href:   resourceURL,
+			Rel:    "self",
+			Method: "GET",
+		},
+	}
+
+	// Si está activo, mostrar link para desactivar y viceversa
+	if isActive {
+		links = append(links, Link{
+			Href:   resourceURL + "/deactivate",
+			Rel:    "deactivate",
+			Method: "PATCH",
+		})
+	} else {
+		links = append(links, Link{
+			Href:   resourceURL + "/activate",
+			Rel:    "activate",
+			Method: "PATCH",
+		})
+	}
+
+	links = append(links, Link{
+		Href:   collectionURL,
+		Rel:    "collection",
+		Method: "GET",
+	})
+
+	return links
 }
 
 // ============================================================================

@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	QueryByID            = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE am.id = ? LIMIT 1"
-	QueryGetAll          = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id ORDER BY am.model_name"
-	QueryGetByEngineType = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE e.name = ? ORDER BY am.model_name"
-	QueryGetByFamily     = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE am.family = ? ORDER BY am.model_name"
+	QueryByID            = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer, am.status FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE am.id = ? LIMIT 1"
+	QueryGetAll          = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer, am.status FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id ORDER BY am.model_name"
+	QueryGetByEngineType = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer, am.status FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE e.name = ? ORDER BY am.model_name"
+	QueryGetByFamily     = "SELECT am.id, am.model_name, am.aircraft_type_name, e.name AS engine_type_name, am.family, m.name AS manufacturer, am.status FROM aircraft_model am LEFT JOIN engine e ON am.engine_type_id = e.id LEFT JOIN manufacturer m ON am.manufacturer_id = m.id WHERE am.family = ? ORDER BY am.model_name"
+	QueryUpdateStatus    = "UPDATE aircraft_model SET status = ? WHERE id = ?"
 )
 
 var log logger.Logger = logger.NewSlogLogger()
@@ -20,6 +21,7 @@ type repository struct {
 	stmtGetAll          *sql.Stmt
 	stmtGetByEngineType *sql.Stmt
 	stmtGetByFamily     *sql.Stmt
+	stmtUpdateStatus    *sql.Stmt
 	db                  *sql.DB
 }
 
@@ -53,11 +55,18 @@ func NewAircraftModelRepository(db *sql.DB) (*repository, error) {
 		return nil, err
 	}
 
+	stmtUpdateStatus, err := db.Prepare(QueryUpdateStatus)
+	if err != nil {
+		log.Error(logger.LogDatabaseUnavailable, "error preparing statement", err)
+		return nil, err
+	}
+
 	return &repository{
 		db:                  db,
 		stmtGetByID:         stmtGetByID,
 		stmtGetAll:          stmtGetAll,
 		stmtGetByEngineType: stmtGetByEngineType,
 		stmtGetByFamily:     stmtGetByFamily,
+		stmtUpdateStatus:    stmtUpdateStatus,
 	}, nil
 }

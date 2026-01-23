@@ -104,11 +104,16 @@ type AircraftRegistrationRepository interface {
 
 // AircraftModelRepository defines the interface for aircraft model data persistence
 type AircraftModelRepository interface {
-	// AircraftModel operations - read only (no transactions needed)
+	BeginTx(ctx context.Context) (Tx, error)
+
+	// AircraftModel operations - read
 	GetAircraftModelByID(ctx context.Context, id string) (*domain.AircraftModel, error)
 	ListAircraftModels(ctx context.Context, filters map[string]interface{}) ([]domain.AircraftModel, error)
 	// GetAircraftModelsByFamily retrieves all aircraft models for a specific family (HU32)
 	GetAircraftModelsByFamily(ctx context.Context, family string) ([]domain.AircraftModel, error)
+
+	// AircraftModel operations - transactional (HU41, HU42)
+	UpdateAircraftModelStatus(ctx context.Context, tx Tx, id string, status bool) error
 }
 
 // RouteRepository defines the interface for route data persistence

@@ -37,6 +37,7 @@ func (r *repository) ListAircraftModels(ctx context.Context, filters map[string]
 			&engineTypeName,
 			&model.Family,
 			&manufacturer,
+			&model.Status,
 		); err != nil {
 			return nil, err
 		}
