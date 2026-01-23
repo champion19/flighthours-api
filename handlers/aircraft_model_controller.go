@@ -157,3 +157,121 @@ func (h *handler) GetAircraftModelsByFamily() gin.HandlerFunc {
 		h.Response.SuccessWithData(c, domain.MsgAircraftFamilyGetOK, response)
 	}
 }
+
+// ActivateAircraftModel godoc
+// @Summary      Activate aircraft model
+// @Description  Sets aircraft model status to active (HU42 - accepts obfuscated ID only)
+// @Tags         Aircraft Models
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "Aircraft Model ID (obfuscated ID)"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]interface{}
+// @Failure      404  {object}  map[string]interface{}
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /aircraft-models/{id}/activate [patch]
+func (h *handler) ActivateAircraftModel() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		inputID := c.Param("id")
+		if inputID == "" {
+			log.Error(logger.LogMessageIDDecodeError, "error", "empty id parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogAircraftModelActivate, "input_id", inputID, "client_ip", c.ClientIP())
+
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		modelUUID, responseID := h.resolveID(inputID)
+		if modelUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
+		}
+
+		// Activate aircraft model via interactor
+		if err := h.AircraftModelInteractor.ActivateAircraftModel(c.Request.Context(), modelUUID); err != nil {
+			log.Error(logger.LogAircraftModelActivateError, "aircraft_model_id", modelUUID, "error", err, "client_ip", c.ClientIP())
+			if err == domain.ErrAircraftModelNotFound {
+				h.Response.Error(c, domain.MsgAircraftModelNotFound)
+				return
+			}
+			h.Response.Error(c, domain.MsgAircraftModelActivateErr)
+			return
+		}
+
+		response := AircraftModelStatusResponse{
+			ID:      responseID,
+			Status:  "active",
+			Updated: true,
+		}
+
+		// Build HATEOAS links (isActive=true, shows link for deactivate)
+		baseURL := GetBaseURL(c)
+		response.Links = BuildAircraftModelStatusLinks(baseURL, responseID, true)
+
+		log.Success(logger.LogAircraftModelActivateOK, "aircraft_model_id", modelUUID, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgAircraftModelActivateOK, response)
+	}
+}
+
+// DeactivateAircraftModel godoc
+// @Summary      Deactivate aircraft model
+// @Description  Sets aircraft model status to inactive (HU41 - accepts obfuscated ID only)
+// @Tags         Aircraft Models
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "Aircraft Model ID (obfuscated ID)"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]interface{}
+// @Failure      404  {object}  map[string]interface{}
+// @Failure      500  {object}  map[string]interface{}
+// @Router       /aircraft-models/{id}/deactivate [patch]
+func (h *handler) DeactivateAircraftModel() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		traceID := middleware.GetRequestID(c)
+		log := Logger.WithTraceID(traceID)
+
+		inputID := c.Param("id")
+		if inputID == "" {
+			log.Error(logger.LogMessageIDDecodeError, "error", "empty id parameter", "client_ip", c.ClientIP())
+			h.Response.Error(c, domain.MsgValIDInvalid)
+			return
+		}
+
+		log.Info(logger.LogAircraftModelDeactivate, "input_id", inputID, "client_ip", c.ClientIP())
+
+		// Resolve ID (accepts both UUID and obfuscated ID)
+		modelUUID, responseID := h.resolveID(inputID)
+		if modelUUID == "" {
+			h.HandleIDDecodingError(c, inputID, domain.ErrInvalidID)
+			return
+		}
+
+		// Deactivate aircraft model via interactor
+		if err := h.AircraftModelInteractor.DeactivateAircraftModel(c.Request.Context(), modelUUID); err != nil {
+			log.Error(logger.LogAircraftModelDeactivateError, "aircraft_model_id", modelUUID, "error", err, "client_ip", c.ClientIP())
+			if err == domain.ErrAircraftModelNotFound {
+				h.Response.Error(c, domain.MsgAircraftModelNotFound)
+				return
+			}
+			h.Response.Error(c, domain.MsgAircraftModelDeactivateErr)
+			return
+		}
+
+		response := AircraftModelStatusResponse{
+			ID:      responseID,
+			Status:  "inactive",
+			Updated: true,
+		}
+
+		// Build HATEOAS links (isActive=false, shows link for activate)
+		baseURL := GetBaseURL(c)
+		response.Links = BuildAircraftModelStatusLinks(baseURL, responseID, false)
+
+		log.Success(logger.LogAircraftModelDeactivateOK, "aircraft_model_id", modelUUID, "client_ip", c.ClientIP())
+		h.Response.SuccessWithData(c, domain.MsgAircraftModelDeactivateOK, response)
+	}
+}

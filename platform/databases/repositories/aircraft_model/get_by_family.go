@@ -28,6 +28,7 @@ func (r *repository) GetAircraftModelsByFamily(ctx context.Context, family strin
 			&engineTypeName,
 			&model.Family,
 			&manufacturer,
+			&model.Status,
 		); err != nil {
 			return nil, err
 		}

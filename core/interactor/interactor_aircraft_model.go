@@ -73,3 +73,49 @@ func (i *AircraftModelInteractor) GetAircraftModelsByFamily(ctx context.Context,
 	log.Success(logger.LogAircraftModelListOK, "family", family, "count", len(models))
 	return models, nil
 }
+
+// ActivateAircraftModel sets an aircraft model's status to active (HU42)
+func (i *AircraftModelInteractor) ActivateAircraftModel(ctx context.Context, id string) error {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAircraftModelActivate, "aircraft_model_id", id)
+
+	// Verify aircraft model exists
+	_, err := i.service.GetAircraftModelByID(ctx, id)
+	if err != nil {
+		log.Error(logger.LogAircraftModelNotFound, "aircraft_model_id", id)
+		return err
+	}
+
+	if err = i.service.ActivateAircraftModel(ctx, id); err != nil {
+		log.Error(logger.LogAircraftModelActivateError, "aircraft_model_id", id, "error", err)
+		return err
+	}
+
+	log.Success(logger.LogAircraftModelActivateOK, "aircraft_model_id", id)
+	return nil
+}
+
+// DeactivateAircraftModel sets an aircraft model's status to inactive (HU41)
+func (i *AircraftModelInteractor) DeactivateAircraftModel(ctx context.Context, id string) error {
+	traceID := middleware.GetTraceIDFromContext(ctx)
+	log := i.logger.WithTraceID(traceID)
+
+	log.Info(logger.LogAircraftModelDeactivate, "aircraft_model_id", id)
+
+	// Verify aircraft model exists
+	_, err := i.service.GetAircraftModelByID(ctx, id)
+	if err != nil {
+		log.Error(logger.LogAircraftModelNotFound, "aircraft_model_id", id)
+		return err
+	}
+
+	if err = i.service.DeactivateAircraftModel(ctx, id); err != nil {
+		log.Error(logger.LogAircraftModelDeactivateError, "aircraft_model_id", id, "error", err)
+		return err
+	}
+
+	log.Success(logger.LogAircraftModelDeactivateOK, "aircraft_model_id", id)
+	return nil
+}

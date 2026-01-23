@@ -22,6 +22,11 @@ func NewAircraftModelService(repo output.AircraftModelRepository, log logger.Log
 	}
 }
 
+// BeginTx starts a new database transaction
+func (s *AircraftModelService) BeginTx(ctx context.Context) (output.Tx, error) {
+	return s.repo.BeginTx(ctx)
+}
+
 // GetAircraftModelByID retrieves an aircraft model by its ID
 func (s *AircraftModelService) GetAircraftModelByID(ctx context.Context, id string) (*domain.AircraftModel, error) {
 	return s.repo.GetAircraftModelByID(ctx, id)
@@ -35,4 +40,34 @@ func (s *AircraftModelService) ListAircraftModels(ctx context.Context, filters m
 // GetAircraftModelsByFamily retrieves all aircraft models for a specific family (HU32)
 func (s *AircraftModelService) GetAircraftModelsByFamily(ctx context.Context, family string) ([]domain.AircraftModel, error) {
 	return s.repo.GetAircraftModelsByFamily(ctx, family)
+}
+
+// UpdateAircraftModelStatus updates the status of an aircraft model with transaction handling
+func (s *AircraftModelService) UpdateAircraftModelStatus(ctx context.Context, id string, status bool) error {
+	tx, err := s.repo.BeginTx(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err = s.repo.UpdateAircraftModelStatus(ctx, tx, id, status); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// ActivateAircraftModel sets the aircraft model status to true (active) - HU42
+func (s *AircraftModelService) ActivateAircraftModel(ctx context.Context, id string) error {
+	return s.UpdateAircraftModelStatus(ctx, id, true)
+}
+
+// DeactivateAircraftModel sets the aircraft model status to false (inactive) - HU41
+func (s *AircraftModelService) DeactivateAircraftModel(ctx context.Context, id string) error {
+	return s.UpdateAircraftModelStatus(ctx, id, false)
 }

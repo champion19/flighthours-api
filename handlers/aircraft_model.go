@@ -10,6 +10,7 @@ type AircraftModelResponse struct {
 	EngineTypeName   string `json:"engine_type_name,omitempty"`
 	Family           string `json:"family"`
 	Manufacturer     string `json:"manufacturer,omitempty"`
+	Status           bool   `json:"status"`
 	Links            []Link `json:"_links,omitempty"`
 }
 
@@ -22,7 +23,16 @@ func FromDomainAircraftModel(model *domain.AircraftModel, encodedID string) Airc
 		EngineTypeName:   model.EngineTypeName,
 		Family:           model.Family,
 		Manufacturer:     model.Manufacturer,
+		Status:           model.Status,
 	}
+}
+
+// AircraftModelStatusResponse - Response DTO for aircraft model status change
+type AircraftModelStatusResponse struct {
+	ID      string `json:"id"`
+	Status  string `json:"status"`
+	Updated bool   `json:"updated"`
+	Links   []Link `json:"_links,omitempty"`
 }
 
 // AircraftModelListResponse - Response DTO for listing aircraft models
@@ -53,6 +63,7 @@ func ToAircraftModelListResponse(models []domain.AircraftModel, encodeFunc func(
 			EngineTypeName:   model.EngineTypeName,
 			Family:           model.Family,
 			Manufacturer:     model.Manufacturer,
+			Status:           model.Status,
 		}
 		// Add HATEOAS links to each model
 		if baseURL != "" {

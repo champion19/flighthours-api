@@ -436,6 +436,14 @@ var messageCodeToHTTPStatus = map[string]int{
 	"MOD_AM_LIST_EXI_04301": http.StatusOK,                  // 200 - Lista de modelos/tipos obtenida
 	"MOD_AM_LIST_ERR_04302": http.StatusInternalServerError, // 500 - Error al listar modelos/tipos
 
+	// Inactivar (HU41)
+	"MOD_AM_INA_EXI_04101": http.StatusOK,                  // 200 - Modelo de aeronave inactivado
+	"MOD_AM_INA_ERR_04102": http.StatusInternalServerError, // 500 - Error técnico al inactivar
+
+	// Activar (HU42)
+	"MOD_AM_ACT_EXI_04201": http.StatusOK,                  // 200 - Modelo de aeronave activado
+	"MOD_AM_ACT_ERR_04202": http.StatusInternalServerError, // 500 - Error técnico al activar
+
 	// ========================================
 	// Aircraft Family Module (FAM_*) - Familia de Aeronave (HU32)
 	// ========================================
@@ -540,7 +548,7 @@ var messageCodeToHTTPStatus = map[string]int{
 	"VUE_AUTH_ERR_00001": http.StatusForbidden, // 403 - No autorizado para este vuelo
 
 	// ========================================
-	// Airline Employee Module (EMP_AIR_*) - Empleado Aerolínea 
+	// Airline Employee Module (EMP_AIR_*) - Empleado Aerolínea
 	// ========================================
 	// Consultar (HU26)
 	"EMP_AIR_CON_EXI_02601": http.StatusOK,                  // 200 - Airline employee retrieved successfully

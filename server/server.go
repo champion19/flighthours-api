@@ -256,6 +256,13 @@ func routing(app *gin.Engine, dependencies *dependency.Dependencies) {
 		// PATCH /airports/:id/deactivate - Deactivate an airport
 		protected.PATCH("/airports/:id/deactivate", handler.DeactivateAirport())
 
+		// ---- Aircraft Models Management (Protected - Write Operations) ----
+		// PATCH /aircraft-models/:id/activate - Activate an aircraft model (HU42)
+		protected.PATCH("/aircraft-models/:id/activate", handler.ActivateAircraftModel())
+
+		// PATCH /aircraft-models/:id/deactivate - Deactivate an aircraft model (HU41)
+		protected.PATCH("/aircraft-models/:id/deactivate", handler.DeactivateAircraftModel())
+
 		// ---- Daily Logbooks Management (Protected) ----
 		// GET /daily-logbooks - List daily logbooks for authenticated employee
 		// Query params: ?status=true (active) or ?status=false (inactive)

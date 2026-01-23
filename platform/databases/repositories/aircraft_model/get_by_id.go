@@ -20,6 +20,7 @@ func (r *repository) GetAircraftModelByID(ctx context.Context, id string) (*doma
 		&engineTypeName,
 		&model.Family,
 		&manufacturer,
+		&model.Status,
 	)
 
 	if err != nil {
